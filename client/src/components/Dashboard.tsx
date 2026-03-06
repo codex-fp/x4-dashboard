@@ -5,9 +5,9 @@ import { DASHBOARDS, getDashboard, WidgetId, PanelDisplay, GridDashboard, Column
 import { ArwesPanel } from './ArwesPanel'
 import { UnderAttackAlert } from './UnderAttackAlert'
 import { PlayerInfo } from './PlayerInfo'
-import { ShipStatus } from './ShipStatus'
-import { TargetInfo } from './TargetInfo'
-import { NavSectorWidget, NavHeadingWidget, NavSpeedometerWidget } from './Navigation'
+import { ShipShieldsWidget, ShipHullWidget, ShipCargoWidget, ShipStatusWidget } from './ShipStatus'
+import { TargetInfoWidget, TargetShieldsWidget, TargetHullWidget } from './TargetInfo'
+import { NavHeadingWidget, NavSpeedometerWidget } from './Navigation'
 import { SystemFlags } from './SystemFlags'
 import { MissionOffers } from './MissionOffers'
 import { ActiveMission } from './ActiveMission'
@@ -30,9 +30,13 @@ function renderWidget(
 ): React.ReactNode {
   switch (id) {
     case 'PlayerInfo':     return <PlayerInfo player={state.player} ship={state.ship} />
-    case 'ShipStatus':     return <ShipStatus ship={state.ship} />
-    case 'TargetInfo':     return state.combat.target ? <TargetInfo target={state.combat.target} /> : null
-    case 'NavSector':      return <NavSectorWidget nav={state.navigation} />
+    case 'ShipShields':    return <ShipShieldsWidget ship={state.ship} />
+    case 'ShipHull':       return <ShipHullWidget ship={state.ship} />
+    case 'ShipCargo':      return <ShipCargoWidget ship={state.ship} />
+    case 'ShipStatus':     return <ShipStatusWidget ship={state.ship} />
+    case 'TargetShields':  return state.combat.target ? <TargetShieldsWidget target={state.combat.target} /> : null
+    case 'TargetHull':     return state.combat.target ? <TargetHullWidget target={state.combat.target} /> : null
+    case 'TargetInfo':     return state.combat.target ? <TargetInfoWidget target={state.combat.target} /> : null
     case 'NavHeading':     return <NavHeadingWidget nav={state.navigation} systems={state.systems} />
     case 'NavSpeedometer': return <NavSpeedometerWidget nav={state.navigation} ship={state.ship} />
     case 'SystemFlags':    return <SystemFlags systems={state.systems} onKeyPress={onKeyPress} />

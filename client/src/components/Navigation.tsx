@@ -91,6 +91,23 @@ function RetroSpeedometer({
     return { active, heightPct }
   })
 
+  const accent = inTravel ? '234,128,252' : '0,229,255'
+  const accentDim = `rgba(${accent},0.12)`
+  const accentBorder = `rgba(${accent},0.75)`
+  // SVG viewBox: 200×200 (same as ARC mode) — gives identical intrinsic aspect ratio
+  // so both modes expand the grid row to the same height.
+  const VW = 200, VH = 200
+  const barSlot = VW / barCount
+  const barW = barSlot * 0.82
+
+  const svgBars = bars.map((bar, i) => ({
+    x: i * barSlot,
+    y: VH * (1 - bar.heightPct / 100),
+    h: VH * (bar.heightPct / 100),
+    w: barW,
+    active: bar.active,
+  }))
+
   return (
     <div className="nav-retro-speedometer">
       <div className="nav-retro-topline">
@@ -98,14 +115,43 @@ function RetroSpeedometer({
         <span>{displayMax.toFixed(0)} MAX</span>
       </div>
 
-      <div className="nav-retro-bars">
-        {bars.map((bar, idx) => (
-          <div
-            key={idx}
-            className={`nav-retro-bar ${bar.active ? 'active' : 'idle'} ${inTravel ? 'travel' : 'normal'}`}
-            style={{ height: `${bar.heightPct}%` }}
-          />
-        ))}
+      <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
+        <svg
+          viewBox={`0 0 ${VW} ${VH}`}
+          className="nav-circ-svg"
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <linearGradient id="retro-bar-normal" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(0,229,255,0.45)" />
+              <stop offset="100%" stopColor="rgba(0,100,140,0.15)" />
+            </linearGradient>
+            <linearGradient id="retro-bar-travel" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(234,128,252,0.45)" />
+              <stop offset="100%" stopColor="rgba(120,48,136,0.15)" />
+            </linearGradient>
+            <filter id="retro-bar-glow" x="-15%" y="-5%" width="130%" height="110%">
+              <feGaussianBlur stdDeviation="0.4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          {svgBars.map((bar, idx) => (
+            <rect
+              key={idx}
+              x={bar.x} y={bar.y}
+              width={bar.w} height={bar.h}
+              fill={bar.active ? `url(#retro-bar-${inTravel ? 'travel' : 'normal'})` : accentDim}
+              stroke={bar.active ? accentBorder : 'none'}
+              strokeWidth={0.3}
+              opacity={bar.active ? 1 : 0.3}
+              filter={bar.active ? 'url(#retro-bar-glow)' : undefined}
+            />
+          ))}
+        </svg>
         <div className="nav-retro-speed-overlay">
           <div className={`nav-retro-overlay-readout ${inTravel ? 'travel' : 'normal'}`}>
             <span className="nav-retro-overlay-value">{speed.toFixed(0)}</span>
@@ -298,46 +344,8 @@ function CircularSpeedometer({
   )
 }
 
-// ── NavSectorWidget ───────────────────────────────────────────────────────────
-
-export function NavSectorWidget({ nav }: { nav: NavType }) {
-  const hasCoords =
-    Math.abs(nav.coordinates.x) > 0.001 ||
-    Math.abs(nav.coordinates.y) > 0.001 ||
-    Math.abs(nav.coordinates.z) > 0.001
-
-  return (
-    <>
-      <div className="nav-sector-under">
-        <div className="nav-sector-label">Sector</div>
-        <div className={`nav-sector-name ${nav.inTravelMode ? 'travel' : ''}`}>{nav.sector || '-'}</div>
-        {nav.cluster && nav.cluster !== nav.sector && <div className="nav-sector-cluster">{nav.cluster}</div>}
-      </div>
-
-      {hasCoords && (
-        <div className="nav-coords-block">
-          <div className="nav-coords-label">Coordinates</div>
-          <div className="nav-coords-grid">
-            {(['X', 'Y', 'Z'] as const).map((axis, i) => {
-              const val = [nav.coordinates.x, nav.coordinates.y, nav.coordinates.z][i]
-              return (
-                <div key={axis} className="nav-coords-cell">
-                  <div className="nav-coords-axis">{axis}</div>
-                  <div className="nav-coords-value">
-                    {val >= 0 ? '+' : ''}
-                    {val.toFixed(0)}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-    </>
-  )
-}
-
 // ── NavHeadingWidget ──────────────────────────────────────────────────────────
+// Sector name (left) + heading value (right) share the same row above the tape.
 
 export function NavHeadingWidget({ nav, systems }: { nav: NavType; systems?: SystemFlags }) {
   const heading = normalizeHeading(nav.heading)
@@ -348,10 +356,19 @@ export function NavHeadingWidget({ nav, systems }: { nav: NavType; systems?: Sys
   return (
     <>
       <div className="nav-heading-compact">
-        <div className="nav-heading-caption">Heading</div>
-        <div className="nav-heading-main">
-          <span>{heading.toFixed(0)}°</span>
-          <span className="nav-heading-main-dir">{compassDir}</span>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '6px' }}>
+          <div>
+            <div className={`nav-sector-name ${nav.inTravelMode ? 'travel' : ''}`} style={{ fontSize: '13px', marginTop: 0 }}>
+              {nav.sector || '–'}
+            </div>
+            {nav.cluster && nav.cluster !== nav.sector && (
+              <div className="nav-sector-cluster">{nav.cluster}</div>
+            )}
+          </div>
+          <div className="nav-heading-main" style={{ marginBottom: 0 }}>
+            <span>{heading.toFixed(0)}°</span>
+            <span className="nav-heading-main-dir">{compassDir}</span>
+          </div>
         </div>
         <HeadingLine heading={heading} inTravel={nav.inTravelMode} />
       </div>
