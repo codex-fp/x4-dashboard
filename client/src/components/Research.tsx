@@ -1,6 +1,5 @@
 import React from 'react'
 import { CurrentResearch } from '../types/gameData'
-import { ArwesPanel } from './ArwesPanel'
 
 interface Props {
   research: CurrentResearch | null
@@ -20,7 +19,7 @@ export function Research({ research }: Props) {
   const pct = Math.max(0, Math.min(100, research.percentageCompleted))
 
   return (
-    <ArwesPanel title="Research" titleIcon="⬡" color="purple">
+    <>
       <div className="research-name">{research.name || 'Unknown Project'}</div>
 
       <div className="research-progress-header">
@@ -49,6 +48,6 @@ export function Research({ research }: Props) {
           Requires: {research.precursors.map(p => p.name).join(', ')}
         </div>
       )}
-    </ArwesPanel>
+    </>
   )
 }

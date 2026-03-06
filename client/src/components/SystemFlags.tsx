@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { SystemFlags as SystemFlagsType, KeyBinding, KeyBindings } from '../types/gameData'
-import { ArwesPanel } from './ArwesPanel'
 
 interface Props {
   systems: SystemFlagsType
@@ -45,7 +44,7 @@ export function SystemFlags({ systems, onKeyPress }: Props) {
   }
 
   return (
-    <ArwesPanel title="Systems" titleIcon="⎔">
+    <>
       <div className="sysflags-grid">
         {FLAG_CONFIG.map(({ key, action, icon, label }) => {
           const isOn = !!systems[key]
@@ -84,6 +83,6 @@ export function SystemFlags({ systems, onKeyPress }: Props) {
       }}>
         Click to toggle · Keys sent to active game window · Configure via ⎔ KEY BINDINGS
       </div>
-    </ArwesPanel>
+    </>
   )
 }

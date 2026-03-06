@@ -1,12 +1,5 @@
-﻿import React, { useState } from 'react'
+import React, { useState } from 'react'
 import { Navigation as NavType, ShipStatus, SystemFlags } from '../types/gameData'
-import { ArwesPanel } from './ArwesPanel'
-
-interface Props {
-  nav: NavType
-  ship?: ShipStatus
-  systems?: SystemFlags
-}
 
 const DIRS_16 = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW']
 
@@ -305,117 +298,127 @@ function CircularSpeedometer({
   )
 }
 
-export function Navigation({ nav, ship, systems }: Props) {
-  const [speedMode, setSpeedMode] = useState<'bars' | 'gauge'>('bars')
-  const heading = normalizeHeading(nav.heading)
-  const compassDir = compassLabel(heading)
-  const maxSpeed = ship?.maxSpeed ?? 0
-  const maxBoost = ship?.maxBoostSpeed ?? 0
-  const isWanted = nav.legalStatus?.toLowerCase() === 'wanted'
-  const isClean = nav.legalStatus?.toLowerCase() === 'clean'
+// ── NavSectorWidget ───────────────────────────────────────────────────────────
+
+export function NavSectorWidget({ nav }: { nav: NavType }) {
   const hasCoords =
     Math.abs(nav.coordinates.x) > 0.001 ||
     Math.abs(nav.coordinates.y) > 0.001 ||
     Math.abs(nav.coordinates.z) > 0.001
 
   return (
-    <ArwesPanel
-      title="Navigation"
-      titleIcon="*"
-      color={isWanted ? 'danger' : 'primary'}
-      style={{ aspectRatio: '3 / 4', minHeight: '320px' }}
-    >
-      <div className="nav-vertical">
-        <div className="nav-sector-under">
-          <div className="nav-sector-label">Sector</div>
-          <div className={`nav-sector-name ${nav.inTravelMode ? 'travel' : ''}`}>{nav.sector || '-'}</div>
-          {nav.cluster && nav.cluster !== nav.sector && <div className="nav-sector-cluster">{nav.cluster}</div>}
-        </div>
-
-        <div className="nav-heading-compact">
-          <div className="nav-heading-caption">Heading</div>
-          <div className="nav-heading-main">
-            <span>{heading.toFixed(0)}°</span>
-            <span className="nav-heading-main-dir">{compassDir}</span>
-          </div>
-          <HeadingLine heading={heading} inTravel={nav.inTravelMode} />
-        </div>
-
-        <div className="nav-speed-wrapper">
-          <div className="nav-speed-header">
-            <div className={`nav-speed-toggle${nav.inTravelMode ? ' travel' : ''}`}>
-              <button
-                className={`nav-speed-toggle-btn${speedMode === 'bars' ? ' active' : ''}`}
-                onClick={() => setSpeedMode('bars')}
-              >BAR</button>
-              <button
-                className={`nav-speed-toggle-btn${speedMode === 'gauge' ? ' active' : ''}`}
-                onClick={() => setSpeedMode('gauge')}
-              >ARC</button>
-            </div>
-          </div>
-          {speedMode === 'bars'
-            ? <RetroSpeedometer speed={nav.speed} maxSpeed={maxSpeed} maxBoost={maxBoost} inTravel={nav.inTravelMode} boostEnergy={ship?.boostEnergy ?? 0} />
-            : <CircularSpeedometer speed={nav.speed} maxSpeed={maxSpeed} maxBoost={maxBoost} inTravel={nav.inTravelMode} boostEnergy={ship?.boostEnergy ?? 0} />
-          }
-        </div>
-
-        <div className="nav-chips-row">
-          {nav.inTravelMode && (
-            <Chip
-              label="Travel Drive"
-              color="#ea80fc"
-              bg="rgba(234,128,252,0.08)"
-              border="rgba(234,128,252,0.35)"
-            />
-          )}
-          {systems?.autopilot && (
-            <Chip
-              label="Autopilot"
-              color="var(--c-cyan)"
-              bg="rgba(0,229,255,0.08)"
-              border="rgba(0,229,255,0.35)"
-            />
-          )}
-          {systems?.massLocked && (
-            <Chip
-              label="Mass Lock"
-              color="var(--c-orange)"
-              bg="rgba(255,109,0,0.08)"
-              border="rgba(255,109,0,0.35)"
-            />
-          )}
-          {nav.legalStatus && (
-            <Chip
-              label={nav.legalStatus}
-              color={isClean ? 'var(--c-green)' : isWanted ? 'var(--c-red)' : 'var(--c-text-dim)'}
-              bg={isClean ? 'rgba(0,230,118,0.06)' : isWanted ? 'rgba(255,23,68,0.08)' : 'transparent'}
-              border={isClean ? 'rgba(0,230,118,0.3)' : isWanted ? 'rgba(255,23,68,0.4)' : 'var(--c-border)'}
-            />
-          )}
-        </div>
-
-        {hasCoords && (
-          <div className="nav-coords-block">
-            <div className="nav-coords-label">Coordinates</div>
-            <div className="nav-coords-grid">
-              {(['X', 'Y', 'Z'] as const).map((axis, i) => {
-                const val = [nav.coordinates.x, nav.coordinates.y, nav.coordinates.z][i]
-                return (
-                  <div key={axis} className="nav-coords-cell">
-                    <div className="nav-coords-axis">{axis}</div>
-                    <div className="nav-coords-value">
-                      {val >= 0 ? '+' : ''}
-                      {val.toFixed(0)}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
+    <>
+      <div className="nav-sector-under">
+        <div className="nav-sector-label">Sector</div>
+        <div className={`nav-sector-name ${nav.inTravelMode ? 'travel' : ''}`}>{nav.sector || '-'}</div>
+        {nav.cluster && nav.cluster !== nav.sector && <div className="nav-sector-cluster">{nav.cluster}</div>}
       </div>
-    </ArwesPanel>
+
+      {hasCoords && (
+        <div className="nav-coords-block">
+          <div className="nav-coords-label">Coordinates</div>
+          <div className="nav-coords-grid">
+            {(['X', 'Y', 'Z'] as const).map((axis, i) => {
+              const val = [nav.coordinates.x, nav.coordinates.y, nav.coordinates.z][i]
+              return (
+                <div key={axis} className="nav-coords-cell">
+                  <div className="nav-coords-axis">{axis}</div>
+                  <div className="nav-coords-value">
+                    {val >= 0 ? '+' : ''}
+                    {val.toFixed(0)}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
+// ── NavHeadingWidget ──────────────────────────────────────────────────────────
+
+export function NavHeadingWidget({ nav, systems }: { nav: NavType; systems?: SystemFlags }) {
+  const heading = normalizeHeading(nav.heading)
+  const compassDir = compassLabel(heading)
+  const isWanted = nav.legalStatus?.toLowerCase() === 'wanted'
+  const isClean = nav.legalStatus?.toLowerCase() === 'clean'
+
+  return (
+    <>
+      <div className="nav-heading-compact">
+        <div className="nav-heading-caption">Heading</div>
+        <div className="nav-heading-main">
+          <span>{heading.toFixed(0)}°</span>
+          <span className="nav-heading-main-dir">{compassDir}</span>
+        </div>
+        <HeadingLine heading={heading} inTravel={nav.inTravelMode} />
+      </div>
+
+      <div className="nav-chips-row">
+        {nav.inTravelMode && (
+          <Chip
+            label="Travel Drive"
+            color="#ea80fc"
+            bg="rgba(234,128,252,0.08)"
+            border="rgba(234,128,252,0.35)"
+          />
+        )}
+        {systems?.autopilot && (
+          <Chip
+            label="Autopilot"
+            color="var(--c-cyan)"
+            bg="rgba(0,229,255,0.08)"
+            border="rgba(0,229,255,0.35)"
+          />
+        )}
+        {systems?.massLocked && (
+          <Chip
+            label="Mass Lock"
+            color="var(--c-orange)"
+            bg="rgba(255,109,0,0.08)"
+            border="rgba(255,109,0,0.35)"
+          />
+        )}
+        {nav.legalStatus && (
+          <Chip
+            label={nav.legalStatus}
+            color={isClean ? 'var(--c-green)' : isWanted ? 'var(--c-red)' : 'var(--c-text-dim)'}
+            bg={isClean ? 'rgba(0,230,118,0.06)' : isWanted ? 'rgba(255,23,68,0.08)' : 'transparent'}
+            border={isClean ? 'rgba(0,230,118,0.3)' : isWanted ? 'rgba(255,23,68,0.4)' : 'var(--c-border)'}
+          />
+        )}
+      </div>
+    </>
+  )
+}
+
+// ── NavSpeedometerWidget ──────────────────────────────────────────────────────
+
+export function NavSpeedometerWidget({ nav, ship }: { nav: NavType; ship?: ShipStatus }) {
+  const [speedMode, setSpeedMode] = useState<'bars' | 'gauge'>('bars')
+  const maxSpeed = ship?.maxSpeed ?? 0
+  const maxBoost = ship?.maxBoostSpeed ?? 0
+
+  return (
+    <div className="nav-speed-wrapper">
+      <div className="nav-speed-header">
+        <div className={`nav-speed-toggle${nav.inTravelMode ? ' travel' : ''}`}>
+          <button
+            className={`nav-speed-toggle-btn${speedMode === 'bars' ? ' active' : ''}`}
+            onClick={() => setSpeedMode('bars')}
+          >BAR</button>
+          <button
+            className={`nav-speed-toggle-btn${speedMode === 'gauge' ? ' active' : ''}`}
+            onClick={() => setSpeedMode('gauge')}
+          >ARC</button>
+        </div>
+      </div>
+      {speedMode === 'bars'
+        ? <RetroSpeedometer speed={nav.speed} maxSpeed={maxSpeed} maxBoost={maxBoost} inTravel={nav.inTravelMode} boostEnergy={ship?.boostEnergy ?? 0} />
+        : <CircularSpeedometer speed={nav.speed} maxSpeed={maxSpeed} maxBoost={maxBoost} inTravel={nav.inTravelMode} boostEnergy={ship?.boostEnergy ?? 0} />
+      }
+    </div>
+  )
+}

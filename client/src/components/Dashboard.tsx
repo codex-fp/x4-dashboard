@@ -1,12 +1,13 @@
 import React from 'react'
 import { Animator, Text } from '@arwes/react'
 import { GameState } from '../types/gameData'
-import { DASHBOARDS, getDashboard, WidgetId, GridDashboard, ColumnsDashboard } from '../dashboards'
+import { DASHBOARDS, getDashboard, WidgetId, PanelDisplay, GridDashboard, ColumnsDashboard } from '../dashboards'
+import { ArwesPanel } from './ArwesPanel'
 import { UnderAttackAlert } from './UnderAttackAlert'
 import { PlayerInfo } from './PlayerInfo'
 import { ShipStatus } from './ShipStatus'
 import { TargetInfo } from './TargetInfo'
-import { Navigation } from './Navigation'
+import { NavSectorWidget, NavHeadingWidget, NavSpeedometerWidget } from './Navigation'
 import { SystemFlags } from './SystemFlags'
 import { MissionOffers } from './MissionOffers'
 import { ActiveMission } from './ActiveMission'
@@ -28,17 +29,95 @@ function renderWidget(
   onKeyPress: (action: string) => void,
 ): React.ReactNode {
   switch (id) {
-    case 'PlayerInfo':    return <PlayerInfo player={state.player} ship={state.ship} />
-    case 'ShipStatus':    return <ShipStatus ship={state.ship} />
-    case 'TargetInfo':    return state.combat.target ? <TargetInfo target={state.combat.target} /> : null
-    case 'Navigation':    return <Navigation nav={state.navigation} ship={state.ship} systems={state.systems} />
-    case 'SystemFlags':   return <SystemFlags systems={state.systems} onKeyPress={onKeyPress} />
-    case 'ActiveMission': return <ActiveMission mission={state.activeMission} />
-    case 'MissionOffers': return <MissionOffers offers={state.missionOffers} />
-    case 'Comms':         return <Comms comms={state.comms} logbook={state.logbook} />
-    case 'Research':      return <Research research={state.currentResearch} />
-    case 'UnderAttack':   return state.combat.underAttack ? <UnderAttackAlert attackType={state.combat.attackType} /> : null
+    case 'PlayerInfo':     return <PlayerInfo player={state.player} ship={state.ship} />
+    case 'ShipStatus':     return <ShipStatus ship={state.ship} />
+    case 'TargetInfo':     return state.combat.target ? <TargetInfo target={state.combat.target} /> : null
+    case 'NavSector':      return <NavSectorWidget nav={state.navigation} />
+    case 'NavHeading':     return <NavHeadingWidget nav={state.navigation} systems={state.systems} />
+    case 'NavSpeedometer': return <NavSpeedometerWidget nav={state.navigation} ship={state.ship} />
+    case 'SystemFlags':    return <SystemFlags systems={state.systems} onKeyPress={onKeyPress} />
+    case 'ActiveMission':  return <ActiveMission mission={state.activeMission} />
+    case 'MissionOffers':  return <MissionOffers offers={state.missionOffers} />
+    case 'Comms':          return <Comms comms={state.comms} logbook={state.logbook} />
+    case 'Research':       return <Research research={state.currentResearch} />
+    case 'UnderAttack':    return state.combat.underAttack ? <UnderAttackAlert attackType={state.combat.attackType} /> : null
   }
+}
+
+function renderPanelContent(
+  panel: PanelDisplay,
+  state: GameState,
+  onKeyPress: (action: string) => void,
+): React.ReactNode {
+  const { internal } = panel
+  if (internal.layout === 'grid') {
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: internal.columns, flex: 1, minHeight: 0 }}>
+        {internal.widgets.map(w => (
+          <div
+            key={w.id}
+            style={{
+              display: 'flex', flexDirection: 'column',
+              gridColumn: w.colSpan ? `${w.col} / span ${w.colSpan}` : w.col,
+              gridRow: w.rowSpan ? `${w.row} / span ${w.rowSpan}` : w.row,
+              ...(w.scale && w.scale !== 1 ? { zoom: w.scale } : {}),
+              ...(w.grow ? { alignSelf: 'stretch' } : {}),
+              ...(w.height ? { height: w.height } : {}),
+            }}
+          >
+            {renderWidget(w.id, state, onKeyPress)}
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'row' }}>
+      {internal.columns.map((col, i) => (
+        <div
+          key={i}
+          style={{
+            width: col.width,
+            flex: col.width ? undefined : 1,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+            minHeight: 0,
+          }}
+        >
+          {col.widgets.map(w => (
+            <div
+              key={w.id}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                ...(w.scale && w.scale !== 1 ? { zoom: w.scale } : {}),
+                ...(w.grow ? { flex: 1, minHeight: 0 } : w.height ? { height: w.height } : {}),
+              }}
+            >
+              {renderWidget(w.id, state, onKeyPress)}
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function renderPanel(
+  panel: PanelDisplay,
+  state: GameState,
+  onKeyPress: (action: string) => void,
+): React.ReactNode {
+  const color = panel.colorFn ? panel.colorFn(state) : (panel.color ?? 'primary')
+  const content = renderPanelContent(panel, state, onKeyPress)
+  if (panel.frameless) return content
+  return (
+    <ArwesPanel title={panel.title} titleIcon={panel.titleIcon} color={color} style={panel.style}>
+      {content}
+    </ArwesPanel>
+  )
 }
 
 interface LayoutProps {
@@ -47,7 +126,7 @@ interface LayoutProps {
 }
 
 function GridLayout({ config, state, onKeyPress }: LayoutProps & { config: GridDashboard }) {
-  const underAttackPlacement = config.widgets.find(w => w.id === 'UnderAttack')
+  const underAttackPlacement = config.panels.find(p => p.id === 'underAttack')
   const rowOffset = (underAttackPlacement && state.combat.underAttack)
     ? (underAttackPlacement.rowSpan ?? 1)
     : 0
@@ -57,22 +136,22 @@ function GridLayout({ config, state, onKeyPress }: LayoutProps & { config: GridD
       className="dashboard-grid"
       style={{ gridTemplateColumns: config.columns }}
     >
-      {config.widgets.map(w => {
-        const content = renderWidget(w.id, state, onKeyPress)
+      {config.panels.map(item => {
+        const content = renderPanel(item, state, onKeyPress)
         if (content === null) return null
-        const effectiveRow = (w.id !== 'UnderAttack' && rowOffset > 0 && w.row >= underAttackPlacement!.row)
-          ? w.row + rowOffset
-          : w.row
+        const effectiveRow = (item.id !== 'underAttack' && rowOffset > 0 && item.row >= underAttackPlacement!.row)
+          ? item.row + rowOffset
+          : item.row
         return (
           <div
-            key={w.id}
+            key={`${item.col}-${item.row}`}
             className="dashboard-grid-cell"
             style={{
-              gridColumn: w.colSpan ? `${w.col} / span ${w.colSpan}` : w.col,
-              gridRow:    w.rowSpan ? `${effectiveRow} / span ${w.rowSpan}` : effectiveRow,
-              ...(w.scale && w.scale !== 1 ? { zoom: w.scale } : {}),
-              ...(w.grow ? { alignSelf: 'stretch' } : {}),
-              ...(w.height ? { height: w.height } : {}),
+              gridColumn: item.colSpan ? `${item.col} / span ${item.colSpan}` : item.col,
+              gridRow:    item.rowSpan ? `${effectiveRow} / span ${item.rowSpan}` : effectiveRow,
+              ...(item.scale && item.scale !== 1 ? { zoom: item.scale } : {}),
+              ...(item.grow ? { alignSelf: 'stretch' } : {}),
+              ...(item.height ? { height: item.height } : {}),
             }}
           >
             {content}
@@ -92,17 +171,17 @@ function ColumnsLayout({ config, state, onKeyPress }: LayoutProps & { config: Co
           className="dashboard-column"
           style={col.width ? { width: col.width, flexShrink: 0 } : { flex: 1 }}
         >
-          {col.widgets.map(w => {
-            const content = renderWidget(w.id, state, onKeyPress)
+          {col.panels.map((item, idx) => {
+            const content = renderPanel(item, state, onKeyPress)
             if (content === null) return null
             return (
               <div
-                key={w.id}
+                key={idx}
                 className="dashboard-grid-cell"
                 style={{
-                  ...(w.scale && w.scale !== 1 ? { zoom: w.scale } : {}),
-                  ...(w.grow ? { flex: 1, minHeight: 0 } : {}),
-                  ...(w.height ? { height: w.height } : {}),
+                  ...(item.scale && item.scale !== 1 ? { zoom: item.scale } : {}),
+                  ...(item.grow ? { flex: 1, minHeight: 0 } : {}),
+                  ...(item.height ? { height: item.height } : {}),
                 }}
               >
                 {content}

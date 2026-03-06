@@ -1,6 +1,5 @@
 ﻿import React from 'react'
 import { ShipStatus as ShipStatusType } from '../types/gameData'
-import { ArwesPanel } from './ArwesPanel'
 
 interface Props {
   ship: ShipStatusType
@@ -25,8 +24,7 @@ export function ShipStatus({ ship }: Props) {
   const hullTone = hullClass(hullPct)
 
   return (
-    <ArwesPanel title="Ship Status" titleIcon="*" color="primary" style={{ minHeight: '220px' }}>
-      <div className="ship-status-panel">
+    <div className="ship-status-panel">
         <div className="ship-status-main">
           <div className="clean-health-stack">
             <div className="clean-health-row">
@@ -94,6 +92,5 @@ export function ShipStatus({ ship }: Props) {
           </aside>
         </div>
       </div>
-    </ArwesPanel>
   )
 }

@@ -1,6 +1,5 @@
 import React from 'react'
 import { PlayerInfo as PlayerInfoType, ShipStatus } from '../types/gameData'
-import { ArwesPanel } from './ArwesPanel'
 
 interface Props {
   player: PlayerInfoType
@@ -18,7 +17,7 @@ export function PlayerInfo({ player, ship }: Props) {
   const hasData = player.name !== '–' && player.name !== 'UNKNOWN'
 
   return (
-    <ArwesPanel title="Commander" titleIcon="◈">
+    <>
       <div className="player-row">
         <div>
           <div className="player-name">{player.name}</div>
@@ -49,6 +48,6 @@ export function PlayerInfo({ player, ship }: Props) {
       {!hasData && (
         <div className="offline-hint">Waiting for game data…</div>
       )}
-    </ArwesPanel>
+    </>
   )
 }

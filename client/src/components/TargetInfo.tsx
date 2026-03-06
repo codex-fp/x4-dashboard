@@ -1,6 +1,5 @@
 ﻿import React from 'react'
 import { CombatTarget } from '../types/gameData'
-import { ArwesPanel } from './ArwesPanel'
 
 interface Props {
   target: CombatTarget
@@ -25,13 +24,7 @@ export function TargetInfo({ target }: Props) {
   const hullTone = hullClass(hullPct)
 
   return (
-    <ArwesPanel
-      title="Target Lock"
-      titleIcon="*"
-      color={target.isHostile ? 'danger' : 'warning'}
-      style={{ minHeight: '220px' }}
-    >
-      <div className="target-v3-panel">
+    <div className="target-v3-panel">
         <header className="target-v3-header">
           <div className="target-v3-name-wrap">
             <div className="target-name">{target.name}</div>
@@ -95,7 +88,6 @@ export function TargetInfo({ target }: Props) {
             <span className="target-badge neutral">No tactical flags</span>
           )}
         </footer>
-      </div>
-    </ArwesPanel>
+    </div>
   )
 }

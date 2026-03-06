@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { CommMessage, LogbookEntry } from '../types/gameData'
-import { ArwesPanel } from './ArwesPanel'
 
 interface Props {
   comms: CommMessage[]
@@ -62,11 +61,7 @@ export function Comms({ comms, logbook }: Props) {
   )
 
   return (
-    <ArwesPanel
-      title="Comms"
-      titleIcon="◈"
-
-    >
+    <>
       {/* Tab switcher */}
       <div style={{ display: 'flex', gap: '4px', marginBottom: '8px', marginTop: '-2px' }}>
         {tabBtn('comms')}
@@ -109,6 +104,6 @@ export function Comms({ comms, logbook }: Props) {
           ))}
         </div>
       )}
-    </ArwesPanel>
+    </>
   )
 }

@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { MissionOffers as MissionOffersType, MissionEntry } from '../types/gameData'
-import { ArwesPanel } from './ArwesPanel'
 
 interface Props {
   offers: MissionOffersType | null
@@ -78,7 +77,7 @@ export function MissionOffers({ offers }: Props) {
   const hasAny = offers && Object.values(offers).some(g => g && g.length > 0)
 
   return (
-    <ArwesPanel title="Mission Offers" titleIcon="◈" style={{ flex: 1, minHeight: 0 }}>
+    <>
       {!hasAny && (
         <div className="empty-state">No missions available</div>
       )}
@@ -111,6 +110,6 @@ export function MissionOffers({ offers }: Props) {
           </div>
         )
       })}
-    </ArwesPanel>
+    </>
   )
 }

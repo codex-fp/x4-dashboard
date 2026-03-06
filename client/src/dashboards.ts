@@ -1,25 +1,28 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Dashboard layout configuration
+// Dashboard → Panel → Widget Architecture
 //
-// Two layout modes per dashboard:
+// Three-level hierarchy:
+//   Dashboard (grid or columns of panels)
+//     └─ Panel (ArwesPanel frame, title, color — defined inline per dashboard)
+//          └─ Widget (pure content component, no frame)
 //
-//   layout: 'grid'
-//     columns: CSS grid-template-columns value
-//     widgets: explicit col/row placements (1-based, colSpan/rowSpan optional)
-//
-//   layout: 'columns'
-//     columns: array of column definitions, each with an optional width and
-//              an ordered list of widgets that stack vertically inside it
+// Panel definitions live directly inside each dashboard's panels array.
+// There is no shared panel registry — each dashboard owns its panel definitions.
 //
 // Widget IDs must match the WidgetId union type.
-// scale?: visual zoom factor, default 1 (e.g. 1.5 = 150%, 0.75 = 75%)
+// scale?: visual zoom factor, default 1 (e.g. 1.5 = 150%)
 // ─────────────────────────────────────────────────────────────────────────────
+
+import type { CSSProperties } from 'react'
+import type { GameState } from './types/gameData'
 
 export type WidgetId =
   | 'PlayerInfo'
   | 'ShipStatus'
   | 'TargetInfo'
-  | 'Navigation'
+  | 'NavSector'
+  | 'NavHeading'
+  | 'NavSpeedometer'
   | 'SystemFlags'
   | 'ActiveMission'
   | 'MissionOffers'
@@ -27,137 +30,226 @@ export type WidgetId =
   | 'Research'
   | 'UnderAttack'
 
-// ── Grid layout ──────────────────────────────────────────────────────────────
+// ── Panel internal layout types ───────────────────────────────────────────────
 
-export interface WidgetPlacement {
+export interface PanelWidgetGrid {
   id: WidgetId
-  col: number       // 1-based grid column
-  row: number       // 1-based grid row
-  colSpan?: number  // default 1
-  rowSpan?: number  // default 1
+  col: number
+  row: number
+  colSpan?: number
+  rowSpan?: number
   scale?: number
-  grow?: boolean    // align-self: stretch — fills available vertical space in the grid cell
-  height?: string   // CSS height, e.g. '200px'
+  grow?: boolean
+  height?: string
+}
+
+export interface PanelWidgetColumn {
+  id: WidgetId
+  scale?: number
+  grow?: boolean
+  height?: string
+}
+
+export type PanelInternalLayout =
+  | { layout: 'grid'; columns: string; widgets: PanelWidgetGrid[] }
+  | { layout: 'columns'; columns: Array<{ width?: string; widgets: PanelWidgetColumn[] }> }
+
+export type PanelColor = 'primary' | 'danger' | 'success' | 'warning' | 'purple'
+
+// ── Panel display — embedded directly in each dashboard's panel items ─────────
+
+export interface PanelDisplay {
+  id?: string                           // optional: used for runtime lookups (e.g. 'underAttack')
+  title?: string
+  titleIcon?: string
+  color?: PanelColor
+  colorFn?: (state: GameState) => PanelColor
+  style?: CSSProperties                 // applied to the ArwesPanel wrapper
+  frameless?: boolean
+  internal: PanelInternalLayout
+}
+
+// ── Dashboard-level panel placements ─────────────────────────────────────────
+
+export interface GridPanelItem extends PanelDisplay {
+  col: number
+  row: number
+  colSpan?: number
+  rowSpan?: number
+  scale?: number
+  grow?: boolean
+  height?: string
+}
+
+export interface ColumnPanelItem extends PanelDisplay {
+  scale?: number
+  grow?: boolean
+  height?: string
 }
 
 export interface GridDashboard {
   id: string
   label: string
   layout: 'grid'
-  columns: string           // CSS grid-template-columns
-  widgets: WidgetPlacement[]
-}
-
-// ── Columns layout ────────────────────────────────────────────────────────────
-
-export interface ColumnWidget {
-  id: WidgetId
-  scale?: number
-  height?: string   // CSS height, e.g. '200px', '50%'
-  grow?: boolean    // flex: 1 — fills all remaining vertical space in the column
-}
-
-export interface ColumnDef {
-  width?: string            // CSS width, e.g. '280px', '1fr' (default: auto)
-  widgets: ColumnWidget[]
+  columns: string
+  panels: GridPanelItem[]
 }
 
 export interface ColumnsDashboard {
   id: string
   label: string
   layout: 'columns'
-  columns: ColumnDef[]
+  columns: Array<{ width?: string; panels: ColumnPanelItem[] }>
 }
 
 export type DashboardConfig = GridDashboard | ColumnsDashboard
 
+// ── Dashboard registry ────────────────────────────────────────────────────────
+
 export const DASHBOARDS: DashboardConfig[] = [
-  // ── Full Dashboard ───────────────────────────────────────────────────────
-  // 4-column: missions | instruments (fixed 280px) | systems (flex) | comms
+
+  // ── Full Dashboard ─────────────────────────────────────────────────────────
   {
     id: 'full',
     label: 'Full Dashboard',
     layout: 'grid',
     columns: '240px 280px 1fr 260px',
-    widgets: [
-      { id: 'ActiveMission',  col: 1, row: 1 },
-      { id: 'MissionOffers',  col: 1, row: 2 },
-      { id: 'PlayerInfo',     col: 2, row: 1 },
-      { id: 'ShipStatus',     col: 3, row: 1, scale: 1.75 },
-      { id: 'TargetInfo',     col: 3, row: 2, scale: 1.5 },
-      { id: 'Navigation',     col: 2, row: 2 },
-      { id: 'SystemFlags',    col: 3, row: 3 },
-      { id: 'Research',       col: 4, row: 1 },
-      { id: 'Comms',          col: 4, row: 2 },
+    panels: [
+      {
+        title: 'Active Mission', titleIcon: '◆',
+        colorFn: (s) => s.activeMission?.completed ? 'success'
+          : (s.activeMission && s.activeMission.timeleft > 0 && s.activeMission.timeleft < 300 ? 'danger' : 'primary'),
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'ActiveMission' }] }] },
+        col: 1, row: 1,
+      },
+      {
+        title: 'Mission Offers', titleIcon: '◈',
+        style: { flex: 1, minHeight: 0 },
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'MissionOffers' }] }] },
+        col: 1, row: 2,
+      },
+      {
+        title: 'Commander', titleIcon: '◈',
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'PlayerInfo' }] }] },
+        col: 2, row: 1,
+      },
+      {
+        title: 'Ship Status', titleIcon: '*', style: { minHeight: '220px' },
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'ShipStatus' }] }] },
+        col: 3, row: 1, scale: 1.75,
+      },
+      {
+        title: 'Target Lock', titleIcon: '*', style: { minHeight: '220px' },
+        colorFn: (s) => s.combat.target?.isHostile ? 'danger' : 'warning',
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'TargetInfo' }] }] },
+        col: 3, row: 2, scale: 1.5,
+      },
+      {
+        title: 'Navigation', titleIcon: '*',
+        colorFn: (s) => s.navigation.legalStatus?.toLowerCase() === 'wanted' ? 'danger' : 'primary',
+        internal: { layout: 'columns', columns: [{ widgets: [
+          { id: 'NavSector' },
+          { id: 'NavHeading' },
+          { id: 'NavSpeedometer', grow: true },
+        ] }] },
+        col: 2, row: 2,
+      },
+      {
+        title: 'Systems', titleIcon: '⎔',
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'SystemFlags' }] }] },
+        col: 3, row: 3,
+      },
+      {
+        title: 'Research', titleIcon: '⬡', color: 'purple',
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'Research' }] }] },
+        col: 4, row: 1,
+      },
+      {
+        title: 'Comms', titleIcon: '◈',
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'Comms' }] }] },
+        col: 4, row: 2,
+      },
     ],
   },
 
-  // ── Flight ───────────────────────────────────────────────────────────────
-  // Focus on real-time flight data. Good for a dedicated secondary screen.
-  // Fixed instrument column left, flexible systems+info column right.
+  // ── Flight ─────────────────────────────────────────────────────────────────
   {
     id: 'flight',
     label: 'Flight',
     layout: 'grid',
-    columns: "30% 50% 20%",
-    widgets: [
+    columns: '30% 40% 30%',
+    panels: [
       {
-        id: 'UnderAttack',
-        col: 1,
-        colSpan: 3,
-        row: 1
+        id: 'underAttack', frameless: true,
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'UnderAttack' }] }] },
+        col: 1, colSpan: 3, row: 1,
       },
       {
-        id: 'Navigation',
-        col: 1,
-        row: 1,
-        rowSpan: 2,
-        scale: 1,
-        grow: true
+        title: 'Navigation', titleIcon: '*',
+        colorFn: (s) => s.navigation.legalStatus?.toLowerCase() === 'wanted' ? 'danger' : 'primary',
+        internal: { layout: 'columns', columns: [{ widgets: [
+          { id: 'NavSector' },
+          { id: 'NavHeading' },
+          { id: 'NavSpeedometer', grow: true },
+        ] }] },
+        col: 2, row: 1, rowSpan: 2, grow: true,
+      },
+      /*{
+        title: 'Ship Status', titleIcon: '*',
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'ShipStatus' }] }] },
+        col: 2, row: 1, scale: 1.25, grow: true,
       },
       {
-        id: "ShipStatus",
-        col: 2,
-        row: 1,
-        scale: 1.25,
-        grow: true
+        title: 'Target Lock', titleIcon: '*',
+        colorFn: (s) => s.combat.target?.isHostile ? 'danger' : 'warning',
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'TargetInfo' }] }] },
+        col: 2, row: 2,
       },
       {
-        id: "TargetInfo",
-        col: 2,
-        row: 2,
-        scale: 1
+        title: 'Systems', titleIcon: '⎔',
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'SystemFlags' }] }] },
+        col: 1, row: 3, colSpan: 3, scale: 1.5, grow: true,
       },
       {
-        id: "SystemFlags",
-        col: 1,
-        row: 3,
-        colSpan: 3,
-        scale: 1.5,
-        grow: true
-      },
-      {
-        id: "ActiveMission",
-        col: 3,
-        row: 1,
-        rowSpan: 2,
-        scale: 1.75,
-      }
-    ]
+        title: 'Active Mission', titleIcon: '◆',
+        colorFn: (s) => s.activeMission?.completed ? 'success'
+          : (s.activeMission && s.activeMission.timeleft > 0 && s.activeMission.timeleft < 300 ? 'danger' : 'primary'),
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'ActiveMission' }] }] },
+        col: 3, row: 1, rowSpan: 2, scale: 1.75,
+      },*/
+    ],
   },
 
-  // ── Missions & Comms ─────────────────────────────────────────────────────
-  // Mission management and communications. Good for a tablet or side display.
+  // ── Missions & Comms ───────────────────────────────────────────────────────
   {
     id: 'comms',
     label: 'Missions & Comms',
     layout: 'grid',
     columns: '1fr 1fr',
-    widgets: [
-      { id: 'ActiveMission',  col: 1, row: 1 },
-      { id: 'MissionOffers',  col: 1, row: 2 },
-      { id: 'Research',       col: 2, row: 1 },
-      { id: 'Comms',          col: 2, row: 2 },
+    panels: [
+      {
+        title: 'Active Mission', titleIcon: '◆',
+        colorFn: (s) => s.activeMission?.completed ? 'success'
+          : (s.activeMission && s.activeMission.timeleft > 0 && s.activeMission.timeleft < 300 ? 'danger' : 'primary'),
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'ActiveMission' }] }] },
+        col: 1, row: 1,
+      },
+      {
+        title: 'Mission Offers', titleIcon: '◈',
+        style: { flex: 1, minHeight: 0 },
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'MissionOffers' }] }] },
+        col: 1, row: 2,
+      },
+      {
+        title: 'Research', titleIcon: '⬡', color: 'purple',
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'Research' }] }] },
+        col: 2, row: 1,
+      },
+      {
+        title: 'Comms', titleIcon: '◈',
+        internal: { layout: 'columns', columns: [{ widgets: [{ id: 'Comms' }] }] },
+        col: 2, row: 2,
+      },
     ],
   },
 ]

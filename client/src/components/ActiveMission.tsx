@@ -1,6 +1,5 @@
 import React from 'react'
 import { ActiveMission as ActiveMissionType } from '../types/gameData'
-import { ArwesPanel } from './ArwesPanel'
 
 interface Props {
   mission: ActiveMissionType | null
@@ -28,11 +27,7 @@ export function ActiveMission({ mission }: Props) {
   const isUrgent = mission.timeleft > 0 && mission.timeleft < 300
 
   return (
-    <ArwesPanel
-      title="Active Mission"
-      titleIcon="◆"
-      color={mission.completed ? 'success' : isUrgent ? 'danger' : 'primary'}
-    >
+    <>
       {mission.completed && (
         <div style={{
           fontSize: '11px', color: 'var(--c-green)', letterSpacing: '3px',
@@ -72,6 +67,6 @@ export function ActiveMission({ mission }: Props) {
           </div>
         )}
       </div>
-    </ArwesPanel>
+    </>
   )
 }
