@@ -1334,9 +1334,57 @@ body {
   min-height: 130px;
   display: flex;
   align-items: flex-end;
+  position: relative;
   gap: 3px;
   padding: 4px 0;
   border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+}
+
+.nav-retro-speed-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  pointer-events: none;
+  padding: 4px 5px;
+}
+
+.nav-retro-overlay-readout {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.nav-retro-overlay-value {
+  font-size: 52px;
+  line-height: 1;
+  font-family: var(--font-ui);
+  font-weight: 700;
+}
+
+.nav-retro-overlay-readout.normal .nav-retro-overlay-value {
+  color: var(--c-cyan);
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.9), 0 0 20px rgba(0, 229, 255, 0.5);
+}
+
+.nav-retro-overlay-readout.travel .nav-retro-overlay-value {
+  color: var(--c-purple);
+  text-shadow: 0 0 8px rgba(234, 128, 252, 0.9), 0 0 20px rgba(234, 128, 252, 0.5);
+}
+
+.nav-retro-overlay-unit {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  font-family: var(--font-mono);
+}
+
+.nav-retro-overlay-readout.normal .nav-retro-overlay-unit {
+  color: rgba(0, 229, 255, 0.6);
+}
+
+.nav-retro-overlay-readout.travel .nav-retro-overlay-unit {
+  color: rgba(234, 128, 252, 0.6);
 }
 
 .nav-retro-bar {
@@ -1353,9 +1401,9 @@ body {
 }
 
 .nav-retro-bar.active.normal {
-  border-color: rgba(0, 230, 118, 0.7);
-  background: linear-gradient(180deg, rgba(0, 230, 118, 0.95), rgba(0, 120, 72, 0.78));
-  box-shadow: 0 0 7px rgba(0, 230, 118, 0.4);
+  border-color: rgba(0, 229, 255, 0.7);
+  background: linear-gradient(180deg, rgba(0, 229, 255, 0.95), rgba(0, 100, 140, 0.78));
+  box-shadow: 0 0 7px rgba(0, 229, 255, 0.4);
   opacity: 1;
 }
 
@@ -1403,6 +1451,36 @@ body {
   justify-content: space-between;
   font-size: 9px;
   color: var(--c-text-dim);
+}
+
+.nav-retro-boost-bar {
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(100, 255, 218, 0.1);
+}
+
+.nav-retro-boost-bar-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 7px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(100, 255, 218, 0.5);
+  font-family: var(--font-mono);
+  margin-bottom: 4px;
+}
+
+.nav-retro-boost-bar-track {
+  height: 9px;
+  background: rgba(100, 255, 218, 0.06);
+  border: 1px solid rgba(100, 255, 218, 0.15);
+}
+
+.nav-retro-boost-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(100, 255, 218, 0.55), rgba(100, 255, 218, 0.9));
+  box-shadow: 0 0 6px rgba(100, 255, 218, 0.4);
+  transition: width 0.4s ease;
 }
 
 .nav-retro-boost-note {

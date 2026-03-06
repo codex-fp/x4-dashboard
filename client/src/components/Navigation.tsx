@@ -80,11 +80,13 @@ function RetroSpeedometer({
   maxSpeed,
   maxBoost,
   inTravel,
+  boostEnergy,
 }: {
   speed: number
   maxSpeed: number
   maxBoost: number
   inTravel: boolean
+  boostEnergy: number
 }) {
   const displayMax = Math.max(1, inTravel && maxBoost > 0 ? maxBoost : maxSpeed > 0 ? maxSpeed : speed)
   const speedPct = clamp(speed / displayMax, 0, 1)
@@ -111,16 +113,22 @@ function RetroSpeedometer({
             style={{ height: `${bar.heightPct}%` }}
           />
         ))}
+        <div className="nav-retro-speed-overlay">
+          <div className={`nav-retro-overlay-readout ${inTravel ? 'travel' : 'normal'}`}>
+            <span className="nav-retro-overlay-value">{speed.toFixed(0)}</span>
+            <span className="nav-retro-overlay-unit">m/s</span>
+          </div>
+        </div>
       </div>
 
-      <div className="nav-retro-readout">
-        <span className={`nav-retro-speed-value ${inTravel ? 'travel' : 'normal'}`}>{speed.toFixed(0)}</span>
-        <span className="nav-retro-speed-unit">m/s</span>
-      </div>
-
-      <div className="nav-retro-footer">
-        <span>0</span>
-        <span>{Math.round(speedPct * 100)}%</span>
+      <div className="nav-retro-boost-bar">
+        <div className="nav-retro-boost-bar-header">
+          <span>BOOST ENERGY</span>
+          <span>{boostEnergy.toFixed(0)}%</span>
+        </div>
+        <div className="nav-retro-boost-bar-track">
+          <div className="nav-retro-boost-bar-fill" style={{ width: `${boostEnergy}%` }} />
+        </div>
       </div>
 
       {inTravel && maxBoost > 0 && (
@@ -135,16 +143,19 @@ function CircularSpeedometer({
   maxSpeed,
   maxBoost,
   inTravel,
+  boostEnergy,
 }: {
   speed: number
   maxSpeed: number
   maxBoost: number
   inTravel: boolean
+  boostEnergy: number
 }) {
   const displayMax = Math.max(1, inTravel && maxBoost > 0 ? maxBoost : maxSpeed > 0 ? maxSpeed : speed)
   const speedPct = clamp(speed / displayMax, 0, 1)
+  const boostPct = clamp(boostEnergy / 100, 0, 1)
 
-  const cx = 100, cy = 108, R = 68
+  const cx = 100, cy = 108, R = 68, BOOST_R = R + 16
   const START = 135 // degrees from 3-o'clock, clockwise (lower-left)
   const SWEEP = 270
 
@@ -165,11 +176,13 @@ function CircularSpeedometer({
 
   const endAngle = START + SWEEP // 405 = same as 45°
   const activeEnd = START + Math.max(speedPct, 0.001) * SWEEP
+  const boostEnd = START + Math.max(boostPct, 0.001) * SWEEP
 
+  // Ticks shortened to fit between main arc and boost arc
   const ticks = Array.from({ length: 11 }, (_, i) => {
     const a = START + (i / 10) * SWEEP
     const major = i % 5 === 0
-    return { a, major, p1: pt(R + 4, a), p2: pt(R + (major ? 17 : 10), a) }
+    return { a, major, p1: pt(R + 4, a), p2: pt(R + (major ? 11 : 7), a) }
   })
 
   const scaleLabels = [
@@ -177,7 +190,7 @@ function CircularSpeedometer({
     { t: 1, text: displayMax >= 1000 ? `${(displayMax / 1000).toFixed(1)}k` : displayMax.toFixed(0) },
   ].map(({ t, text }) => {
     const a = START + t * SWEEP
-    const p = pt(R + 28, a)
+    const p = pt(R + 32, a)
     return { x: p.x, y: p.y, text }
   })
 
@@ -206,6 +219,19 @@ function CircularSpeedometer({
         {/* Outer decorative ring */}
         <circle cx={cx} cy={cy} r={R + 22} fill="none" stroke={`rgba(${accentRgb},0.05)`} strokeWidth={1} />
         <circle cx={cx} cy={cy} r={R + 1} fill="none" stroke={`rgba(${accentRgb},0.08)`} strokeWidth={1} />
+
+        {/* Boost arc track background */}
+        <path d={arcD(BOOST_R, START, endAngle)} fill="none" stroke="rgba(100,255,218,0.09)" strokeWidth={5} />
+
+        {/* Boost arc active */}
+        {boostPct > 0.002 && (
+          <>
+            <path d={arcD(BOOST_R, START, boostEnd)} fill="none" stroke="rgba(100,255,218,0.25)" strokeWidth={8}
+              filter="url(#circ-glow-soft)" />
+            <path d={arcD(BOOST_R, START, boostEnd)} fill="none" stroke="#64ffda" strokeWidth={2}
+              filter="url(#circ-glow)" />
+          </>
+        )}
 
         {/* Track arc background */}
         <path d={arcD(R, START, endAngle)} fill="none" stroke={`rgba(${accentRgb},0.12)`} strokeWidth={8} />
@@ -257,18 +283,18 @@ function CircularSpeedometer({
           {speed.toFixed(0)}
         </text>
 
-        {/* m/s unit */}
+        {/* m/s + speed % */}
         <text x={cx} y={cy + 14} textAnchor="middle" dominantBaseline="middle"
-          fill={`rgba(${accentRgb},0.45)`} fontSize="8"
+          fill={`rgba(${accentRgb},0.45)`} fontSize="7"
           style={{ fontFamily: 'var(--font-mono)', letterSpacing: '1.5px' }}>
-          m/s
+          m/s · {Math.round(speedPct * 100)}%
         </text>
 
-        {/* Percentage */}
+        {/* Boost readout */}
         <text x={cx} y={cy + 27} textAnchor="middle" dominantBaseline="middle"
-          fill={`rgba(${accentRgb},0.28)`} fontSize="7"
+          fill="rgba(100,255,218,0.6)" fontSize="7"
           style={{ fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
-          {Math.round(speedPct * 100)}%
+          BOOST {boostEnergy.toFixed(0)}%
         </text>
       </svg>
 
@@ -329,8 +355,8 @@ export function Navigation({ nav, ship, systems }: Props) {
             </div>
           </div>
           {speedMode === 'bars'
-            ? <RetroSpeedometer speed={nav.speed} maxSpeed={maxSpeed} maxBoost={maxBoost} inTravel={nav.inTravelMode} />
-            : <CircularSpeedometer speed={nav.speed} maxSpeed={maxSpeed} maxBoost={maxBoost} inTravel={nav.inTravelMode} />
+            ? <RetroSpeedometer speed={nav.speed} maxSpeed={maxSpeed} maxBoost={maxBoost} inTravel={nav.inTravelMode} boostEnergy={ship?.boostEnergy ?? 0} />
+            : <CircularSpeedometer speed={nav.speed} maxSpeed={maxSpeed} maxBoost={maxBoost} inTravel={nav.inTravelMode} boostEnergy={ship?.boostEnergy ?? 0} />
           }
         </div>
 

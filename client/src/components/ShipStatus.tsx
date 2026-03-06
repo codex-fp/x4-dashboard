@@ -22,7 +22,6 @@ function safeNum(value: number | null | undefined, digits = 0): string {
 export function ShipStatus({ ship }: Props) {
   const hullPct = Math.max(0, Math.min(100, ship.hull))
   const shieldsPct = Math.max(0, Math.min(100, ship.shields))
-  const boostPct = Math.max(0, Math.min(100, ship.boostEnergy))
   const hullTone = hullClass(hullPct)
 
   return (
@@ -63,20 +62,6 @@ export function ShipStatus({ ship }: Props) {
               </div>
             </div>
 
-            <div className="clean-health-row compact">
-              <div className="clean-health-head">
-                <span className="clean-health-label">Boost Energy</span>
-                <span className="clean-health-value shields-val small">{boostPct.toFixed(0)}%</span>
-              </div>
-              <div className="clean-health-track compact">
-                <div className="status-bar-fill shields" style={{ width: `${boostPct}%` }} />
-                <div className="clean-health-grid">
-                  {TRACK_TICKS.map((_, i) => (
-                    <div key={i} className="clean-health-tick" />
-                  ))}
-                </div>
-              </div>
-            </div>
           </div>
 
           <aside className="ship-status-aside">
