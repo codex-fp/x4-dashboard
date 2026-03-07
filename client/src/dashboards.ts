@@ -125,68 +125,46 @@ export const DASHBOARDS: DashboardConfig[] = [
                 col: 1, colSpan: 3, row: 1,
             },
             {
-                title: 'Navigation',
-                titleIcon: '*',
                 color: 'primary',
                 internal: {
                     layout: 'columns', columns: [{
                         widgets: [
-                            {id: 'NavHeading', scale: 2},
-                            {id: 'NavSpeedometer', grow: true, scale: 2.5 },
+                            {id: 'NavHeading'},
+                            {id: 'NavSpeedometer', grow: true, },
                         ]
                     }]
                 },
-                col: 2, row: 1, rowSpan: 2 , grow: true,
+                col: 2, row: 1, rowSpan: 2 , grow: true, scale: 2.5
             },
             {
-                title: 'Ship', titleIcon: '*',
                 internal: {
                     layout: 'columns', columns: [{
                         widgets: [
-                            {id: 'ShipShields', scale: 2.5},
-                            {id: 'ShipHull', scale: 2.5},
+                            {id: 'ShipShields'},
+                            {id: 'ShipHull'},
                         ]
                     }]
                 },
-                col: 1, colSpan: 3, row: 3, scale: 1,
+                col: 1, colSpan: 3, row: 3, scale: 2.5,
             },
             {
-                title: "Target", titleIcon: '*',
                 colorFn: (s) => s.combat.target?.isHostile ? 'danger' : 'warning',
                 internal: {
                     layout: 'columns', columns: [{
                         widgets: [
-                            {id: 'TargetInfo', scale: 1.5},
-                            {id: 'TargetShields', scale: 1.5},
-                            {id: 'TargetHull', scale: 1.5},
+                            {id: 'TargetInfo', scale: 0.7},
+                            {id: 'TargetShields'},
+                            {id: 'TargetHull'},
                         ]
                     }]
                 },
-                col: 1, row: 1, rowSpan: 2
+                col: 1, row: 1, rowSpan: 2, scale: 2.5
             },
             {
-                title: 'Systems', titleIcon: '⎔',
-                internal: { layout: 'columns', columns: [{ widgets: [{ id: 'SystemFlags', scale: 2.5 }] }] },
-                col: 3, row: 1, rowSpan: 2, grow: true
+                titleIcon: '⎔',
+                internal: { layout: 'columns', columns: [{ widgets: [{ id: 'SystemFlags' }] }] },
+                col: 3, row: 1, rowSpan: 2, grow: true, scale: 2.5
             }
-            /*{
-              title: 'Target Lock', titleIcon: '*',
-              colorFn: (s) => s.combat.target?.isHostile ? 'danger' : 'warning',
-              internal: { layout: 'columns', columns: [{ widgets: [{ id: 'TargetInfo' }] }] },
-              col: 2, row: 2,
-            },
-            {
-              title: 'Systems', titleIcon: '⎔',
-              internal: { layout: 'columns', columns: [{ widgets: [{ id: 'SystemFlags' }] }] },
-              col: 1, row: 3, colSpan: 3, scale: 1.5, grow: true,
-            },
-            {
-              title: 'Active Mission', titleIcon: '◆',
-              colorFn: (s) => s.activeMission?.completed ? 'success'
-                : (s.activeMission && s.activeMission.timeleft > 0 && s.activeMission.timeleft < 300 ? 'danger' : 'primary'),
-              internal: { layout: 'columns', columns: [{ widgets: [{ id: 'ActiveMission' }] }] },
-              col: 3, row: 1, rowSpan: 2, scale: 1.75,
-            },*/
         ],
     },
 
@@ -202,23 +180,23 @@ export const DASHBOARDS: DashboardConfig[] = [
                 colorFn: (s) => s.activeMission?.completed ? 'success'
                     : (s.activeMission && s.activeMission.timeleft > 0 && s.activeMission.timeleft < 300 ? 'danger' : 'primary'),
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'ActiveMission'}]}]},
-                col: 1, row: 1,
+                col: 1, row: 1, scale: 2
             },
             {
                 title: 'Mission Offers', titleIcon: '◈',
                 style: {flex: 1, minHeight: 0},
-                internal: {layout: 'columns', columns: [{widgets: [{id: 'MissionOffers'}]}]},
-                col: 1, row: 2,
+                internal: {layout: 'columns', columns: [{widgets: [{id: 'MissionOffers', grow: true}]}]},
+                col: 1, row: 2, grow: true, scale: 2
             },
             {
                 title: 'Research', titleIcon: '⬡', color: 'purple',
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'Research'}]}]},
-                col: 2, row: 1,
+                col: 2, row: 1, scale: 2
             },
             {
                 title: 'Comms', titleIcon: '◈',
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'Comms'}]}]},
-                col: 2, row: 2,
+                col: 2, row: 2, scale: 2
             },
         ],
     },

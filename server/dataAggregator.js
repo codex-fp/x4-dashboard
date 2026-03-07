@@ -92,6 +92,20 @@ class DataAggregator {
       seta:         es?.seta         ?? false,
     };
 
+    const ti = ext.targetInfo;
+    const combatTarget = (ti && ti.hasTarget) ? {
+      name:        ti.name        || '',
+      shipName:    ti.shipName    || '',
+      hull:        Math.max(0, Math.min(100, ti.hull    ?? 100)),
+      shields:     Math.max(0, Math.min(100, ti.shields ?? 100)),
+      faction:     ti.faction     || '',
+      legalStatus: ti.legalStatus || '',
+      isHostile:   ti.isHostile   ?? false,
+      distance:    ti.distance    ?? 0,
+      combatRank:  ti.combatRank  || '',
+      bounty:      ti.bounty      ?? 0,
+    } : null;
+
     return {
       _meta: {
         timestamp:         new Date().toISOString(),
@@ -101,7 +115,7 @@ class DataAggregator {
       ship,
       flight,
       combat: {
-        target: null,
+        target: combatTarget,
       },
       missionOffers:   normalizeMissionOffers(ext.missionOffers),
       activeMission:   normalizeActiveMission(ext.activeMission),

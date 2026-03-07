@@ -98,6 +98,8 @@ class MockDataSource extends EventEmitter {
     this.inCombat       = false;
     this.combatTimer    = null;
     this.combatCooldown = false;
+    this.targetHull     = 100;
+    this.targetShields  = 100;
 
     // Misc
     this.tick                  = 0;
@@ -116,6 +118,19 @@ class MockDataSource extends EventEmitter {
         sectorname:  this.sector,
         sectorowner: 'Teladi Company',
       },
+      targetInfo: this.inCombat ? {
+        hasTarget:   true,
+        name:        'XEN-SCOUT-041',
+        shipName:    'Xenon S',
+        hull:        Math.round(this.targetHull),
+        shields:     Math.round(this.targetShields),
+        faction:     'Xenon',
+        isHostile:   true,
+        legalStatus: '',
+        combatRank:  '',
+        bounty:      0,
+        distance:    Math.round(800 + Math.random() * 400),
+      } : { hasTarget: false },
       shipStatus: {
         hull:        Math.round(this.hull),
         shields:     Math.round(this.shields),
@@ -162,9 +177,11 @@ class MockDataSource extends EventEmitter {
     const t = this.tick * 0.05;
 
     if (this.inCombat) {
-      this.hull    = Math.max(18, this.hull    - 0.4 - Math.random() * 0.8);
-      this.shields = Math.max(0,  this.shields - 1.2 - Math.random() * 1.5);
-      this.speed   = 300 + Math.sin(t * 3) * 200;
+      this.hull          = Math.max(18, this.hull          - 0.4 - Math.random() * 0.8);
+      this.shields       = Math.max(0,  this.shields       - 1.2 - Math.random() * 1.5);
+      this.targetHull    = Math.max(0,  this.targetHull    - 1.5 - Math.random() * 2.0);
+      this.targetShields = Math.max(0,  this.targetShields - 2.0 - Math.random() * 2.5);
+      this.speed         = 300 + Math.sin(t * 3) * 200;
     } else {
       this.shields = Math.min(100, this.shields + 0.25);
       this.hull    = Math.min(100, this.hull    + 0.02);
@@ -180,7 +197,9 @@ class MockDataSource extends EventEmitter {
 
   startCombat() {
     if (this.inCombat || this.combatCooldown) return;
-    this.inCombat = true;
+    this.inCombat      = true;
+    this.targetHull    = 100;
+    this.targetShields = 100;
     console.log('[Mock] ⚠ COMBAT STARTED');
 
     this.combatTimer = setTimeout(() => {
