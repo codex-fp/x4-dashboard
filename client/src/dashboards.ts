@@ -170,6 +170,63 @@ export const DASHBOARDS: DashboardConfig[] = [
         ],
     },
 
+    {
+        id: 'flight-horizontal',
+        label: 'Flight Horizontal',
+        layout: 'grid',
+        columns: '1fr 1fr',
+        panels: [
+            {
+                color: 'primary',
+                internal: {
+                    layout: 'columns', columns: [{
+                        widgets: [
+                            {id: 'NavHeading', scale: 0.7},
+                            {id: 'NavSpeedometer', grow: true,},
+                        ]
+                    }]
+                },
+                col: 1, row: 2, grow: true, scale: 2.5
+            },
+            {
+                internal: {
+                    layout: 'columns', columns: [{
+                        widgets: [
+                            {id: 'ShipShields'},
+                            {id: 'ShipHull'},
+                        ]
+                    }]
+                },
+                col: 1, colSpan: 2, row: 5, scale: 2.5,
+            },
+            {
+                title: "Target",
+                colorFn: (s) => s.combat.target?.isHostile ? 'danger' : 'warning',
+                internal: {
+                    layout: 'columns', columns: [{
+                        widgets: [
+                            {id: 'TargetInfo', scale: 0.7},
+                            {id: 'TargetShields'},
+                            {id: 'TargetHull'},
+                        ]
+                    }]
+                },
+                col: 2, row: 2, rowSpan: 1, scale: 2.5
+            },
+            {
+                titleIcon: '⎔',
+                internal: {layout: 'columns', columns: [{widgets: [{id: 'SystemFlags'}]}]},
+                col: 1, row: 3, colSpan: 2, grow: true, scale: 2.5
+            },
+            {
+                id: 'underAttack', frameless: true,
+                style: {zIndex: 10, alignSelf: 'start', pointerEvents: 'none'},
+                internal: {layout: 'columns', columns: [{widgets: [{id: 'UnderAttack', scale: 3}]}]},
+                col: 1, colSpan: 2, row: 1, scale: 1
+            },
+        ],
+    },
+
     // ── Missions & Comms ───────────────────────────────────────────────────────
     {
         id: 'comms',

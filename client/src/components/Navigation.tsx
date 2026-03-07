@@ -27,24 +27,40 @@ function Chip({ label, color, bg, border }: { label: string; color: string; bg: 
 function RetroSpeedometer({
   speed,
   maxSpeed,
-  maxBoost,
+  maxBoostSpeed,
+  maxTravelSpeed,
+  boosting,
   inTravel,
   boostEnergy,
 }: {
   speed: number
   maxSpeed: number
-  maxBoost: number
+  maxBoostSpeed: number
+  maxTravelSpeed: number
+  boosting: boolean
   inTravel: boolean
   boostEnergy: number
 }) {
-  const displayMax = Math.max(1, inTravel && maxBoost > 0 ? maxBoost : maxSpeed > 0 ? maxSpeed : speed)
+  // Scale selection:
+  //   travel mode  → maxTravelSpeed if known, else auto-scale to current speed
+  //   boosting     → maxBoostSpeed (speed can exceed maxSpeed)
+  //   normal       → maxSpeed
+  const isOverspeed = boosting && maxBoostSpeed > maxSpeed && speed > maxSpeed
+  const displayMax = Math.max(1,
+    inTravel
+      ? (maxTravelSpeed > 0 ? maxTravelSpeed : Math.max(maxBoostSpeed, speed) * 1.1)
+      : (maxBoostSpeed > maxSpeed ? maxBoostSpeed : maxSpeed > 0 ? maxSpeed : speed)
+  )
   const speedPct = clamp(speed / displayMax, 0, 1)
+  // Fraction of the bar scale that corresponds to the normal speed cap
+  const normalFrac = (maxBoostSpeed > maxSpeed && !inTravel) ? maxSpeed / displayMax : 1
   const barCount = 24
   const bars = Array.from({ length: barCount }, (_, i) => {
     const threshold = (i + 1) / barCount
     const active = speedPct >= threshold
     const heightPct = 24 + (i / (barCount - 1)) * 76
-    return { active, heightPct }
+    const isBoostOver = active && isOverspeed && threshold > normalFrac
+    return { active, heightPct, isBoostOver }
   })
 
   const accent = inTravel ? '234,128,252' : '0,229,255'
@@ -56,12 +72,16 @@ function RetroSpeedometer({
   const barSlot = VW / barCount
   const barW = barSlot * 0.82
 
+  // X position of the normal-speed cap line when boost scale is active
+  const normalCapX = isOverspeed ? normalFrac * VW : null
+
   const svgBars = bars.map((bar, i) => ({
     x: i * barSlot,
     y: VH * (1 - bar.heightPct / 100),
     h: VH * (bar.heightPct / 100),
     w: barW,
     active: bar.active,
+    isBoostOver: bar.isBoostOver,
   }))
 
   return (
@@ -86,6 +106,10 @@ function RetroSpeedometer({
               <stop offset="0%" stopColor="rgba(234,128,252,0.45)" />
               <stop offset="100%" stopColor="rgba(120,48,136,0.15)" />
             </linearGradient>
+            <linearGradient id="retro-bar-boost" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(255,149,0,0.65)" />
+              <stop offset="100%" stopColor="rgba(160,70,0,0.15)" />
+            </linearGradient>
             <filter id="retro-bar-glow" x="-15%" y="-5%" width="130%" height="110%">
               <feGaussianBlur stdDeviation="0.4" result="blur" />
               <feMerge>
@@ -95,18 +119,30 @@ function RetroSpeedometer({
               </feMerge>
             </filter>
           </defs>
-          {svgBars.map((bar, idx) => (
-            <rect
-              key={idx}
-              x={bar.x} y={bar.y}
-              width={bar.w} height={bar.h}
-              fill={bar.active ? `url(#retro-bar-${inTravel ? 'travel' : 'normal'})` : accentDim}
-              stroke={bar.active ? accentBorder : 'none'}
-              strokeWidth={0.3}
-              opacity={bar.active ? 1 : 0.3}
-              filter={bar.active ? 'url(#retro-bar-glow)' : undefined}
+          {svgBars.map((bar, idx) => {
+            const gradId = bar.isBoostOver ? 'retro-bar-boost' : inTravel ? 'retro-bar-travel' : 'retro-bar-normal'
+            const borderColor = bar.isBoostOver ? 'rgba(255,149,0,0.85)' : accentBorder
+            return (
+              <rect
+                key={idx}
+                x={bar.x} y={bar.y}
+                width={bar.w} height={bar.h}
+                fill={bar.active ? `url(#${gradId})` : accentDim}
+                stroke={bar.active ? borderColor : 'none'}
+                strokeWidth={0.3}
+                opacity={bar.active ? 1 : 0.3}
+                filter={bar.active ? 'url(#retro-bar-glow)' : undefined}
+              />
+            )
+          })}
+          {/* Normal-cap marker line shown when boost scale is active */}
+          {normalCapX !== null && (
+            <line
+              x1={normalCapX} y1={0} x2={normalCapX} y2={VH}
+              stroke="rgba(255,149,0,0.55)" strokeWidth={1.2}
+              strokeDasharray="3,3"
             />
-          ))}
+          )}
         </svg>
         <div className="nav-retro-speed-overlay">
           <div className={`nav-retro-overlay-readout ${inTravel ? 'travel' : 'normal'}`}>
@@ -126,8 +162,8 @@ function RetroSpeedometer({
         </div>
       </div>
 
-      {inTravel && maxBoost > 0 && (
-        <div className="nav-retro-boost-note">Travel mode scale uses boost max {maxBoost.toFixed(0)}</div>
+      {isOverspeed && (
+        <div className="nav-retro-boost-note" style={{ color: 'rgba(255,149,0,0.8)' }}>Boost overspeed — max {maxBoostSpeed.toFixed(0)} m/s</div>
       )}
     </div>
   )
@@ -136,17 +172,26 @@ function RetroSpeedometer({
 function CircularSpeedometer({
   speed,
   maxSpeed,
-  maxBoost,
+  maxBoostSpeed,
+  maxTravelSpeed,
+  boosting,
   inTravel,
   boostEnergy,
 }: {
   speed: number
   maxSpeed: number
-  maxBoost: number
+  maxBoostSpeed: number
+  maxTravelSpeed: number
+  boosting: boolean
   inTravel: boolean
   boostEnergy: number
 }) {
-  const displayMax = Math.max(1, inTravel && maxBoost > 0 ? maxBoost : maxSpeed > 0 ? maxSpeed : speed)
+  const isOverspeed = boosting && maxBoostSpeed > maxSpeed && speed > maxSpeed
+  const displayMax = Math.max(1,
+    inTravel
+      ? (maxTravelSpeed > 0 ? maxTravelSpeed : Math.max(maxBoostSpeed, speed) * 1.1)
+      : (maxBoostSpeed > maxSpeed ? maxBoostSpeed : maxSpeed > 0 ? maxSpeed : speed)
+  )
   const speedPct = clamp(speed / displayMax, 0, 1)
   const boostPct = clamp(boostEnergy / 100, 0, 1)
 
@@ -170,8 +215,11 @@ function CircularSpeedometer({
   }
 
   const endAngle = START + SWEEP // 405 = same as 45°
-  const activeEnd = START + Math.max(speedPct, 0.001) * SWEEP
-  const boostEnd = START + Math.max(boostPct, 0.001) * SWEEP
+  // When overspeed: split arc into normal (cyan) + overspeed (orange)
+  const normalSpeedPct = isOverspeed ? clamp(maxSpeed / displayMax, 0, 1) : speedPct
+  const activeEnd      = START + Math.max(speedPct, 0.001) * SWEEP
+  const normalEnd      = START + Math.max(normalSpeedPct, 0.001) * SWEEP
+  const boostEnd       = START + Math.max(boostPct, 0.001) * SWEEP
 
   // Ticks shortened to fit between main arc and boost arc
   const ticks = Array.from({ length: 11 }, (_, i) => {
@@ -231,17 +279,40 @@ function CircularSpeedometer({
         {/* Track arc background */}
         <path d={arcD(R, START, endAngle)} fill="none" stroke={`rgba(${accentRgb},0.12)`} strokeWidth={8} />
 
-        {/* Active arc glow layer */}
-        {speedPct > 0.002 && (
-          <path d={arcD(R, START, activeEnd)} fill="none" stroke={`rgba(${accentRgb},0.3)`} strokeWidth={12}
+        {/* Active arc glow layer (normal speed portion) */}
+        {normalSpeedPct > 0.002 && (
+          <path d={arcD(R, START, normalEnd)} fill="none" stroke={`rgba(${accentRgb},0.3)`} strokeWidth={12}
             filter="url(#circ-glow-soft)" />
         )}
 
-        {/* Active arc crisp layer */}
-        {speedPct > 0.002 && (
-          <path d={arcD(R, START, activeEnd)} fill="none" stroke={accent} strokeWidth={3}
+        {/* Active arc crisp layer (normal speed portion) */}
+        {normalSpeedPct > 0.002 && (
+          <path d={arcD(R, START, normalEnd)} fill="none" stroke={accent} strokeWidth={3}
             filter="url(#circ-glow)" />
         )}
+
+        {/* Overspeed arc (boost beyond maxSpeed) */}
+        {isOverspeed && speedPct > normalSpeedPct + 0.002 && (
+          <>
+            <path d={arcD(R, normalEnd, activeEnd)} fill="none" stroke="rgba(255,149,0,0.35)" strokeWidth={12}
+              filter="url(#circ-glow-soft)" />
+            <path d={arcD(R, normalEnd, activeEnd)} fill="none" stroke="#ff9500" strokeWidth={3}
+              filter="url(#circ-glow)" />
+          </>
+        )}
+
+        {/* Normal-cap tick mark when boost scale is active */}
+        {isOverspeed && (() => {
+          const capPt1 = pt(R - 6, normalEnd)
+          const capPt2 = pt(R + 6, normalEnd)
+          return (
+            <line
+              x1={capPt1.x.toFixed(2)} y1={capPt1.y.toFixed(2)}
+              x2={capPt2.x.toFixed(2)} y2={capPt2.y.toFixed(2)}
+              stroke="rgba(255,149,0,0.7)" strokeWidth={1.5}
+            />
+          )
+        })()}
 
         {/* Tick marks */}
         {ticks.map((t, i) => (
@@ -269,11 +340,13 @@ function CircularSpeedometer({
 
         {/* Speed value */}
         <text x={cx} y={cy - 10} textAnchor="middle" dominantBaseline="middle"
-          fill={accent} fontSize="30"
+          fill={isOverspeed ? '#ff9500' : accent} fontSize="30"
           style={{
             fontFamily: 'var(--font-ui)',
             fontWeight: 700,
-            filter: `drop-shadow(0 0 7px rgba(${accentRgb},0.6))`,
+            filter: isOverspeed
+              ? 'drop-shadow(0 0 7px rgba(255,149,0,0.7))'
+              : `drop-shadow(0 0 7px rgba(${accentRgb},0.6))`,
           }}>
           {speed.toFixed(0)}
         </text>
@@ -293,8 +366,8 @@ function CircularSpeedometer({
         </text>
       </svg>
 
-      {inTravel && maxBoost > 0 && (
-        <div className="nav-retro-boost-note">Travel mode — boost max {maxBoost.toFixed(0)}</div>
+      {isOverspeed && (
+        <div className="nav-retro-boost-note" style={{ color: 'rgba(255,149,0,0.8)' }}>Boost overspeed — max {maxBoostSpeed.toFixed(0)} m/s</div>
       )}
     </div>
   )
@@ -345,8 +418,16 @@ export function NavSpeedometerWidget({ flight, scale = 1 }: { flight: FlightStat
         </div>
       </div>
       {speedMode === 'bars'
-        ? <RetroSpeedometer speed={flight.speed} maxSpeed={flight.maxSpeed} maxBoost={0} inTravel={flight.travelDrive} boostEnergy={flight.boostEnergy} />
-        : <CircularSpeedometer speed={flight.speed} maxSpeed={flight.maxSpeed} maxBoost={0} inTravel={flight.travelDrive} boostEnergy={flight.boostEnergy} />
+        ? <RetroSpeedometer
+            speed={flight.speed} maxSpeed={flight.maxSpeed}
+            maxBoostSpeed={flight.maxBoostSpeed ?? 0} maxTravelSpeed={flight.maxTravelSpeed ?? 0}
+            boosting={flight.boosting} inTravel={flight.travelDrive} boostEnergy={flight.boostEnergy}
+          />
+        : <CircularSpeedometer
+            speed={flight.speed} maxSpeed={flight.maxSpeed}
+            maxBoostSpeed={flight.maxBoostSpeed ?? 0} maxTravelSpeed={flight.maxTravelSpeed ?? 0}
+            boosting={flight.boosting} inTravel={flight.travelDrive} boostEnergy={flight.boostEnergy}
+          />
       }
     </div>
   )

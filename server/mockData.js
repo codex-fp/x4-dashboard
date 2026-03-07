@@ -93,6 +93,11 @@ class MockDataSource extends EventEmitter {
     this.flightAssist = true;
     this.seta         = false;
     this.travelDrive  = false;
+    this.boosting     = false;
+
+    // Flight phase cycle: normal → boost → recover → travel → travel_stop
+    this.flightPhase = 'normal';
+    this.phaseTick   = 0;
 
     // Combat
     this.inCombat       = false;
@@ -133,14 +138,16 @@ class MockDataSource extends EventEmitter {
         distance:    Math.round(800 + Math.random() * 400),
       } : { hasTarget: false },
       shipStatus: {
-        hull:        Math.round(this.hull),
-        shields:     Math.round(this.shields),
-        speed:       Math.round(this.speed),
-        maxSpeed:    480,
-        boosting:    false,
-        travelMode:  this.travelDrive,
-        flightAssist: this.flightAssist,
-        boostEnergy: Math.round(this.boostEnergy),
+        hull:          Math.round(this.hull),
+        shields:       Math.round(this.shields),
+        speed:         Math.round(this.speed),
+        maxSpeed:      480,
+        maxBoostSpeed: 960,
+        maxTravelSpeed: 5200,
+        boosting:      this.boosting,
+        travelMode:    this.travelDrive,
+        flightAssist:  this.flightAssist,
+        boostEnergy:   Math.round(this.boostEnergy),
         docked:        false,
         seta:          this.seta,
         shipSize:      'ship_s',
@@ -185,18 +192,72 @@ class MockDataSource extends EventEmitter {
       this.shields       = Math.max(0,  this.shields       - 1.2 - Math.random() * 1.5);
       this.targetHull    = Math.max(0,  this.targetHull    - 1.5 - Math.random() * 2.0);
       this.targetShields = Math.max(0,  this.targetShields - 2.0 - Math.random() * 2.5);
-      this.speed         = 300 + Math.sin(t * 3) * 200;
+      this.boosting    = false;
+      this.travelDrive = false;
+      this.speed       = 300 + Math.sin(t * 3) * 200;
+      this.boostEnergy = Math.min(100, this.boostEnergy + 0.3);
     } else {
       this.shields = Math.min(100, this.shields + 0.25);
       this.hull    = Math.min(100, this.hull    + 0.02);
-      this.speed   = Math.max(0, 250 + Math.sin(t * 0.7) * 250 + Math.cos(t * 0.3) * 80);
+      this._advanceFlightPhase(t);
     }
 
-    this.boostEnergy = Math.min(100, this.boostEnergy + 0.5);
     if (this.tick % 10 === 0) this.credits += Math.random() * 1200;
     if (this.tick % 5  === 0) this.activeMissionTimeLeft = Math.max(0, this.activeMissionTimeLeft - 1);
 
     this.emit_data(true);
+  }
+
+  // Phase durations at 250 ms/tick (4 ticks/s):
+  //   normal (80 ticks = 20 s) → boost (24 ticks = 6 s) →
+  //   recover (60 ticks = 15 s) → travel (80 ticks = 20 s) →
+  //   travel_stop (40 ticks = 10 s) → normal …
+  _advanceFlightPhase(t) {
+    this.phaseTick++;
+    switch (this.flightPhase) {
+      case 'normal': {
+        this.boosting    = false;
+        this.travelDrive = false;
+        this.speed       = Math.max(0, 250 + Math.sin(t * 0.7) * 220 + Math.cos(t * 0.3) * 60);
+        this.boostEnergy = Math.min(100, this.boostEnergy + 0.5);
+        if (this.phaseTick >= 80) { this.flightPhase = 'boost';   this.phaseTick = 0; }
+        break;
+      }
+      case 'boost': {
+        this.boosting    = true;
+        this.travelDrive = false;
+        const bp = Math.min(1, this.phaseTick / 14);
+        this.speed       = 480 + bp * 480 + Math.sin(t * 5) * 30;
+        this.boostEnergy = Math.max(0, this.boostEnergy - 3.2);
+        if (this.phaseTick >= 24) { this.flightPhase = 'recover'; this.phaseTick = 0; this.boosting = false; }
+        break;
+      }
+      case 'recover': {
+        this.boosting    = false;
+        this.travelDrive = false;
+        this.speed       = Math.max(0, 250 + Math.sin(t * 0.7) * 220 + Math.cos(t * 0.3) * 60);
+        this.boostEnergy = Math.min(100, this.boostEnergy + 0.9);
+        if (this.phaseTick >= 60) { this.flightPhase = 'travel'; this.phaseTick = 0; }
+        break;
+      }
+      case 'travel': {
+        this.boosting    = false;
+        this.travelDrive = true;
+        const tp = Math.min(1, this.phaseTick / 40);
+        this.speed       = 480 + tp * tp * 4600 + Math.sin(t * 2) * 120;
+        this.boostEnergy = Math.min(100, this.boostEnergy + 0.3);
+        if (this.phaseTick >= 80) { this.flightPhase = 'travel_stop'; this.phaseTick = 0; }
+        break;
+      }
+      case 'travel_stop': {
+        this.boosting    = false;
+        this.travelDrive = false;
+        this.speed       = Math.max(0, this.speed * 0.84 - 40);
+        this.boostEnergy = Math.min(100, this.boostEnergy + 0.5);
+        if (this.phaseTick >= 40 || this.speed < 10) { this.flightPhase = 'normal'; this.phaseTick = 0; }
+        break;
+      }
+    }
   }
 
   startCombat() {

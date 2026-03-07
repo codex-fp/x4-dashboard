@@ -84,12 +84,14 @@ class DataAggregator {
 
     const flight = {
       speed,
-      maxSpeed:     es?.maxSpeed     ?? 0,
-      boostEnergy:  es?.boostEnergy  ?? 100,
-      boosting:     es?.boosting     ?? false,
-      travelDrive:  es?.travelMode   ?? false,
-      flightAssist: es?.flightAssist ?? true,
-      seta:         es?.seta         ?? false,
+      maxSpeed:      es?.maxSpeed      ?? 0,
+      maxBoostSpeed: es?.maxBoostSpeed ?? 0,
+      maxTravelSpeed: es?.maxTravelSpeed ?? 0,
+      boostEnergy:   es?.boostEnergy   ?? 100,
+      boosting:      es?.boosting      ?? false,
+      travelDrive:   es?.travelMode    ?? false,
+      flightAssist:  es?.flightAssist  ?? true,
+      seta:          es?.seta          ?? false,
     };
 
     const ti = ext.targetInfo;

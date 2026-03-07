@@ -21,9 +21,11 @@ export interface ShipStatus {
 }
 
 export interface FlightState {
-  speed: number;        // current m/s
-  maxSpeed: number;     // speed hardcap m/s
-  boostEnergy: number;  // 0–100 %
+  speed: number;          // current m/s
+  maxSpeed: number;       // normal speed cap m/s
+  maxBoostSpeed: number;  // boosted speed cap m/s (0 if unknown)
+  maxTravelSpeed: number; // travel drive cap m/s (0 if unknown/auto-scale)
+  boostEnergy: number;    // 0–100 %
   boosting: boolean;
   travelDrive: boolean;
   flightAssist: boolean;
