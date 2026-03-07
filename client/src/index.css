@@ -1559,7 +1559,8 @@ body {
 
 .nav-speed-header {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 3px;
 }
 
@@ -1763,6 +1764,34 @@ body {
 @keyframes hullSvgPulse {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.7; }
+}
+
+/* ── Combined health bar label rows ────────────────────────────── */
+
+.health-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.health-bar-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.health-bar-bot-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 4px;
+}
+
+.health-bar-svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
 }
 
 .ship-status-aside {

@@ -12,89 +12,94 @@ function hullClass(pct: number): string {
 }
 
 export function ShipShieldsWidget({ ship }: Props) {
-  const pct = Math.max(0, Math.min(100, ship.shields))
-  const clipId = React.useId()
-  // Hexagon points: pointed left and right ends (viewBox 400×12)
-  const points = '6,0 394,0 400,6 394,12 6,12 0,6'
+  const shieldsPct = Math.max(0, Math.min(100, ship.shields))
+  const hullPct    = Math.max(0, Math.min(100, ship.hull))
+  const tone       = hullClass(hullPct)
+  const shieldsClipId = React.useId()
+  const hullClipId    = React.useId()
+
+  const hullFill =
+    tone === 'low' ? 'var(--c-red)' :
+    tone === 'med' ? 'var(--c-orange)' :
+    'var(--c-green)'
+  const hullStroke =
+    tone === 'low' ? 'rgba(255,23,68,0.3)' :
+    tone === 'med' ? 'rgba(255,109,0,0.3)' :
+    'rgba(0,230,118,0.3)'
+  const hullFrameFill =
+    tone === 'low' ? 'rgba(255,23,68,0.04)' :
+    tone === 'med' ? 'rgba(255,109,0,0.04)' :
+    'rgba(0,230,118,0.04)'
+
+  // Shields polygon — full width, bottom-right lip overhangs hull
+  const shieldsPoints = '0,0 400,0 400,22 392,22 386,26 0,22'
+  // Hull polygon — recessed, top-right tucked under shields lip
+  const hullPoints    = '8,22 386,22 394,26 394,34 8,34'
+
   return (
-    <div className="svg-bar-row">
-      <div className="svg-bar-head">
+    <div className="health-bar-wrap">
+      {/* Top label row: SHIELDS */}
+      <div className="health-bar-top-row">
         <span className="svg-bar-label">Shields</span>
-        <span className="svg-bar-value shields-val">{pct.toFixed(0)}%</span>
+        <span className="svg-bar-value shields-val">{shieldsPct.toFixed(0)}%</span>
       </div>
-      <svg className="svg-bar-svg shields-svg" viewBox="0 0 400 12" preserveAspectRatio="none">
+
+      {/* Combined SVG — both bars in one coordinate space */}
+      <svg
+        className="health-bar-svg"
+        viewBox="0 0 400 34"
+        preserveAspectRatio="none"
+      >
         <defs>
-          <clipPath id={clipId} clipPathUnits="objectBoundingBox">
-            <rect x="0" y="0" width={pct / 100} height="1" />
+          <clipPath id={shieldsClipId} clipPathUnits="objectBoundingBox">
+            <rect x="0" y="0" width={shieldsPct / 100} height="1" />
+          </clipPath>
+          <clipPath id={hullClipId} clipPathUnits="objectBoundingBox">
+            <rect x="0" y="0" width={hullPct / 100} height="1" />
           </clipPath>
         </defs>
-        {/* Frame — always full width */}
+
+        {/* ── Shields bar ── */}
         <polygon
-          points={points}
+          points={shieldsPoints}
           fill="rgba(0,229,255,0.04)"
           stroke="rgba(0,229,255,0.25)"
           strokeWidth="1"
         />
-        {/* Fill — clipped to pct% */}
         <polygon
-          points={points}
+          points={shieldsPoints}
           fill="var(--c-cyan)"
           stroke="none"
-          clipPath={`url(#${clipId})`}
+          clipPath={`url(#${shieldsClipId})`}
+        />
+
+        {/* ── Hull bar ── */}
+        <polygon
+          points={hullPoints}
+          fill={hullFrameFill}
+          stroke={hullStroke}
+          strokeWidth="1"
+        />
+        <polygon
+          points={hullPoints}
+          fill={hullFill}
+          stroke="none"
+          clipPath={`url(#${hullClipId})`}
+          className={tone === 'low' ? 'hull-svg-low' : undefined}
         />
       </svg>
+
+      {/* Bottom label row: HULL */}
+      <div className="health-bar-bot-row">
+        <span className="svg-bar-label">Hull</span>
+        <span className={`svg-bar-value hull-val ${tone}`}>{hullPct.toFixed(0)}%</span>
+      </div>
     </div>
   )
 }
 
-export function ShipHullWidget({ ship }: Props) {
-  const pct = Math.max(0, Math.min(100, ship.hull))
-  const tone = hullClass(pct)
-  const clipId = React.useId()
-  // Armour plate: diagonal top-right cut, angled lower-left corner (viewBox 400×10)
-  const points = '0,0 392,0 400,5 400,10 8,10 0,5'
-  const fillColour =
-    tone === 'low' ? 'var(--c-red)' :
-    tone === 'med' ? 'var(--c-orange)' :
-    'var(--c-green)'
-  const strokeColour =
-    tone === 'low' ? 'rgba(255,23,68,0.3)' :
-    tone === 'med' ? 'rgba(255,109,0,0.3)' :
-    'rgba(0,230,118,0.3)'
-  const frameFill =
-    tone === 'low' ? 'rgba(255,23,68,0.04)' :
-    tone === 'med' ? 'rgba(255,109,0,0.04)' :
-    'rgba(0,230,118,0.04)'
-  return (
-    <div className="svg-bar-row">
-      <div className="svg-bar-head">
-        <span className="svg-bar-label">Hull</span>
-        <span className={`svg-bar-value hull-val ${tone}`}>{pct.toFixed(0)}%</span>
-      </div>
-      <svg className="svg-bar-svg" viewBox="0 0 400 10" preserveAspectRatio="none">
-        <defs>
-          <clipPath id={clipId} clipPathUnits="objectBoundingBox">
-            <rect x="0" y="0" width={pct / 100} height="1" />
-          </clipPath>
-        </defs>
-        {/* Frame — always full width */}
-        <polygon
-          points={points}
-          fill={frameFill}
-          stroke={strokeColour}
-          strokeWidth="1"
-        />
-        {/* Fill — clipped to pct% */}
-        <polygon
-          points={points}
-          fill={fillColour}
-          stroke="none"
-          clipPath={`url(#${clipId})`}
-          className={tone === 'low' ? 'hull-svg-low' : undefined}
-        />
-      </svg>
-    </div>
-  )
+export function ShipHullWidget(_props: Props) {
+  return null
 }
 
 export function ShipCargoWidget(_props: Props) {
