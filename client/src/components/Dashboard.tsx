@@ -12,6 +12,7 @@ import { MissionOffers } from './MissionOffers'
 import { ActiveMission } from './ActiveMission'
 import { Comms } from './Comms'
 import { Research } from './Research'
+import { UnderAttackAlert } from './UnderAttackAlert'
 
 interface Props {
   state: GameState
@@ -44,7 +45,9 @@ function renderWidget(
     case 'MissionOffers':  return <MissionOffers offers={state.missionOffers} />
     case 'Comms':          return <Comms logbook={state.logbook} />
     case 'Research':       return <Research research={state.currentResearch} />
-    case 'UnderAttack':    return null
+    case 'UnderAttack':
+      if (state.combat.alertLevel === 0) return null
+      return <UnderAttackAlert alertLevel={state.combat.alertLevel} attackerCount={state.combat.attackerCount} incomingMissiles={state.combat.incomingMissiles} />
   }
 }
 
@@ -149,6 +152,7 @@ function GridLayout({ config, state, onKeyPress }: LayoutProps & { config: GridD
               ...(item.scale && item.scale !== 1 ? { zoom: item.scale } : {}),
               ...(item.grow ? { alignSelf: 'stretch' } : {}),
               ...(item.height ? { height: item.height } : {}),
+              ...(item.frameless && item.style ? item.style : {}),
             }}
           >
             {content}
@@ -191,9 +195,14 @@ function ColumnsLayout({ config, state, onKeyPress }: LayoutProps & { config: Co
   )
 }
 
+function toggleMockCombat() {
+  fetch('/api/mock/combat', { method: 'POST' }).catch(() => {})
+}
+
 export function Dashboard({ state, wsConnected, dashboardId, onKeyPress, onOpenSettings, onChangeDashboard }: Props) {
   const { _meta, ship } = state
   const config = getDashboard(dashboardId)
+  const inCombat = state.combat.alertLevel > 0
 
   return (
     <div className="dashboard">
@@ -207,7 +216,7 @@ export function Dashboard({ state, wsConnected, dashboardId, onKeyPress, onOpenS
             contentStyle={{ fontFamily: "'Exo 2', sans-serif" }}
             className="header-logo"
           >
-            X4 FOUNDATIONS · COMMAND INTERFACE
+            X4 FOUNDATIONS · DASHBOARD
           </Text>
         </Animator>
 
@@ -221,6 +230,14 @@ export function Dashboard({ state, wsConnected, dashboardId, onKeyPress, onOpenS
               <span className="conn-dot" />
               EXT APP
             </div>
+          )}
+          {_meta.mockMode && (
+            <button
+              className={`header-settings-btn ${inCombat ? 'mock-combat-active' : ''}`}
+              onClick={toggleMockCombat}
+            >
+              {inCombat ? '⚔ END COMBAT' : '⚔ START COMBAT'}
+            </button>
           )}
           {/* ── Dashboard selector ── */}
           <select

@@ -98,8 +98,9 @@ class MockDataSource extends EventEmitter {
     this.inCombat       = false;
     this.combatTimer    = null;
     this.combatCooldown = false;
-    this.targetHull     = 100;
-    this.targetShields  = 100;
+    this.targetHull      = 100;
+    this.targetShields   = 100;
+    this.incomingMissiles = 0;
 
     // Misc
     this.tick                  = 0;
@@ -140,9 +141,12 @@ class MockDataSource extends EventEmitter {
         travelMode:  this.travelDrive,
         flightAssist: this.flightAssist,
         boostEnergy: Math.round(this.boostEnergy),
-        docked:      false,
-        seta:        this.seta,
-        shipSize:    'ship_s',
+        docked:        false,
+        seta:          this.seta,
+        shipSize:      'ship_s',
+        alertLevel:       this.inCombat ? 2 : 0,
+        attackerCount:    this.inCombat ? 1 : 0,
+        incomingMissiles: this.incomingMissiles,
       },
     };
 
@@ -197,17 +201,45 @@ class MockDataSource extends EventEmitter {
 
   startCombat() {
     if (this.inCombat || this.combatCooldown) return;
-    this.inCombat      = true;
-    this.targetHull    = 100;
-    this.targetShields = 100;
+    this.inCombat         = true;
+    this.targetHull       = 100;
+    this.targetShields    = 100;
+    this.incomingMissiles = 0;
     console.log('[Mock] ⚠ COMBAT STARTED');
 
+    // Missile fires ~5s into combat, tracked for 4s then intercept/miss
+    this.intervals.push(setTimeout(() => {
+      if (!this.inCombat) return;
+      this.incomingMissiles = 1;
+      console.log('[Mock] ⟫ MISSILE INBOUND');
+      this.intervals.push(setTimeout(() => {
+        this.incomingMissiles = 0;
+        console.log('[Mock] Missile resolved');
+      }, 4000));
+    }, 5000));
+
     this.combatTimer = setTimeout(() => {
-      this.inCombat = false;
-      this.combatCooldown = true;
+      this.inCombat         = false;
+      this.incomingMissiles = 0;
+      this.combatCooldown   = true;
       console.log('[Mock] Combat ended, hull:', Math.round(this.hull), 'shields:', Math.round(this.shields));
       setTimeout(() => { this.combatCooldown = false; }, 30000);
     }, 15000);
+  }
+
+  toggleCombat() {
+    if (this.inCombat) {
+      if (this.combatTimer) clearTimeout(this.combatTimer);
+      this.combatTimer      = null;
+      this.inCombat         = false;
+      this.incomingMissiles = 0;
+      this.combatCooldown   = false;
+      console.log('[Mock] Combat ended manually');
+    } else {
+      this.combatCooldown = false;
+      this.startCombat();
+    }
+    this.emit_data(true);
   }
 
   start() {

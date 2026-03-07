@@ -26,14 +26,16 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// Serve built client from server/public
-const publicDir = path.join(__dirname, 'public');
-if (fs.existsSync(publicDir)) {
-  app.use(express.static(publicDir));
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api')) return next();
-    res.sendFile(path.join(publicDir, 'index.html'));
-  });
+// Serve built client from server/public (disabled in mock mode — use Vite on :3000 for HMR)
+if (!MOCK_MODE) {
+  const publicDir = path.join(__dirname, 'public');
+  if (fs.existsSync(publicDir)) {
+    app.use(express.static(publicDir));
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api')) return next();
+      res.sendFile(path.join(publicDir, 'index.html'));
+    });
+  }
 }
 
 const server = http.createServer(app);
@@ -50,9 +52,15 @@ function broadcast(data) {
   }
 }
 
+function broadcastState() {
+  const state = aggregator.getState();
+  broadcast({ ...state, _meta: { ...state._meta, mockMode: MOCK_MODE } });
+}
+
 wss.on('connection', (ws, req) => {
   console.log(`[WS] Client connected from ${req.socket.remoteAddress}`);
-  ws.send(JSON.stringify(aggregator.getState()));
+  const state = aggregator.getState();
+  ws.send(JSON.stringify({ ...state, _meta: { ...state._meta, mockMode: MOCK_MODE } }));
   ws.on('error', (err) => console.log(`[WS] Client error: ${err.message}`));
   ws.on('close', () => console.log('[WS] Client disconnected'));
 });
@@ -62,7 +70,7 @@ const aggregator = new DataAggregator();
 
 function onExternalData(data) {
   aggregator.updateExternal(data);
-  broadcast(aggregator.getState());
+  broadcastState();
 }
 
 let mock = null;
@@ -127,6 +135,12 @@ app.put('/api/keybindings', (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+app.post('/api/mock/combat', (req, res) => {
+  if (!MOCK_MODE || !mock) return res.status(404).json({ error: 'Not in mock mode' });
+  mock.toggleCombat();
+  res.json({ ok: true, inCombat: mock.inCombat });
 });
 
 app.get('/api/state', (req, res) => {

@@ -115,7 +115,10 @@ class DataAggregator {
       ship,
       flight,
       combat: {
-        target: combatTarget,
+        target:           combatTarget,
+        alertLevel:       es?.alertLevel       ?? 0,
+        attackerCount:    es?.attackerCount     ?? 0,
+        incomingMissiles: es?.incomingMissiles  ?? 0,
       },
       missionOffers:   normalizeMissionOffers(ext.missionOffers),
       activeMission:   normalizeActiveMission(ext.activeMission),

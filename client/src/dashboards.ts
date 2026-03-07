@@ -120,21 +120,16 @@ export const DASHBOARDS: DashboardConfig[] = [
         columns: '30% 40% 30%',
         panels: [
             {
-                id: 'underAttack', frameless: true,
-                internal: {layout: 'columns', columns: [{widgets: [{id: 'UnderAttack'}]}]},
-                col: 1, colSpan: 3, row: 1,
-            },
-            {
                 color: 'primary',
                 internal: {
                     layout: 'columns', columns: [{
                         widgets: [
-                            {id: 'NavHeading'},
-                            {id: 'NavSpeedometer', grow: true, },
+                            {id: 'NavHeading', scale: 0.7},
+                            {id: 'NavSpeedometer', grow: true,},
                         ]
                     }]
                 },
-                col: 2, row: 1, rowSpan: 2 , grow: true, scale: 2.5
+                col: 2, row: 2, rowSpan: 2, grow: true, scale: 2.5
             },
             {
                 internal: {
@@ -145,9 +140,10 @@ export const DASHBOARDS: DashboardConfig[] = [
                         ]
                     }]
                 },
-                col: 1, colSpan: 3, row: 3, scale: 2.5,
+                col: 1, colSpan: 3, row: 4, scale: 2.5,
             },
             {
+                title: "Target",
                 colorFn: (s) => s.combat.target?.isHostile ? 'danger' : 'warning',
                 internal: {
                     layout: 'columns', columns: [{
@@ -158,13 +154,19 @@ export const DASHBOARDS: DashboardConfig[] = [
                         ]
                     }]
                 },
-                col: 1, row: 1, rowSpan: 2, scale: 2.5
+                col: 1, row: 2, rowSpan: 2, scale: 2.5
             },
             {
                 titleIcon: '⎔',
-                internal: { layout: 'columns', columns: [{ widgets: [{ id: 'SystemFlags' }] }] },
-                col: 3, row: 1, rowSpan: 2, grow: true, scale: 2.5
-            }
+                internal: {layout: 'columns', columns: [{widgets: [{id: 'SystemFlags'}]}]},
+                col: 3, row: 2, rowSpan: 2, grow: true, scale: 2.5
+            },
+            {
+                id: 'underAttack', frameless: true,
+                style: {zIndex: 10, alignSelf: 'start', pointerEvents: 'none'},
+                internal: {layout: 'columns', columns: [{widgets: [{id: 'UnderAttack', scale: 3}]}]},
+                col: 1, colSpan: 3, row: 1, scale: 1
+            },
         ],
     },
 

@@ -133,6 +133,14 @@ body {
   text-transform: uppercase;
   transition: all 0.15s;
 }
+.header-settings-btn.mock-combat-active {
+  border-color: rgba(255, 23, 68, 0.6);
+  color: var(--c-red);
+}
+.header-settings-btn.mock-combat-active:hover {
+  border-color: var(--c-red);
+  background: rgba(255, 23, 68, 0.08);
+}
 .header-settings-btn:hover {
   border-color: var(--c-cyan);
   color: var(--c-cyan);
@@ -1949,4 +1957,63 @@ body {
   .target-v3-facts {
     gap: 8px;
   }
+}
+
+/* ── Under Attack Alert ──────────────────────────────────────────────────── */
+.under-attack-alert {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 6px 16px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  animation: under-attack-pulse 1s ease-in-out infinite alternate;
+}
+
+.under-attack-alert--alert {
+  color: var(--c-orange);
+  border-top: 1px solid rgba(255, 109, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 109, 0, 0.4);
+  background: rgba(255, 109, 0, 0.06);
+  text-shadow: 0 0 8px rgba(255, 109, 0, 0.7);
+}
+
+.under-attack-alert--combat {
+  color: var(--c-red);
+  border-top: 1px solid rgba(255, 23, 68, 0.5);
+  border-bottom: 1px solid rgba(255, 23, 68, 0.5);
+  background: rgba(255, 23, 68, 0.08);
+  text-shadow: 0 0 10px rgba(255, 23, 68, 0.8);
+  animation-duration: 0.5s;
+}
+
+.under-attack-icon {
+  opacity: 0.85;
+}
+
+.under-attack-count {
+  font-size: 11px;
+  letter-spacing: 2px;
+  opacity: 0.8;
+}
+
+.under-attack-missile {
+  color: var(--c-red);
+  text-shadow: 0 0 12px rgba(255, 23, 68, 0.9);
+  letter-spacing: 3px;
+  animation: missile-flash 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes missile-flash {
+  from { opacity: 0.5; }
+  to   { opacity: 1;   }
+}
+
+@keyframes under-attack-pulse {
+  from { opacity: 0.7; }
+  to   { opacity: 1;   }
 }
