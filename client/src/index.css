@@ -133,6 +133,22 @@ body {
   text-transform: uppercase;
   transition: all 0.15s;
 }
+.header-settings-btn.mock-travel-active {
+  border-color: rgba(0, 229, 255, 0.6);
+  color: var(--c-cyan);
+}
+.header-settings-btn.mock-travel-active:hover {
+  border-color: var(--c-cyan);
+  background: rgba(0, 229, 255, 0.08);
+}
+.header-settings-btn.mock-boost-active {
+  border-color: rgba(255, 109, 0, 0.6);
+  color: var(--c-orange);
+}
+.header-settings-btn.mock-boost-active:hover {
+  border-color: var(--c-orange);
+  background: rgba(255, 109, 0, 0.08);
+}
 .header-settings-btn.mock-combat-active {
   border-color: rgba(255, 23, 68, 0.6);
   color: var(--c-red);
@@ -1700,7 +1716,7 @@ body {
 /* ── Parallelogram cell health bar ─────────────────────────────── */
 
 .para-bar-row {
-  padding: 6px 0;
+  padding: 8px 0 4px 0;
 }
 
 .para-bar-head {
@@ -1711,7 +1727,7 @@ body {
 }
 
 .para-bar-label {
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--c-text-dim);
@@ -1731,7 +1747,7 @@ body {
 
 .para-bar-cells {
   display: flex;
-  gap: 3px;
+  gap: 2px;
   height: 18px;
 }
 
