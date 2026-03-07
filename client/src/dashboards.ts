@@ -112,86 +112,6 @@ export type DashboardConfig = GridDashboard | ColumnsDashboard
 
 export const DASHBOARDS: DashboardConfig[] = [
 
-    // ── Full Dashboard ─────────────────────────────────────────────────────────
-    {
-        id: 'full',
-        label: 'Full Dashboard',
-        layout: 'grid',
-        columns: '240px 280px 1fr 260px',
-        panels: [
-            {
-                title: 'Active Mission', titleIcon: '◆',
-                colorFn: (s) => s.activeMission?.completed ? 'success'
-                    : (s.activeMission && s.activeMission.timeleft > 0 && s.activeMission.timeleft < 300 ? 'danger' : 'primary'),
-                internal: {layout: 'columns', columns: [{widgets: [{id: 'ActiveMission'}]}]},
-                col: 1, row: 1,
-            },
-            {
-                title: 'Mission Offers', titleIcon: '◈',
-                style: {flex: 1, minHeight: 0},
-                internal: {layout: 'columns', columns: [{widgets: [{id: 'MissionOffers'}]}]},
-                col: 1, row: 2,
-            },
-            {
-                title: 'Commander', titleIcon: '◈',
-                internal: {layout: 'columns', columns: [{widgets: [{id: 'PlayerInfo'}]}]},
-                col: 2, row: 1,
-            },
-            {
-                title: 'Ship Status', titleIcon: '*', style: {minHeight: '220px'},
-                internal: {
-                    layout: 'columns', columns: [{
-                        widgets: [
-                            {id: 'ShipShields'},
-                            {id: 'ShipHull'},
-                            {id: 'ShipCargo'},
-                            {id: 'ShipStatus'},
-                        ]
-                    }]
-                },
-                col: 3, row: 1, scale: 1.75,
-            },
-            {
-                title: 'Target Lock', titleIcon: '*', style: {minHeight: '220px'},
-                colorFn: (s) => s.combat.target?.isHostile ? 'danger' : 'warning',
-                internal: { layout: 'columns', columns: [{ widgets: [
-                    { id: 'TargetInfo' },
-                    { id: 'TargetShields' },
-                    { id: 'TargetHull' },
-                ] }] },
-                col: 3, row: 2, scale: 1.5,
-            },
-            {
-                title: 'Navigation', titleIcon: '*',
-                color: 'primary',
-                internal: {
-                    layout: 'columns', columns: [{
-                        widgets: [
-                            {id: 'NavHeading'},
-                            {id: 'NavSpeedometer', grow: true},
-                        ]
-                    }]
-                },
-                col: 2, row: 2,
-            },
-            {
-                title: 'Systems', titleIcon: '⎔',
-                internal: {layout: 'columns', columns: [{widgets: [{id: 'SystemFlags'}]}]},
-                col: 3, row: 3,
-            },
-            {
-                title: 'Research', titleIcon: '⬡', color: 'purple',
-                internal: {layout: 'columns', columns: [{widgets: [{id: 'Research'}]}]},
-                col: 4, row: 1,
-            },
-            {
-                title: 'Comms', titleIcon: '◈',
-                internal: {layout: 'columns', columns: [{widgets: [{id: 'Comms'}]}]},
-                col: 4, row: 2,
-            },
-        ],
-    },
-
     // ── Flight ─────────────────────────────────────────────────────────────────
     {
         id: 'flight',
@@ -211,8 +131,8 @@ export const DASHBOARDS: DashboardConfig[] = [
                 internal: {
                     layout: 'columns', columns: [{
                         widgets: [
-                            {id: 'NavHeading'},
-                            {id: 'NavSpeedometer', grow: true},
+                            {id: 'NavHeading', scale: 2},
+                            {id: 'NavSpeedometer', grow: true, scale: 2.5 },
                         ]
                     }]
                 },
@@ -223,8 +143,8 @@ export const DASHBOARDS: DashboardConfig[] = [
                 internal: {
                     layout: 'columns', columns: [{
                         widgets: [
-                            {id: 'ShipShields', scale: 2},
-                            {id: 'ShipHull', scale: 2},
+                            {id: 'ShipShields', scale: 2.5},
+                            {id: 'ShipHull', scale: 2.5},
                         ]
                     }]
                 },
@@ -246,8 +166,8 @@ export const DASHBOARDS: DashboardConfig[] = [
             },
             {
                 title: 'Systems', titleIcon: '⎔',
-                internal: { layout: 'columns', columns: [{ widgets: [{ id: 'SystemFlags' }] }] },
-                col: 3, row: 1, rowSpan: 2, grow: true,
+                internal: { layout: 'columns', columns: [{ widgets: [{ id: 'SystemFlags', scale: 2.5 }] }] },
+                col: 3, row: 1, rowSpan: 2, grow: true
             }
             /*{
               title: 'Target Lock', titleIcon: '*',

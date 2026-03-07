@@ -327,7 +327,7 @@ export function NavHeadingWidget({ player, flight }: { player: PlayerInfo; fligh
 
 // ── NavSpeedometerWidget ──────────────────────────────────────────────────────
 
-export function NavSpeedometerWidget({ flight }: { flight: FlightState }) {
+export function NavSpeedometerWidget({ flight, scale = 1 }: { flight: FlightState; scale?: number }) {
   const [speedMode, setSpeedMode] = useState<'bars' | 'gauge'>('bars')
 
   return (

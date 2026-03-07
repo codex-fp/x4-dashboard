@@ -120,6 +120,7 @@ class MockDataSource extends EventEmitter {
         hull:        Math.round(this.hull),
         shields:     Math.round(this.shields),
         speed:       Math.round(this.speed),
+        maxSpeed:    480,
         boosting:    false,
         travelMode:  this.travelDrive,
         flightAssist: this.flightAssist,

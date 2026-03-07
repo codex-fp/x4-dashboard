@@ -26,6 +26,7 @@ function renderWidget(
   id: WidgetId,
   state: GameState,
   onKeyPress: (action: string) => void,
+  scale: number = 1,
 ): React.ReactNode {
   switch (id) {
     case 'PlayerInfo':     return <PlayerInfo player={state.player} ship={state.ship} />
@@ -37,7 +38,7 @@ function renderWidget(
     case 'TargetHull':     return state.combat.target ? <TargetHullWidget target={state.combat.target} /> : null
     case 'TargetInfo':     return state.combat.target ? <TargetInfoWidget target={state.combat.target} /> : null
     case 'NavHeading':     return <NavHeadingWidget player={state.player} flight={state.flight} />
-    case 'NavSpeedometer': return <NavSpeedometerWidget flight={state.flight} />
+    case 'NavSpeedometer': return <NavSpeedometerWidget flight={state.flight} scale={scale} />
     case 'SystemFlags':    return <SystemFlags flight={state.flight} onKeyPress={onKeyPress} />
     case 'ActiveMission':  return <ActiveMission mission={state.activeMission} />
     case 'MissionOffers':  return <MissionOffers offers={state.missionOffers} />
@@ -87,6 +88,7 @@ function renderPanelContent(
             flexDirection: 'column',
             gap: '10px',
             minHeight: 0,
+            overflow: 'hidden',
           }}
         >
           {col.widgets.map(w => (
@@ -99,7 +101,7 @@ function renderPanelContent(
                 ...(w.grow ? { flex: 1, minHeight: 0 } : w.height ? { height: w.height } : {}),
               }}
             >
-              {renderWidget(w.id, state, onKeyPress)}
+              {renderWidget(w.id, state, onKeyPress, w.scale ?? 1)}
             </div>
           ))}
         </div>
