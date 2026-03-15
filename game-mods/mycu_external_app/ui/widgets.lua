@@ -1,8 +1,8 @@
--- Application state is refreshed every second.
+-- Application state is refreshed every 50ms.
 -- Each widget is assigned to one or many of the groups limited by maxGroup value.
 -- Group number means in what call it should be executed.
--- So eg. widget assigned to groups { 1, 2, 3 } will be executed every second.
--- But widget assigned to group { 3 } will be executed only every third second.
+-- So eg. widget assigned to groups { 1, 2, 3 } will be executed every tick.
+-- But widget assigned to group { 3 } will be executed only every third tick.
 
 return {
     playerProfile = {

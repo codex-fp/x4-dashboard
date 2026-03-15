@@ -42,9 +42,9 @@ function RetroSpeedometer({
   boostEnergy: number
 }) {
   // Scale selection:
-  //   travel mode  → maxTravelSpeed if known, else auto-scale to current speed
-  //   boosting     → maxBoostSpeed (speed can exceed maxSpeed)
-  //   normal       → maxSpeed
+  //   travel mode  -> maxTravelSpeed if known, else auto-scale to current speed
+  //   boosting     -> maxBoostSpeed (speed can exceed maxSpeed)
+  //   normal       -> maxSpeed
   const isOverspeed = boosting && maxBoostSpeed > maxSpeed && speed > maxSpeed
   const displayMax = Math.max(1,
     inTravel

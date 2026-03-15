@@ -3,6 +3,45 @@ local C = ffi.C
 
 pcall(ffi.cdef, [[
     typedef uint64_t UniverseID;
+    typedef struct {
+        float HullValue;
+        float ShieldValue;
+        double ShieldDelay;
+        float ShieldRate;
+        float GroupedShieldValue;
+        double GroupedShieldDelay;
+        float GroupedShieldRate;
+        float BurstDPS;
+        float SustainedDPS;
+        float TurretBurstDPS;
+        float TurretSustainedDPS;
+        float GroupedTurretBurstDPS;
+        float GroupedTurretSustainedDPS;
+        float ForwardSpeed;
+        float BoostSpeed;
+        float TravelSpeed;
+        float YawSpeed;
+        float PitchSpeed;
+        float RollSpeed;
+        float HorizontalStrafeSpeed;
+        float VerticalStrafeSpeed;
+        float ForwardAcceleration;
+        float HorizontalStrafeAcceleration;
+        float VerticalStrafeAcceleration;
+        uint32_t NumDocksShipMedium;
+        uint32_t NumDocksShipSmall;
+        uint32_t ShipCapacityMedium;
+        uint32_t ShipCapacitySmall;
+        uint32_t CrewCapacity;
+        uint32_t ContainerCapacity;
+        uint32_t SolidCapacity;
+        uint32_t LiquidCapacity;
+        uint32_t UnitCapacity;
+        uint32_t MissileCapacity;
+        uint32_t CountermeasureCapacity;
+        uint32_t DeployableCapacity;
+        float RadarRange;
+    } UILoadoutStatistics3;
     UniverseID GetPlayerOccupiedShipID(void);
     UniverseID GetPlayerControlledShipID(void);
     bool IsFlightAssistActive(void);
@@ -10,16 +49,10 @@ pcall(ffi.cdef, [[
     float GetBoostEnergyPercentage(void);
     bool IsSetaActive(void);
     const char* GetPlayerShipSize(void);
-    float GetObjectMaxForwardSpeed(UniverseID objectid, bool includeboost);
+    UILoadoutStatistics3 GetCurrentLoadoutStatistics3(UniverseID shipid);
     int GetAlertLevel(UniverseID componentid);
     int GetNumAllAttackers(UniverseID componentid);
     int GetNumIncomingMissiles(UniverseID componentid);
-]])
-
--- GetObjectMaxTravelSpeed may not exist in all X4 versions; load separately so
--- a missing symbol doesn't break the block above.
-pcall(ffi.cdef, [[
-    float GetObjectMaxTravelSpeed(UniverseID objectid);
 ]])
 
 local output = {}
@@ -32,10 +65,15 @@ function output.handle()
 
     local hull, shields = GetPlayerShipHullShield()
     local _, _, speedPerSecond, boosting, travelMode = GetPlayerSpeed()
-    local maxSpeed      = C.GetObjectMaxForwardSpeed(shipId, false)
-    local maxBoostSpeed = C.GetObjectMaxForwardSpeed(shipId, true)
+    local maxSpeed = 0
+    local maxBoostSpeed = 0
     local maxTravelSpeed = 0
-    pcall(function() maxTravelSpeed = C.GetObjectMaxTravelSpeed(shipId) end)
+    pcall(function()
+        local loadout = C.GetCurrentLoadoutStatistics3(shipId)
+        maxSpeed = tonumber(loadout.ForwardSpeed) or 0
+        maxBoostSpeed = tonumber(loadout.BoostSpeed) or 0
+        maxTravelSpeed = tonumber(loadout.TravelSpeed) or 0
+    end)
 
     local alertLevel       = 0
     local attackerCount    = 0
@@ -44,8 +82,10 @@ function output.handle()
     pcall(function() attackerCount    = C.GetNumAllAttackers(shipId) end)
     pcall(function() incomingMissiles = C.GetNumIncomingMissiles(shipId) end)
 
+    local shipName = GetComponentData(ConvertStringTo64Bit(tostring(shipId)), "name") or ""
+
     return {
-        name         = ffi.string(C.GetComponentName(shipId)),
+        name         = shipName,
         hull         = hull or 0,
         shields      = shields or 0,
         speed         = math.floor(speedPerSecond or 0),

@@ -162,7 +162,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // === Start server ===
-server.listen(PORT, '0.0.0.0', () => {
+server.listen({ port: PORT, host: '::', ipv6Only: false }, () => {
   const ifaces = require('os').networkInterfaces();
   const lan = Object.values(ifaces).flat().find(i => i.family === 'IPv4' && !i.internal);
 
