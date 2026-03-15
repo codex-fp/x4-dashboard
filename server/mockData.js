@@ -95,16 +95,14 @@ class MockDataSource extends EventEmitter {
     this.travelDrive  = false;
     this.boosting     = false;
 
-    // Flight phase cycle: normal → boost → recover → travel → travel_stop
+    // Flight phase — driven by mock buttons only (no auto-transitions into boost/travel)
     this.flightPhase = 'normal';
     this.phaseTick   = 0;
 
     // Combat
-    this.inCombat       = false;
-    this.combatTimer    = null;
-    this.combatCooldown = false;
-    this.targetHull      = 100;
-    this.targetShields   = 100;
+    this.inCombat         = false;
+    this.targetHull       = 100;
+    this.targetShields    = 100;
     this.incomingMissiles = 0;
 
     // Misc
@@ -208,10 +206,9 @@ class MockDataSource extends EventEmitter {
     this.emit_data(true);
   }
 
-  // Phase durations at 250 ms/tick (4 ticks/s):
-  //   normal (80 ticks = 20 s) → boost (24 ticks = 6 s) →
-  //   recover (60 ticks = 15 s) → travel (80 ticks = 20 s) →
-  //   travel_stop (40 ticks = 10 s) → normal …
+  // Flight phases driven entirely by manual toggles (travel/boost buttons).
+  // Phases never auto-transition into boost or travel — only the mock buttons do that.
+  // boost → recover → normal (wind-down only); travel_stop → normal (wind-down only).
   _advanceFlightPhase(t) {
     this.phaseTick++;
     switch (this.flightPhase) {
@@ -220,7 +217,7 @@ class MockDataSource extends EventEmitter {
         this.travelDrive = false;
         this.speed       = Math.max(0, 250 + Math.sin(t * 0.7) * 220 + Math.cos(t * 0.3) * 60);
         this.boostEnergy = Math.min(100, this.boostEnergy + 0.5);
-        if (this.phaseTick >= 80) { this.flightPhase = 'boost';   this.phaseTick = 0; }
+        // no auto-transition — stays in normal until a button is pressed
         break;
       }
       case 'boost': {
@@ -237,7 +234,8 @@ class MockDataSource extends EventEmitter {
         this.travelDrive = false;
         this.speed       = Math.max(0, 250 + Math.sin(t * 0.7) * 220 + Math.cos(t * 0.3) * 60);
         this.boostEnergy = Math.min(100, this.boostEnergy + 0.9);
-        if (this.phaseTick >= 60) { this.flightPhase = 'travel'; this.phaseTick = 0; }
+        if (this.phaseTick >= 60) { this.flightPhase = 'normal'; this.phaseTick = 0; }
+        // no auto-transition to travel — only the travel button does that
         break;
       }
       case 'travel': {
@@ -246,7 +244,7 @@ class MockDataSource extends EventEmitter {
         const tp = Math.min(1, this.phaseTick / 40);
         this.speed       = 480 + tp * tp * 4600 + Math.sin(t * 2) * 120;
         this.boostEnergy = Math.min(100, this.boostEnergy + 0.3);
-        if (this.phaseTick >= 80) { this.flightPhase = 'travel_stop'; this.phaseTick = 0; }
+        // no auto-transition — stays in travel until the travel button is pressed again
         break;
       }
       case 'travel_stop': {
@@ -261,43 +259,54 @@ class MockDataSource extends EventEmitter {
   }
 
   startCombat() {
-    if (this.inCombat || this.combatCooldown) return;
+    if (this.inCombat) return;
     this.inCombat         = true;
     this.targetHull       = 100;
     this.targetShields    = 100;
     this.incomingMissiles = 0;
     console.log('[Mock] ⚠ COMBAT STARTED');
+  }
 
-    // Missile fires ~5s into combat, tracked for 4s then intercept/miss
-    this.intervals.push(setTimeout(() => {
-      if (!this.inCombat) return;
-      this.incomingMissiles = 1;
-      console.log('[Mock] ⟫ MISSILE INBOUND');
-      this.intervals.push(setTimeout(() => {
-        this.incomingMissiles = 0;
-        console.log('[Mock] Missile resolved');
-      }, 4000));
-    }, 5000));
+  toggleTravel() {
+    if (this.inCombat) return; // combat overrides flight state
+    if (this.travelDrive) {
+      // Disengage travel drive
+      this.flightPhase = 'travel_stop';
+      this.phaseTick   = 0;
+      console.log('[Mock] Travel drive disengaged manually');
+    } else {
+      // Engage travel drive; skip boost/recover phases
+      this.flightPhase = 'travel';
+      this.phaseTick   = 0;
+      this.boosting    = false;
+    }
+    this.emit_data(true);
+  }
 
-    this.combatTimer = setTimeout(() => {
-      this.inCombat         = false;
-      this.incomingMissiles = 0;
-      this.combatCooldown   = true;
-      console.log('[Mock] Combat ended, hull:', Math.round(this.hull), 'shields:', Math.round(this.shields));
-      setTimeout(() => { this.combatCooldown = false; }, 30000);
-    }, 15000);
+  toggleBoost() {
+    if (this.inCombat) return; // combat overrides flight state
+    if (this.boosting) {
+      // Stop boosting, go to recover
+      this.flightPhase = 'recover';
+      this.phaseTick   = 0;
+      this.boosting    = false;
+      console.log('[Mock] Boost disengaged manually');
+    } else {
+      // Start boost; interrupt travel if active
+      this.flightPhase = 'boost';
+      this.phaseTick   = 0;
+      this.travelDrive = false;
+      console.log('[Mock] Boost engaged manually');
+    }
+    this.emit_data(true);
   }
 
   toggleCombat() {
     if (this.inCombat) {
-      if (this.combatTimer) clearTimeout(this.combatTimer);
-      this.combatTimer      = null;
       this.inCombat         = false;
       this.incomingMissiles = 0;
-      this.combatCooldown   = false;
       console.log('[Mock] Combat ended manually');
     } else {
-      this.combatCooldown = false;
       this.startCombat();
     }
     this.emit_data(true);
@@ -317,14 +326,10 @@ class MockDataSource extends EventEmitter {
 
     // Full external data (missions, logbook, etc.) every 3s
     this.intervals.push(setInterval(() => this.emit_data(false), 3000));
-
-    // Combat every 45s
-    this.intervals.push(setInterval(() => this.startCombat(), 45000));
   }
 
   stop() {
     for (const i of this.intervals) clearInterval(i);
-    if (this.combatTimer) clearTimeout(this.combatTimer);
     this.intervals = [];
   }
 }

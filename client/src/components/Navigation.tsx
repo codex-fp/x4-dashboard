@@ -384,16 +384,7 @@ export function NavHeadingWidget({ player, flight }: { player: PlayerInfo; fligh
         </div>
       </div>
 
-      {flight.travelDrive && (
-        <div className="nav-chips-row">
-          <Chip
-            label="Travel Drive"
-            color="#ea80fc"
-            bg="rgba(234,128,252,0.08)"
-            border="rgba(234,128,252,0.35)"
-          />
-        </div>
-      )}
+
     </>
   )
 }
@@ -416,6 +407,14 @@ export function NavSpeedometerWidget({ flight, scale = 1 }: { flight: FlightStat
             onClick={() => setSpeedMode('gauge')}
           >ARC</button>
         </div>
+        {flight.travelDrive && (
+          <Chip
+            label="Travel Drive"
+            color="#ea80fc"
+            bg="rgba(234,128,252,0.08)"
+            border="rgba(234,128,252,0.35)"
+          />
+        )}
       </div>
       {speedMode === 'bars'
         ? <RetroSpeedometer

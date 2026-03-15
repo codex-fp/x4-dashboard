@@ -1,4 +1,5 @@
 import React from 'react'
+import { FrameCorners } from '@arwes/react'
 import { ShipStatus as ShipStatusType } from '../types/gameData'
 
 interface Props {
@@ -13,83 +14,67 @@ function hullClass(pct: number): string {
 
 export function ShipShieldsWidget({ ship }: Props) {
   const shieldsPct = Math.max(0, Math.min(100, ship.shields))
-  const hullPct    = Math.max(0, Math.min(100, ship.hull))
-  const tone       = hullClass(hullPct)
-  const shieldsClipId = React.useId()
-  const hullClipId    = React.useId()
+  const hullPct = Math.max(0, Math.min(100, ship.hull))
+  const tone = hullClass(hullPct)
 
-  const hullFill =
-    tone === 'low' ? 'var(--c-red)' :
-    tone === 'med' ? 'var(--c-orange)' :
-    'var(--c-green)'
-  const hullStroke =
-    tone === 'low' ? 'rgba(255,23,68,0.3)' :
-    tone === 'med' ? 'rgba(255,109,0,0.3)' :
-    'rgba(0,230,118,0.3)'
-  const hullFrameFill =
-    tone === 'low' ? 'rgba(255,23,68,0.04)' :
-    tone === 'med' ? 'rgba(255,109,0,0.04)' :
-    'rgba(0,230,118,0.04)'
-
-  // Shields polygon — full width, bottom-right lip overhangs hull
-  const shieldsPoints = '0,0 400,0 400,22 392,22 386,26 0,22'
-  // Hull polygon — recessed, top-right tucked under shields lip
-  const hullPoints    = '8,22 386,22 394,26 394,34 8,34'
+  const hullFrameStyle = {
+    '--arwes-frames-line-color': tone === 'low'
+      ? 'hsl(349deg 100% 55%)'
+      : tone === 'med'
+        ? 'hsl(26deg 100% 50%)'
+        : 'hsl(151deg 100% 45%)',
+    '--arwes-frames-bg-color': tone === 'low'
+      ? 'hsl(349deg 100% 55% / 8%)'
+      : tone === 'med'
+        ? 'hsl(26deg 100% 50% / 8%)'
+        : 'hsl(151deg 100% 45% / 8%)',
+    '--arwes-frames-line-filter': tone === 'low'
+      ? 'drop-shadow(0 0 3px hsl(349deg 100% 55% / 60%))'
+      : tone === 'med'
+        ? 'drop-shadow(0 0 3px hsl(26deg 100% 50% / 60%))'
+        : 'drop-shadow(0 0 3px hsl(151deg 100% 45% / 60%))',
+  } as React.CSSProperties
 
   return (
     <div className="health-bar-wrap">
-      {/* Top label row: SHIELDS */}
       <div className="health-bar-top-row">
         <span className="svg-bar-label">Shields</span>
         <span className="svg-bar-value shields-val">{shieldsPct.toFixed(0)}%</span>
       </div>
 
-      {/* Combined SVG — both bars in one coordinate space */}
-      <svg
-        className="health-bar-svg"
-        viewBox="0 0 400 34"
-        preserveAspectRatio="none"
-      >
-        <defs>
-          <clipPath id={shieldsClipId} clipPathUnits="objectBoundingBox">
-            <rect x="0" y="0" width={shieldsPct / 100} height="1" />
-          </clipPath>
-          <clipPath id={hullClipId} clipPathUnits="objectBoundingBox">
-            <rect x="0" y="0" width={hullPct / 100} height="1" />
-          </clipPath>
-        </defs>
+      <div className="health-bar-bars">
+        <div className="health-bar-track shields-track">
+          <FrameCorners
+            style={{
+              '--arwes-frames-line-color': 'hsl(191deg 100% 50%)',
+              '--arwes-frames-bg-color': 'hsl(191deg 100% 50% / 10%)',
+              '--arwes-frames-line-filter': 'drop-shadow(0 0 4px hsl(191deg 100% 50% / 60%))',
+            } as React.CSSProperties}
+            animated
+            strokeWidth={1}
+            cornerLength={10}
+          />
+          <div className="health-bar-track-inner">
+            <div className="health-bar-fill shields-fill" style={{ width: `${shieldsPct}%` }} />
+          </div>
+        </div>
 
-        {/* ── Shields bar ── */}
-        <polygon
-          points={shieldsPoints}
-          fill="rgba(0,229,255,0.04)"
-          stroke="rgba(0,229,255,0.25)"
-          strokeWidth="1"
-        />
-        <polygon
-          points={shieldsPoints}
-          fill="var(--c-cyan)"
-          stroke="none"
-          clipPath={`url(#${shieldsClipId})`}
-        />
+        <div className="health-bar-track hull-track">
+          <FrameCorners
+            style={hullFrameStyle}
+            animated
+            strokeWidth={1}
+            cornerLength={8}
+          />
+          <div className="health-bar-track-inner">
+            <div
+              className={`health-bar-fill hull-fill ${tone || 'high'} ${tone === 'low' ? 'hull-svg-low' : ''}`}
+              style={{ width: `${hullPct}%` }}
+            />
+          </div>
+        </div>
+      </div>
 
-        {/* ── Hull bar ── */}
-        <polygon
-          points={hullPoints}
-          fill={hullFrameFill}
-          stroke={hullStroke}
-          strokeWidth="1"
-        />
-        <polygon
-          points={hullPoints}
-          fill={hullFill}
-          stroke="none"
-          clipPath={`url(#${hullClipId})`}
-          className={tone === 'low' ? 'hull-svg-low' : undefined}
-        />
-      </svg>
-
-      {/* Bottom label row: HULL */}
       <div className="health-bar-bot-row">
         <span className="svg-bar-label">Hull</span>
         <span className={`svg-bar-value hull-val ${tone}`}>{hullPct.toFixed(0)}%</span>

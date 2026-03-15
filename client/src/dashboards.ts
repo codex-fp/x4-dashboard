@@ -129,7 +129,7 @@ export const DASHBOARDS: DashboardConfig[] = [
                         ]
                     }]
                 },
-                col: 2, row: 2, rowSpan: 2, grow: true, scale: 2.5
+                col: 2, row: 2, rowSpan: 2, grow: true, scale: 1.43
             },
             {
                 internal: {
@@ -140,7 +140,7 @@ export const DASHBOARDS: DashboardConfig[] = [
                         ]
                     }]
                 },
-                col: 1, colSpan: 3, row: 4, scale: 2.5,
+                col: 1, colSpan: 3, row: 4, scale: 1.43,
             },
             {
                 title: "Target",
@@ -154,17 +154,17 @@ export const DASHBOARDS: DashboardConfig[] = [
                         ]
                     }]
                 },
-                col: 1, row: 2, rowSpan: 2, scale: 2.5
+                col: 1, row: 2, rowSpan: 2, scale: 1.43
             },
             {
                 titleIcon: '⎔',
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'SystemFlags'}]}]},
-                col: 3, row: 2, rowSpan: 2, grow: true, scale: 2.5
+                col: 3, row: 2, rowSpan: 2, grow: true, scale: 1.43
             },
             {
                 id: 'underAttack', frameless: true,
                 style: {zIndex: 10, alignSelf: 'start', pointerEvents: 'none'},
-                internal: {layout: 'columns', columns: [{widgets: [{id: 'UnderAttack', scale: 3}]}]},
+                internal: {layout: 'columns', columns: [{widgets: [{id: 'UnderAttack', scale: 1.71}]}]},
                 col: 1, colSpan: 3, row: 1, scale: 1
             },
         ],
@@ -186,7 +186,7 @@ export const DASHBOARDS: DashboardConfig[] = [
                         ]
                     }]
                 },
-                col: 1, row: 2, grow: true, scale: 2.5
+                col: 1, row: 2, grow: true, scale: 1.43
             },
             {
                 internal: {
@@ -197,7 +197,7 @@ export const DASHBOARDS: DashboardConfig[] = [
                         ]
                     }]
                 },
-                col: 1, colSpan: 2, row: 5, scale: 2.5,
+                col: 1, colSpan: 2, row: 5, scale: 1.43,
             },
             {
                 title: "Target",
@@ -211,17 +211,17 @@ export const DASHBOARDS: DashboardConfig[] = [
                         ]
                     }]
                 },
-                col: 2, row: 2, rowSpan: 1, scale: 2.5
+                col: 2, row: 2, rowSpan: 1, scale: 1.43
             },
             {
                 titleIcon: '⎔',
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'SystemFlags'}]}]},
-                col: 1, row: 3, colSpan: 2, grow: true, scale: 2.5
+                col: 1, row: 3, colSpan: 2, grow: true, scale: 1.43
             },
             {
                 id: 'underAttack', frameless: true,
                 style: {zIndex: 10, alignSelf: 'start', pointerEvents: 'none'},
-                internal: {layout: 'columns', columns: [{widgets: [{id: 'UnderAttack', scale: 3}]}]},
+                internal: {layout: 'columns', columns: [{widgets: [{id: 'UnderAttack', scale: 1.71}]}]},
                 col: 1, colSpan: 2, row: 1, scale: 1
             },
         ],
@@ -239,23 +239,23 @@ export const DASHBOARDS: DashboardConfig[] = [
                 colorFn: (s) => s.activeMission?.completed ? 'success'
                     : (s.activeMission && s.activeMission.timeleft > 0 && s.activeMission.timeleft < 300 ? 'danger' : 'primary'),
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'ActiveMission'}]}]},
-                col: 1, row: 1, scale: 2
+                col: 1, row: 1, scale: 1.14
             },
             {
                 title: 'Mission Offers', titleIcon: '◈',
                 style: {flex: 1, minHeight: 0},
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'MissionOffers', grow: true}]}]},
-                col: 1, row: 2, grow: true, scale: 2
+                col: 1, row: 2, grow: true, scale: 1.14
             },
             {
                 title: 'Research', titleIcon: '⬡', color: 'purple',
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'Research'}]}]},
-                col: 2, row: 1, scale: 2
+                col: 2, row: 1, scale: 1.14
             },
             {
                 title: 'Comms', titleIcon: '◈',
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'Comms'}]}]},
-                col: 2, row: 2, scale: 2
+                col: 2, row: 2, scale: 1.14
             },
         ],
     },

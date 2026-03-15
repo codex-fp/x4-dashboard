@@ -26,16 +26,14 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// Serve built client from server/public (disabled in mock mode — use Vite on :3000 for HMR)
-if (!MOCK_MODE) {
-  const publicDir = path.join(__dirname, 'public');
-  if (fs.existsSync(publicDir)) {
-    app.use(express.static(publicDir));
-    app.get('*', (req, res, next) => {
-      if (req.path.startsWith('/api')) return next();
-      res.sendFile(path.join(publicDir, 'index.html'));
-    });
-  }
+// Serve built client from server/public
+const publicDir = path.join(__dirname, 'public');
+if (fs.existsSync(publicDir)) {
+  app.use(express.static(publicDir));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(publicDir, 'index.html'));
+  });
 }
 
 const server = http.createServer(app);
@@ -141,6 +139,18 @@ app.post('/api/mock/combat', (req, res) => {
   if (!MOCK_MODE || !mock) return res.status(404).json({ error: 'Not in mock mode' });
   mock.toggleCombat();
   res.json({ ok: true, inCombat: mock.inCombat });
+});
+
+app.post('/api/mock/travel', (req, res) => {
+  if (!MOCK_MODE || !mock) return res.status(404).json({ error: 'Not in mock mode' });
+  mock.toggleTravel();
+  res.json({ ok: true, travelDrive: mock.travelDrive });
+});
+
+app.post('/api/mock/boost', (req, res) => {
+  if (!MOCK_MODE || !mock) return res.status(404).json({ error: 'Not in mock mode' });
+  mock.toggleBoost();
+  res.json({ ok: true, boosting: mock.boosting });
 });
 
 app.get('/api/state', (req, res) => {

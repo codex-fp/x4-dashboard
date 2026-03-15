@@ -215,10 +215,20 @@ function toggleMockCombat() {
   fetch('/api/mock/combat', { method: 'POST' }).catch(() => {})
 }
 
+function toggleMockTravel() {
+  fetch('/api/mock/travel', { method: 'POST' }).catch(() => {})
+}
+
+function toggleMockBoost() {
+  fetch('/api/mock/boost', { method: 'POST' }).catch(() => {})
+}
+
 export function Dashboard({ state, wsConnected, dashboardId, onKeyPress, onOpenSettings, onChangeDashboard }: Props) {
   const { _meta, ship } = state
   const config = getDashboard(dashboardId)
-  const inCombat = state.combat.alertLevel > 0
+  const inCombat     = state.combat.alertLevel > 0
+  const inTravel     = state.flight.travelDrive
+  const inBoost      = state.flight.boosting
 
   return (
     <div className="dashboard">
@@ -248,12 +258,26 @@ export function Dashboard({ state, wsConnected, dashboardId, onKeyPress, onOpenS
             </div>
           )}
           {_meta.mockMode && (
-            <button
-              className={`header-settings-btn ${inCombat ? 'mock-combat-active' : ''}`}
-              onClick={toggleMockCombat}
-            >
-              {inCombat ? '⚔ END COMBAT' : '⚔ START COMBAT'}
-            </button>
+            <>
+              <button
+                className={`header-settings-btn ${inTravel ? 'mock-travel-active' : ''}`}
+                onClick={toggleMockTravel}
+              >
+                {inTravel ? '△ END TRAVEL' : '△ TRAVEL MODE'}
+              </button>
+              <button
+                className={`header-settings-btn ${inBoost ? 'mock-boost-active' : ''}`}
+                onClick={toggleMockBoost}
+              >
+                {inBoost ? '▲ END BOOST' : '▲ BOOST'}
+              </button>
+              <button
+                className={`header-settings-btn ${inCombat ? 'mock-combat-active' : ''}`}
+                onClick={toggleMockCombat}
+              >
+                {inCombat ? '⚔ END COMBAT' : '⚔ START COMBAT'}
+              </button>
+            </>
           )}
           {/* ── Dashboard selector ── */}
           <select
