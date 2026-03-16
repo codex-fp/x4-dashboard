@@ -11,16 +11,20 @@ npm run dev:mock      # Dev mode with mock data (no X4 game needed)
 npm run mock          # Server only with mock data at http://localhost:3001
 npm run build         # Compile React → server/public/ (required before npm start)
 npm start             # Production: Node serves built client at port 3001
+npm run typecheck     # Run the only validation step from repo root
+npm run check         # Alias for typecheck
 ```
 
 **There are no tests and no linter configured.**
 
 Type-check only:
 ```bash
-cd client && npx tsc --noEmit
+npm run typecheck
+# or: cd client && npx tsc --noEmit
 ```
 
 This is the sole validation tool. Run it after editing any TypeScript file.
+Do not edit files in `server/public/` directly; they are build output from `client/`.
 
 ## Architecture Overview
 
@@ -32,9 +36,9 @@ In dev mode, Vite runs on port 3000 and proxies `/api` to port 3001.
 2. `server/index.js` strips X4 color codes (`server/utils/normalizeData.js`) and feeds data to the aggregator, then broadcasts via WebSocket
 3. `server/dataAggregator.js` merges partial updates into a unified `GameState` (ship-only ticks don't wipe mission/logbook data)
 4. `client/src/hooks/useGameData.ts` receives WebSocket messages and exposes `{ state, wsConnected, pressKey }` to components
-5. `pressKey(action)` → `POST /api/keypress` → `server/keyPresser.js` → PowerShell `SendKeys` (Windows) / `xdotool` (Linux) → key reaches X4
+5. `pressKey(action)` → `POST /api/keypress` → `server/keyPresser.js` → PowerShell `SendKeys` (Windows) / `xdotool` (Linux) / `osascript` (macOS) → key reaches X4
 
-**When adding a new data field:** update both `client/src/types/gameData.ts` **and** `getState()` in `server/dataAggregator.js`.
+**When adding a new data field:** update both `client/src/types/gameData.ts` **and** `getState()` in `server/dataAggregator.js`. If the field should appear in preview mode too, update `server/mockData.js`.
 
 ## Module Systems
 
@@ -72,6 +76,23 @@ export interface FlightState {
 - Hooks: `useState`, `useEffect`, `useCallback` — follow the existing pattern in `useGameData.ts`
 - **Never enable React StrictMode** — it breaks Arwes animations
 - Keep components presentational where possible; lift state into hooks
+
+## Frontend Architecture
+
+- Frontend structure is `Dashboard -> Panel -> Widget`
+- Dashboards are the top-level screen presets selected from the UI list (for example `Flight`, `Flight Horizontal`, `Missions & Comms`)
+- Dashboards define the outer page layout and place panels in either grid or column arrangements
+- Panels are the dashboard sections; most render through `ArwesPanel` and provide the frame, title, color, and panel-level layout
+- Panels define their internal widget layout with either a grid or columns config; `frameless: true` panels skip `ArwesPanel` and render raw content
+- Widgets are the actual views inside panels; they render content only and do not own panel chrome or top-level dashboard layout
+
+## Dashboard Layout System
+
+- Dashboard layouts are config-driven in `client/src/dashboards.ts`
+- `Dashboard.tsx` is the widget registry and layout renderer; add new widget cases there when introducing a new widget ID
+- Widget components should render content only; panel chrome belongs in `ArwesPanel` and dashboard config
+- Panel definitions live inline inside each dashboard config; there is no shared panel registry
+- `frameless: true` panels return raw content and skip `ArwesPanel`
 
 ## Arwes UI Framework
 
@@ -139,7 +160,7 @@ All frontend types are in `client/src/types/gameData.ts`. Top-level `GameState` 
 | `player` | `PlayerInfo` | `playerProfile` |
 | `ship` | `ShipStatus` | `shipStatus` |
 | `flight` | `FlightState` | `shipStatus` |
-| `combat` | `CombatState` | Reserved (target always null) |
+| `combat` | `CombatState` | `targetInfo` + `shipStatus` alert fields |
 | `missionOffers` | `MissionOffers \| null` | `mission_offers` |
 | `activeMission` | `ActiveMission \| null` | `active_mission` |
 | `logbook` | `{ list: LogbookEntry[] } \| null` | `logbook` |
@@ -161,12 +182,14 @@ Lives in `game-mods/mycu_external_app/`. Deploy by copying the folder to the X4 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PORT` | `3001` | Server port |
+| `MOCK` | unset | Set to `true` to force mock mode |
 
 ## What NOT to Do
 
 - Do not enable React StrictMode — it breaks Arwes animations
 - Do not add a linter or test framework without explicit user request
 - Do not split `index.css` into modules
+- Do not hand-edit files in `server/public/`; rebuild from `client/` instead
 - Do not use `enum` or `type` aliases where an `interface` works
 - Do not use `export default` in client source files
 - Do not use async/await in `server/` files
