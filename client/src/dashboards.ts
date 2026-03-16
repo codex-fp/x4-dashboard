@@ -272,6 +272,38 @@ export const DASHBOARDS: DashboardConfig[] = [
         ],
     },
 
+    {
+        id: 'systems-horizontal',
+        label: 'Systems Horizontal',
+        layout: 'columns',
+        columns: [{
+            panels: [
+                {
+                    title: 'Systems', titleIcon: '⎔',
+                    internal: {
+                        layout: 'grid',
+                        columns: 'repeat(4, minmax(0, 1fr))',
+                        rows: 'repeat(2, minmax(0, 1fr))',
+                        gap: '6px',
+                        alignContent: 'stretch',
+                        width: '100%',
+                        widgets: [
+                            {id: 'TravelDriveToggle', col: 1, row: 1},
+                            {id: 'SetaToggle', col: 2, row: 1},
+                            {id: 'FlightAssistToggle', col: 3, row: 1},
+                            {id: 'AutopilotToggle', col: 4, row: 1},
+                            {id: 'ScanModeToggle', col: 1, row: 2},
+                            {id: 'LongRangeScanToggle', col: 2, row: 2},
+                            {id: 'MapToggle', col: 3, row: 2},
+                            {id: 'MissionManagerToggle', col: 4, row: 2},
+                        ]
+                    },
+                    grow: true, scale: 1.43
+                },
+            ]
+        }],
+    },
+
     // ── Missions & Comms ───────────────────────────────────────────────────────
     {
         id: 'comms',
