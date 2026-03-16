@@ -579,18 +579,14 @@ body {
 .target-badge.rank    { color: var(--c-purple); border-color: rgba(234,128,252,0.3); }
 
 /* â”€â”€ System Flag Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-.sysflags-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-  gap: 5px;
-}
-
 .sysflag-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
+  width: 100%;
+  min-height: 96px;
   padding: 10px 6px 8px;
   font-family: var(--font-mono);
   font-size: 10px;

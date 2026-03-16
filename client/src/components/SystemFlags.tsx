@@ -6,31 +6,64 @@ interface Props {
   onKeyPress: (action: string) => void
 }
 
-const FLAG_CONFIG: Array<{
+interface FlagConfig {
   key?: keyof FlightState
   action: string
   icon: string
   label: string
   stateless?: boolean
-}> = [
-  { key: 'flightAssist', action: 'flightAssist', icon: '⊳', label: 'Flight Assist' },
-  { key: 'seta',         action: 'seta',          icon: '≫', label: 'SETA' },
-  { key: 'travelDrive',  action: 'travelDrive',   icon: '△', label: 'Travel Drive' },
-  { action: 'autopilot', icon: '◈', label: 'Autopilot', stateless: true },
-]
+}
 
-export function SystemFlags({ flight, onKeyPress }: Props) {
-  const [bindings, setBindings] = useState<Record<string, KeyBinding>>({})
-  const [pressing, setPressing] = useState<string | null>(null)
+const FLAG_CONFIG: Record<string, FlagConfig> = {
+  flightAssist: { key: 'flightAssist', action: 'flightAssist', icon: '⊳', label: 'Flight Assist' },
+  seta: { key: 'seta', action: 'seta', icon: '≫', label: 'SETA' },
+  travelDrive: { key: 'travelDrive', action: 'travelDrive', icon: '△', label: 'Travel Drive' },
+  autopilot: { action: 'autopilot', icon: '◈', label: 'Autopilot', stateless: true },
+}
+
+let bindingsCache: Record<string, KeyBinding> | null = null
+let bindingsRequest: Promise<Record<string, KeyBinding>> | null = null
+
+function loadBindings(): Promise<Record<string, KeyBinding>> {
+  if (bindingsCache) return Promise.resolve(bindingsCache)
+
+  if (!bindingsRequest) {
+    bindingsRequest = fetch('/api/keybindings')
+      .then(r => r.json())
+      .then((data: KeyBindings) => {
+        bindingsCache = data.bindings || {}
+        return bindingsCache
+      })
+      .catch(() => ({}))
+  }
+
+  return bindingsRequest
+}
+
+function useSystemFlagBindings() {
+  const [bindings, setBindings] = useState<Record<string, KeyBinding>>(bindingsCache || {})
 
   useEffect(() => {
-    fetch('/api/keybindings')
-      .then(r => r.json())
-      .then((data: KeyBindings) => setBindings(data.bindings || {}))
-      .catch(() => {})
+    let active = true
+
+    loadBindings().then(data => {
+      if (active) setBindings(data)
+    })
+
+    return () => {
+      active = false
+    }
   }, [])
 
-  function handlePress(action: string) {
+  return bindings
+}
+
+function SystemFlagToggle({ flight, onKeyPress, config }: Props & { config: FlagConfig }) {
+  const bindings = useSystemFlagBindings()
+  const [pressing, setPressing] = useState<string | null>(null)
+  const { key, action, icon, label, stateless } = config
+
+  function handlePress() {
     if (!bindings[action]) return
 
     setPressing(action)
@@ -38,47 +71,45 @@ export function SystemFlags({ flight, onKeyPress }: Props) {
     setTimeout(() => setPressing(null), 200)
   }
 
+  const isOn = key ? !!flight[key] : false
+  const binding = bindings[action]
+  const isPressed = pressing === action
+  const stateLabel = stateless ? '◌ CMD' : isOn ? '● ON' : '○ OFF'
+
   return (
-    <>
-      <div className="sysflags-grid">
-        {FLAG_CONFIG.map(({ key, action, icon, label, stateless }) => {
-          const isOn = key ? !!flight[key] : false
-          const binding = bindings[action]
-          const isPressed = pressing === action
-          const stateLabel = stateless ? '◌ CMD' : isOn ? '● ON' : '○ OFF'
-
-          return (
-            <button
-              key={action}
-              className={`sysflag-btn ${isOn ? 'on' : 'off'} ${!binding ? 'no-binding' : ''}`}
-              onClick={() => handlePress(action)}
-              disabled={!binding}
-              title={
-                binding
-                  ? `${label}: ${stateless ? 'COMMAND' : isOn ? 'ON' : 'OFF'} — Press: ${binding.key}`
-                  : `${label}: No key binding. Configure in ⎔ KEY BINDINGS.`
-              }
-              style={isPressed ? { transform: 'scale(0.92)', opacity: 0.65 } : undefined}
-            >
-              <span className="sysflag-icon">{icon}</span>
-              <span className="sysflag-name">{label}</span>
-              <span className={`sysflag-state ${!stateless && isOn ? 'state-on' : 'state-off'}`}>
-                {stateLabel}
-              </span>
-              {binding && (
-                <span className="sysflag-key">{binding.key}</span>
-              )}
-            </button>
-          )
-        })}
-      </div>
-
-      <div style={{
-        marginTop: '8px', fontSize: '9px', color: 'var(--c-text-dim)',
-        letterSpacing: '1px', opacity: 0.55, lineHeight: 1.5,
-      }}>
-        Click to toggle · Keys sent to active game window · Configure via ⎔ KEY BINDINGS
-      </div>
-    </>
+    <button
+      className={`sysflag-btn ${isOn ? 'on' : 'off'} ${!binding ? 'no-binding' : ''}`}
+      onClick={handlePress}
+      disabled={!binding}
+      title={
+        binding
+          ? `${label}: ${stateless ? 'COMMAND' : isOn ? 'ON' : 'OFF'} - Press: ${binding.key}`
+          : `${label}: No key binding. Configure in KEY BINDINGS.`
+      }
+      style={isPressed ? { transform: 'scale(0.92)', opacity: 0.65 } : undefined}
+    >
+      <span className="sysflag-icon">{icon}</span>
+      <span className="sysflag-name">{label}</span>
+      <span className={`sysflag-state ${!stateless && isOn ? 'state-on' : 'state-off'}`}>
+        {stateLabel}
+      </span>
+      {binding && <span className="sysflag-key">{binding.key}</span>}
+    </button>
   )
+}
+
+export function FlightAssistToggleWidget(props: Props) {
+  return <SystemFlagToggle {...props} config={FLAG_CONFIG.flightAssist} />
+}
+
+export function SetaToggleWidget(props: Props) {
+  return <SystemFlagToggle {...props} config={FLAG_CONFIG.seta} />
+}
+
+export function TravelDriveToggleWidget(props: Props) {
+  return <SystemFlagToggle {...props} config={FLAG_CONFIG.travelDrive} />
+}
+
+export function AutopilotToggleWidget(props: Props) {
+  return <SystemFlagToggle {...props} config={FLAG_CONFIG.autopilot} />
 }

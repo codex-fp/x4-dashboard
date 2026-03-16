@@ -27,7 +27,10 @@ export type WidgetId =
     | 'TargetInfo'
     | 'NavHeading'
     | 'NavSpeedometer'
-    | 'SystemFlags'
+    | 'FlightAssistToggle'
+    | 'SetaToggle'
+    | 'TravelDriveToggle'
+    | 'AutopilotToggle'
     | 'ActiveMission'
     | 'MissionOffers'
     | 'Comms'
@@ -55,7 +58,17 @@ export interface PanelWidgetColumn {
 }
 
 export type PanelInternalLayout =
-    | { layout: 'grid'; columns: string; widgets: PanelWidgetGrid[] }
+    | {
+        layout: 'grid'
+        columns: string
+        widgets: PanelWidgetGrid[]
+        gap?: string
+        justifyContent?: CSSProperties['justifyContent']
+        justifyItems?: CSSProperties['justifyItems']
+        alignContent?: CSSProperties['alignContent']
+        alignItems?: CSSProperties['alignItems']
+        width?: string
+      }
     | { layout: 'columns'; columns: Array<{ width?: string; widgets: PanelWidgetColumn[] }> }
 
 export type PanelColor = 'primary' | 'danger' | 'success' | 'warning' | 'purple'
@@ -157,8 +170,20 @@ export const DASHBOARDS: DashboardConfig[] = [
                 col: 1, row: 2, rowSpan: 2, scale: 1.43
             },
             {
-                titleIcon: '⎔',
-                internal: {layout: 'columns', columns: [{widgets: [{id: 'SystemFlags'}]}]},
+                title: 'Systems', titleIcon: '⎔',
+                internal: {
+                    layout: 'grid',
+                    columns: '1fr 1fr',
+                    gap: '6px',
+                    alignContent: 'start',
+                    width: '100%',
+                    widgets: [
+                        {id: 'FlightAssistToggle', col: 1, row: 1},
+                        {id: 'SetaToggle', col: 2, row: 1},
+                        {id: 'TravelDriveToggle', col: 1, row: 2},
+                        {id: 'AutopilotToggle', col: 2, row: 2},
+                    ]
+                },
                 col: 3, row: 2, rowSpan: 2, grow: true, scale: 1.43
             },
             {
@@ -214,8 +239,15 @@ export const DASHBOARDS: DashboardConfig[] = [
                 col: 2, row: 2, rowSpan: 1, scale: 1.43
             },
             {
-                titleIcon: '⎔',
-                internal: {layout: 'columns', columns: [{widgets: [{id: 'SystemFlags'}]}]},
+                title: 'Systems', titleIcon: '⎔',
+                internal: {
+                    layout: 'grid', columns: '1fr 1fr', gap: '6px', alignContent: 'start', width: '100%', widgets: [
+                        {id: 'FlightAssistToggle', col: 1, row: 1},
+                        {id: 'SetaToggle', col: 2, row: 1},
+                        {id: 'TravelDriveToggle', col: 1, row: 2},
+                        {id: 'AutopilotToggle', col: 2, row: 2},
+                    ]
+                },
                 col: 1, row: 3, colSpan: 2, grow: true, scale: 1.43
             },
             {

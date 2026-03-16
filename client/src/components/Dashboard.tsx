@@ -7,7 +7,12 @@ import { PlayerInfo } from './PlayerInfo'
 import { ShipShieldsWidget, ShipHullWidget, ShipCargoWidget, ShipStatusWidget } from './ShipStatus'
 import { TargetInfoWidget, TargetShieldsWidget, TargetHullWidget } from './TargetInfo'
 import { NavHeadingWidget, NavSpeedometerWidget } from './Navigation'
-import { SystemFlags } from './SystemFlags'
+import {
+  AutopilotToggleWidget,
+  FlightAssistToggleWidget,
+  SetaToggleWidget,
+  TravelDriveToggleWidget,
+} from './SystemFlags'
 import { MissionOffers } from './MissionOffers'
 import { ActiveMission } from './ActiveMission'
 import { Comms } from './Comms'
@@ -56,7 +61,10 @@ function renderWidget(
     case 'TargetInfo':     return <TargetInfoWidget target={target} />
     case 'NavHeading':     return <NavHeadingWidget player={state.player} flight={state.flight} />
     case 'NavSpeedometer': return <NavSpeedometerWidget flight={state.flight} scale={scale} />
-    case 'SystemFlags':    return <SystemFlags flight={state.flight} onKeyPress={onKeyPress} />
+    case 'FlightAssistToggle': return <FlightAssistToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
+    case 'SetaToggle':         return <SetaToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
+    case 'TravelDriveToggle':  return <TravelDriveToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
+    case 'AutopilotToggle':    return <AutopilotToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
     case 'ActiveMission':  return <ActiveMission mission={state.activeMission} />
     case 'MissionOffers':  return <MissionOffers offers={state.missionOffers} />
     case 'Comms':          return <Comms logbook={state.logbook} />
@@ -75,7 +83,18 @@ function renderPanelContent(
   const { internal } = panel
   if (internal.layout === 'grid') {
     return (
-      <div style={{ display: 'grid', gridTemplateColumns: internal.columns, flex: 1, minHeight: 0 }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: internal.columns,
+        gap: internal.gap ?? '6px',
+        justifyContent: internal.justifyContent,
+        justifyItems: internal.justifyItems,
+        alignContent: internal.alignContent,
+        alignItems: internal.alignItems,
+        width: internal.width,
+        flex: 1,
+        minHeight: 0,
+      }}>
         {internal.widgets.map(w => (
           <div
             key={w.id}
