@@ -20,36 +20,6 @@
       "label": "Autopilot",
       "description": "Toggle autopilot navigation"
     },
-    "boostEngine": {
-      "key": " ",
-      "modifiers": [],
-      "label": "Boost",
-      "description": "Activate engine boost"
-    },
-    "lightsOn": {
-      "key": "{F9}",
-      "modifiers": [],
-      "label": "Lights",
-      "description": "Toggle ship lights"
-    },
-    "landingGear": {
-      "key": "{F5}",
-      "modifiers": [],
-      "label": "Landing Gear",
-      "description": "Deploy/retract landing gear"
-    },
-    "hardpoints": {
-      "key": "{F3}",
-      "modifiers": [],
-      "label": "Weapons",
-      "description": "Deploy/retract weapons"
-    },
-    "shieldBoost": {
-      "key": "{F4}",
-      "modifiers": [],
-      "label": "Shield Boost",
-      "description": "Activate shield boost"
-    },
     "travelDrive": {
       "key": "{F2}",
       "modifiers": [],
@@ -61,12 +31,6 @@
       "modifiers": [],
       "label": "Map",
       "description": "Open the in-game map"
-    },
-    "silentRunning": {
-      "key": "{F1}",
-      "modifiers": [],
-      "label": "Silent Running",
-      "description": "Toggle silent running mode"
     }
   }
 }
