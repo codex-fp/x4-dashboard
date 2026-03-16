@@ -3,12 +3,25 @@ import { AnimatorGeneralProvider, Animator, GridLines, Dots } from '@arwes/react
 import { useGameData } from './hooks/useGameData'
 import { Dashboard } from './components/Dashboard'
 import { KeyBindingsModal } from './components/KeyBindingsModal'
+import { DASHBOARDS, getDashboard } from './dashboards'
 
-const WS_URL = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:3001`
 const DASHBOARD_SCALE_STORAGE_KEY = 'dashboardScale'
+const DEFAULT_DASHBOARD_ID = DASHBOARDS[0]?.id ?? 'flight'
+
+function getWebSocketUrl(): string {
+  const envUrl = import.meta.env.VITE_WS_URL?.trim()
+  if (envUrl) return envUrl
+
+  const currentUrl = new URL(window.location.href)
+  const protocol = currentUrl.protocol === 'https:' ? 'wss:' : 'ws:'
+  const port = currentUrl.port === '3000' ? '3001' : currentUrl.port
+
+  return `${protocol}//${currentUrl.hostname}${port ? `:${port}` : ''}`
+}
 
 function getInitialDashboard(): string {
-  return new URLSearchParams(window.location.search).get('dashboard') ?? 'full'
+  const dashboardId = new URLSearchParams(window.location.search).get('dashboard')
+  return dashboardId ? getDashboard(dashboardId).id : DEFAULT_DASHBOARD_ID
 }
 
 function getInitialDashboardScale(): number {
@@ -22,7 +35,7 @@ function getInitialDashboardScale(): number {
 }
 
 export function App() {
-  const { state, wsConnected, pressKey } = useGameData(WS_URL)
+  const { state, wsConnected, pressKey } = useGameData(getWebSocketUrl())
   const [showBindings, setShowBindings] = useState(false)
   const [dashboardId, setDashboardId] = useState(getInitialDashboard)
   const [dashboardScale, setDashboardScale] = useState(getInitialDashboardScale)

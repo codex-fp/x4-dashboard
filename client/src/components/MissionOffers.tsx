@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
-import { MissionOffers as MissionOffersType, MissionEntry } from '../types/gameData'
+import { MissionOffers as MissionOffersType, MissionEntry, MissionOffer } from '../types/gameData'
+import { formatCredits, formatShortDuration } from '../utils/format'
+import { toPlainText } from '../utils/text'
 
 interface Props {
   offers: MissionOffersType | null
@@ -11,22 +13,9 @@ function diffClass(d: number) {
   return `diff-${Math.max(1, Math.min(6, d))}`
 }
 
-function formatCredits(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
-  if (n >= 1_000)     return `${(n / 1_000).toFixed(0)}K`
-  return n.toLocaleString()
-}
-
-function formatDuration(secs: number): string {
-  if (!secs) return ''
-  const h = Math.floor(secs / 3600)
-  const m = Math.floor((secs % 3600) / 60)
-  if (h > 0) return `${h}h ${m}m`
-  return `${m}m`
-}
-
 function MissionItem({ mission, type }: { mission: MissionEntry; type: string }) {
   const [expanded, setExpanded] = useState(false)
+  const description = toPlainText(mission.description || '')
 
   return (
     <div
@@ -40,7 +29,7 @@ function MissionItem({ mission, type }: { mission: MissionEntry; type: string })
         </span>
         {mission.duration > 0 && (
           <span style={{ fontSize: '9px', color: 'var(--c-text-dim)' }}>
-            ◷ {formatDuration(mission.duration)}
+            {formatShortDuration(mission.duration)}
           </span>
         )}
       </div>
@@ -53,25 +42,47 @@ function MissionItem({ mission, type }: { mission: MissionEntry; type: string })
           <span className="mission-reward">{mission.rewardtext}</span>
         )}
       </div>
-      {expanded && mission.description && (
+      {expanded && description && (
         <div
           style={{
             marginTop: '5px', fontSize: '10px', color: 'var(--c-text-dim)',
             lineHeight: '1.5', borderTop: '1px solid var(--c-border-dim)', paddingTop: '5px',
+            whiteSpace: 'pre-line',
           }}
-          dangerouslySetInnerHTML={{ __html: mission.description }}
-        />
+        >
+          {description}
+        </div>
       )}
     </div>
   )
 }
 
-const GROUPS = [
+interface MissionGroupConfig {
+  key: keyof MissionOffersType
+  label: string
+  color: string
+}
+
+const GROUPS: MissionGroupConfig[] = [
   { key: 'plot',      label: 'Plot',      color: '#ff9800' },
   { key: 'guild',     label: 'Guild',     color: '#4caf50' },
   { key: 'coalition', label: 'Coalition', color: '#9c27b0' },
   { key: 'other',     label: 'Other',     color: '#2196f3' },
 ]
+
+function flattenMissionOffers(group: MissionOffer[] | undefined, type: string): Array<{ mission: MissionEntry; type: string }> {
+  if (!group?.length) return []
+
+  const missions: Array<{ mission: MissionEntry; type: string }> = []
+
+  for (const offer of group) {
+    for (const mission of Object.values(offer.missions || {})) {
+      missions.push({ mission, type })
+    }
+  }
+
+  return missions
+}
 
 export function MissionOffers({ offers }: Props) {
   const hasAny = offers && Object.values(offers).some(g => g && g.length > 0)
@@ -83,17 +94,7 @@ export function MissionOffers({ offers }: Props) {
       )}
 
       {offers && GROUPS.map(({ key, label, color }) => {
-        const group = (offers as any)[key] as any[]
-        if (!group?.length) return null
-
-        const allMissions: Array<{ m: MissionEntry; type: string }> = []
-        for (const offer of group) {
-          if (offer.missions) {
-            for (const m of Object.values(offer.missions) as MissionEntry[]) {
-              allMissions.push({ m, type: key })
-            }
-          }
-        }
+        const allMissions = flattenMissionOffers(offers[key], key)
         if (!allMissions.length) return null
 
         return (
@@ -102,7 +103,7 @@ export function MissionOffers({ offers }: Props) {
               {label} ({allMissions.length})
             </div>
             {allMissions.slice(0, 10).map((item, i) => (
-              <MissionItem key={i} mission={item.m} type={item.type} />
+              <MissionItem key={`${item.type}-${i}`} mission={item.mission} type={item.type} />
             ))}
             {allMissions.length > 10 && (
               <div className="empty-state">+{allMissions.length - 10} more</div>

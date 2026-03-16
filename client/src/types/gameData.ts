@@ -107,6 +107,14 @@ export interface LogbookEntry {
   factionname: string;
 }
 
+export interface GenericDataRecord {
+  [key: string]: unknown;
+}
+
+export interface GenericListItem {
+  [key: string]: unknown;
+}
+
 export interface GameState {
   _meta: ConnectionMeta;
   player: PlayerInfo;
@@ -117,10 +125,10 @@ export interface GameState {
   activeMission: ActiveMission | null;
   logbook: { list: LogbookEntry[] } | null;
   currentResearch: CurrentResearch | null;
-  factions: Record<string, any> | null;
-  agents: any[] | null;
-  inventory: Record<string, any> | null;
-  transactionLog: { list: any[] } | null;
+  factions: GenericDataRecord | null;
+  agents: GenericListItem[] | null;
+  inventory: GenericDataRecord | null;
+  transactionLog: { list: GenericListItem[] } | null;
 }
 
 export interface KeyBinding {

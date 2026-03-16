@@ -1,22 +1,15 @@
 import React from 'react'
 import { CurrentResearch } from '../types/gameData'
+import { clampPercentage, formatShortDuration } from '../utils/format'
 
 interface Props {
   research: CurrentResearch | null
 }
 
-function formatTime(secs: number): string {
-  if (!secs) return ''
-  const h = Math.floor(secs / 3600)
-  const m = Math.floor((secs % 3600) / 60)
-  if (h > 0) return `${h}h ${m}m`
-  return `${m}m`
-}
-
 export function Research({ research }: Props) {
   if (!research || research.name === null) return null
 
-  const pct = Math.max(0, Math.min(100, research.percentageCompleted))
+  const pct = clampPercentage(research.percentageCompleted)
 
   return (
     <>
@@ -24,7 +17,7 @@ export function Research({ research }: Props) {
 
       <div className="research-progress-header">
         <span style={{ fontSize: '9px', color: 'var(--c-text-dim)', letterSpacing: '1px' }}>
-          Progress{research.researchtime > 0 ? ` · ${formatTime(research.researchtime)} total` : ''}
+          Progress{research.researchtime > 0 ? ` · ${formatShortDuration(research.researchtime)} total` : ''}
         </span>
         <span className="research-pct">{pct.toFixed(1)}%</span>
       </div>

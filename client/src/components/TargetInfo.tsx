@@ -1,5 +1,7 @@
 import React from 'react'
 import { CombatTarget } from '../types/gameData'
+import { clampPercentage, formatDistanceMeters } from '../utils/format'
+import { hasCombatTarget } from '../utils/gameState'
 
 interface Props {
   target: CombatTarget
@@ -17,13 +19,8 @@ function hullClass(pct: number): string {
   return 'low'
 }
 
-function formatDist(m: number): string {
-  if (m >= 1000) return `${(m / 1000).toFixed(1)} km`
-  return `${Math.round(m)} m`
-}
-
 export function TargetShieldsWidget({ target }: Props) {
-  const pct = Math.max(0, Math.min(100, target.shields))
+  const pct = clampPercentage(target.shields)
   return (
     <div className="clean-health-row">
       <div className="clean-health-head">
@@ -41,7 +38,7 @@ export function TargetShieldsWidget({ target }: Props) {
 }
 
 export function TargetHullWidget({ target }: Props) {
-  const pct = Math.max(0, Math.min(100, target.hull))
+  const pct = clampPercentage(target.hull)
   const tone = hullClass(pct)
   return (
     <div className="clean-health-row">
@@ -60,18 +57,7 @@ export function TargetHullWidget({ target }: Props) {
 }
 
 export function TargetInfoWidget({ target }: TargetInfoProps) {
-  const showPlaceholder = !target || !(
-    target.name?.trim() ||
-    target.shipName?.trim() ||
-    target.faction?.trim() ||
-    target.legalStatus?.trim() ||
-    target.combatRank?.trim() ||
-    target.isHostile ||
-    target.bounty > 0 ||
-    target.distance > 0
-  )
-
-  if (showPlaceholder) {
+  if (!hasCombatTarget(target)) {
     return (
       <div className="target-placeholder">
         <header className="target-v3-header">
@@ -108,7 +94,7 @@ export function TargetInfoWidget({ target }: TargetInfoProps) {
         <div className="target-v3-facts">
           <div className="target-v3-fact">
             <span className="target-v3-fact-label">Distance</span>
-            <span className="target-v3-fact-value">{target.distance > 0 ? formatDist(target.distance) : '-'}</span>
+            <span className="target-v3-fact-value">{target.distance > 0 ? formatDistanceMeters(target.distance) : '-'}</span>
           </div>
           <div className="target-v3-fact">
             <span className="target-v3-fact-label">Faction</span>

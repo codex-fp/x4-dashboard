@@ -1,42 +1,42 @@
-/**
- * X4 Dashboard Server
- * Aggregates data from X4 External App, broadcasts unified state via WebSocket,
- * and handles key press commands.
- */
-
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
-const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 const DataAggregator = require('./dataAggregator');
 const MockDataSource = require('./mockData');
 const keyPresser = require('./keyPresser');
 const { normalizeData } = require('./utils/normalizeData');
+const { readKeybindings, writeKeybindings, mergeKeybindingUpdates } = require('./keybindingsStore');
+const { REMOTE_CONTROL_ENABLED, requireLocalControlRequest } = require('./requestGuards');
 
 const PORT = process.env.PORT || 3001;
-const KEYBINDINGS_PATH = path.join(__dirname, 'config', 'keybindings.json');
-
 const MOCK_MODE = process.argv.includes('--mock') || process.env.MOCK === 'true';
-
-// === Express + HTTP server ===
-const app = express();
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-
-// Serve built client from server/public
 const publicDir = path.join(__dirname, 'public');
 const publicIndexPath = path.join(publicDir, 'index.html');
 
-if (fs.existsSync(publicIndexPath)) {
-  app.use(express.static(publicDir));
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api')) return next();
-    res.sendFile(publicIndexPath);
-  });
-} else {
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+const aggregator = new DataAggregator();
+
+let mock = null;
+
+// === Express + static client ===
+app.use(express.json({ limit: '10mb' }));
+
+function registerClientRoutes() {
+  if (fs.existsSync(publicIndexPath)) {
+    app.use(express.static(publicDir));
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api')) return next();
+      res.sendFile(publicIndexPath);
+    });
+    return;
+  }
+
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
     res.status(503).type('html').send(`<!DOCTYPE html>
@@ -56,42 +56,46 @@ npm start</pre>
   });
 }
 
-const server = http.createServer(app);
+registerClientRoutes();
 
 // === WebSocket server ===
-const wss = new WebSocket.Server({ server });
+function serializeState() {
+  const state = aggregator.getState();
+  return { ...state, _meta: { ...state._meta, mockMode: MOCK_MODE } };
+}
 
 function broadcast(data) {
-  const msg = JSON.stringify(data);
+  const message = JSON.stringify(data);
+
   for (const client of wss.clients) {
-    if (client.readyState === WebSocket.OPEN) {
-      try { client.send(msg); } catch { /* ignore */ }
+    if (client.readyState !== WebSocket.OPEN) {
+      continue;
+    }
+
+    try {
+      client.send(message);
+    } catch {
+      // ignore
     }
   }
 }
 
 function broadcastState() {
-  const state = aggregator.getState();
-  broadcast({ ...state, _meta: { ...state._meta, mockMode: MOCK_MODE } });
+  broadcast(serializeState());
 }
 
 wss.on('connection', (ws, req) => {
   console.log(`[WS] Client connected from ${req.socket.remoteAddress}`);
-  const state = aggregator.getState();
-  ws.send(JSON.stringify({ ...state, _meta: { ...state._meta, mockMode: MOCK_MODE } }));
+  ws.send(JSON.stringify(serializeState()));
   ws.on('error', (err) => console.log(`[WS] Client error: ${err.message}`));
   ws.on('close', () => console.log('[WS] Client disconnected'));
 });
 
-// === Data aggregation ===
-const aggregator = new DataAggregator();
-
+// === Data sources ===
 function onExternalData(data) {
   aggregator.updateExternal(data);
   broadcastState();
 }
-
-let mock = null;
 
 if (MOCK_MODE) {
   mock = new MockDataSource();
@@ -100,78 +104,76 @@ if (MOCK_MODE) {
 }
 
 // === REST API ===
-
-// Receives game data pushed directly from the X4 Lua mod (mycu_external_app)
 app.post('/api/data', (req, res) => {
   if (!MOCK_MODE) {
     const data = normalizeData(req.body || {});
     onExternalData({ ...data, _connected: true });
   }
+
   res.send('ok');
 });
 
-app.post('/api/keypress', (req, res) => {
-  const { action } = req.body || {};
-  if (!action) return res.status(400).json({ error: 'action is required' });
+app.post('/api/keypress', requireLocalControlRequest, (req, res) => {
+  const action = typeof req.body?.action === 'string' ? req.body.action.trim() : '';
+  if (!action) {
+    return res.status(400).json({ error: 'action is required' });
+  }
 
-  let bindings;
+  let keybindings;
   try {
-    bindings = JSON.parse(fs.readFileSync(KEYBINDINGS_PATH, 'utf8'));
+    keybindings = readKeybindings();
   } catch (err) {
     return res.status(500).json({ error: `Cannot read keybindings: ${err.message}` });
   }
 
-  const binding = bindings.bindings?.[action];
+  const binding = keybindings.bindings?.[action];
   if (!binding) {
-    return res.status(404).json({ error: `Unknown action: ${action}`, available: Object.keys(bindings.bindings || {}) });
+    return res.status(404).json({
+      error: `Unknown action: ${action}`,
+      available: Object.keys(keybindings.bindings || {}),
+    });
   }
 
   keyPresser.press(binding.key, binding.modifiers || []);
-  res.json({ ok: true, action, key: binding.key });
+  return res.json({ ok: true, action, key: binding.key });
 });
 
-app.get('/api/keybindings', (req, res) => {
+app.get('/api/keybindings', requireLocalControlRequest, (req, res) => {
   try {
-    const data = JSON.parse(fs.readFileSync(KEYBINDINGS_PATH, 'utf8'));
-    res.json(data);
+    res.json(readKeybindings());
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.put('/api/keybindings', (req, res) => {
+app.put('/api/keybindings', requireLocalControlRequest, (req, res) => {
   try {
-    const current = JSON.parse(fs.readFileSync(KEYBINDINGS_PATH, 'utf8'));
+    const current = readKeybindings();
     const updates = req.body?.bindings || {};
-    const updated = {
-      ...current,
-      bindings: { ...current.bindings, ...updates },
-    };
-    fs.writeFileSync(KEYBINDINGS_PATH, JSON.stringify(updated, null, 2));
+    const next = mergeKeybindingUpdates(current, updates);
+
+    writeKeybindings(next);
     console.log('[Keybindings] Updated:', Object.keys(updates).join(', '));
-    res.json(updated);
+    res.json(next);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/mock/combat', (req, res) => {
-  if (!MOCK_MODE || !mock) return res.status(404).json({ error: 'Not in mock mode' });
-  mock.toggleCombat();
-  res.json({ ok: true, inCombat: mock.inCombat });
-});
+function registerMockToggleRoute(route, action, stateKey) {
+  app.post(route, (req, res) => {
+    if (!MOCK_MODE || !mock) {
+      return res.status(404).json({ error: 'Not in mock mode' });
+    }
 
-app.post('/api/mock/travel', (req, res) => {
-  if (!MOCK_MODE || !mock) return res.status(404).json({ error: 'Not in mock mode' });
-  mock.toggleTravel();
-  res.json({ ok: true, travelDrive: mock.travelDrive });
-});
+    action();
+    return res.json({ ok: true, [stateKey]: mock[stateKey] });
+  });
+}
 
-app.post('/api/mock/boost', (req, res) => {
-  if (!MOCK_MODE || !mock) return res.status(404).json({ error: 'Not in mock mode' });
-  mock.toggleBoost();
-  res.json({ ok: true, boosting: mock.boosting });
-});
+registerMockToggleRoute('/api/mock/combat', () => mock.toggleCombat(), 'inCombat');
+registerMockToggleRoute('/api/mock/travel', () => mock.toggleTravel(), 'travelDrive');
+registerMockToggleRoute('/api/mock/boost', () => mock.toggleBoost(), 'boosting');
 
 app.get('/api/state', (req, res) => {
   res.json(aggregator.getState());
@@ -183,21 +185,22 @@ app.get('/api/health', (req, res) => {
 
 // === Start server ===
 server.listen({ port: PORT, host: '::', ipv6Only: false }, () => {
-  const ifaces = require('os').networkInterfaces();
-  const lan = Object.values(ifaces).flat().find(i => i.family === 'IPv4' && !i.internal);
+  const lan = Object.values(os.networkInterfaces())
+    .flat()
+    .find((iface) => iface && iface.family === 'IPv4' && !iface.internal);
 
   console.log('\n========================================');
   console.log('  X4 Foundations Dashboard Server');
-  if (MOCK_MODE) console.log('  *** MOCK MODE — preview only ***');
+  if (MOCK_MODE) console.log('  *** MOCK MODE - preview only ***');
   console.log('========================================');
   console.log(`  Open:   http://localhost:${PORT}`);
   if (lan) console.log(`  LAN:    http://${lan.address}:${PORT}`);
   if (!MOCK_MODE) console.log(`  Data:   POST http://localhost:${PORT}/api/data`);
   if (!fs.existsSync(publicIndexPath)) console.log('  Client: Build required (`npm run build`)');
+  console.log(`  Controls: ${REMOTE_CONTROL_ENABLED ? 'remote enabled' : 'localhost only'}`);
   console.log('========================================\n');
 });
 
-// Graceful shutdown
 process.on('SIGINT', () => {
   console.log('\nShutting down...');
   mock?.stop();

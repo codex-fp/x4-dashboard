@@ -9,5 +9,9 @@
 /server/.npm-cache/
 /client/dist/
 /server/public/
+.env
+.env.*
+!.env.example
+*.local
 *.log
 .DS_Store

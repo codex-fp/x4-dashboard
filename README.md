@@ -29,6 +29,7 @@ This app can simulate local key presses on the machine where the server is runni
 
 - Keep it on a trusted local machine or private LAN only.
 - Do not expose the server directly to the public internet.
+- Control endpoints are localhost-only by default. Set `ALLOW_REMOTE_CONTROLS=true` only if you understand the risk.
 - The game window usually needs to be focused, or running borderless windowed, for key presses to land reliably.
 
 ## Requirements
@@ -103,6 +104,23 @@ npm run check
 
 There is no dedicated test suite yet; TypeScript checking is the main validation step for the client.
 
+Release validation:
+
+```bash
+npm run release:check
+```
+
+## Environment variables
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `PORT` | `3001` | Server port |
+| `MOCK` | unset | Forces mock mode when set to `true` |
+| `AUTOHOTKEY_PATH` | unset | Explicit path to `AutoHotkey64.exe` |
+| `X4_FORCE_ACTIVATE` | `false` | Try to focus the game window before sending keys |
+| `X4_WINDOW_TITLE` | `X4` | Window title fragment used for focus matching |
+| `ALLOW_REMOTE_CONTROLS` | `false` | Allows remote access to `/api/keypress` and keybinding management |
+
 ## X4 mod setup
 
 The Lua integration lives in `game-mods/mycu_external_app/`.
@@ -169,6 +187,15 @@ x4-dashboard/
 |- README.md
 |- LICENSE
 ```
+
+## Public repo hygiene
+
+- Contribution guide: `CONTRIBUTING.md`
+- Security policy: `SECURITY.md`
+- Release checklist: `RELEASE.md`
+- Changelog: `CHANGELOG.md`
+- Build output is ignored and regenerated locally
+- Repository line endings are normalized with `.gitattributes`
 
 ## Known limitations
 
