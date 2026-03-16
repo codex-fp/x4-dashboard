@@ -8,6 +8,7 @@ This roadmap is a lightweight public planning document for the next release cycl
 - Add custom application icons and better installer branding
 - Improve first-run experience for desktop users
 - Reduce Electron packaging rough edges and clarify runtime requirements
+- Make LAN access a first-class mode so the app is reachable from other devices by default, not only localhost
 
 ### 2. Dashboard UX improvements
 - Add a dedicated settings and diagnostics surface
