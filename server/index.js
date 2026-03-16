@@ -28,11 +28,31 @@ app.use(express.json({ limit: '10mb' }));
 
 // Serve built client from server/public
 const publicDir = path.join(__dirname, 'public');
-if (fs.existsSync(publicDir)) {
+const publicIndexPath = path.join(publicDir, 'index.html');
+
+if (fs.existsSync(publicIndexPath)) {
   app.use(express.static(publicDir));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
-    res.sendFile(path.join(publicDir, 'index.html'));
+    res.sendFile(publicIndexPath);
+  });
+} else {
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.status(503).type('html').send(`<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>X4 Dashboard - build required</title>
+  </head>
+  <body style="font-family: sans-serif; padding: 24px; line-height: 1.5;">
+    <h1>Client build required</h1>
+    <p>This checkout keeps source files only. Build the frontend before opening the dashboard.</p>
+    <pre style="background: #f4f4f4; padding: 12px;">npm run build
+npm start</pre>
+  </body>
+</html>`);
   });
 }
 
@@ -173,6 +193,7 @@ server.listen({ port: PORT, host: '::', ipv6Only: false }, () => {
   console.log(`  Open:   http://localhost:${PORT}`);
   if (lan) console.log(`  LAN:    http://${lan.address}:${PORT}`);
   if (!MOCK_MODE) console.log(`  Data:   POST http://localhost:${PORT}/api/data`);
+  if (!fs.existsSync(publicIndexPath)) console.log('  Client: Build required (`npm run build`)');
   console.log('========================================\n');
 });
 

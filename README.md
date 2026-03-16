@@ -62,7 +62,9 @@ Then open `http://localhost:3001`.
 
 ## Running with the real game
 
-Build the client once after frontend changes:
+This repository keeps source files only. The production frontend in `server/public/` is generated locally and ignored by Git.
+
+Build the client before starting the server, and rebuild after frontend changes:
 
 ```bash
 npm run build
@@ -146,7 +148,7 @@ Supported key format uses SendKeys-style notation:
 
 ## Architecture overview
 
-The app is a single Node.js server that serves a built React frontend from `server/public/`.
+The app is a single Node.js server that serves a locally built React frontend from `server/public/`.
 
 Data flow:
 
@@ -163,7 +165,7 @@ x4-dashboard/
 |- client/                      React + TypeScript source
 |- game-mods/mycu_external_app/ X4 Lua extension
 |- server/                      Express, WebSocket, keypress bridge
-|- server/public/               Built frontend served in production
+|- server/public/               Local build output (generated, ignored by Git)
 |- README.md
 |- LICENSE
 ```

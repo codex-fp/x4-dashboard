@@ -8,5 +8,6 @@
 /client/.npm-cache/
 /server/.npm-cache/
 /client/dist/
+/server/public/
 *.log
 .DS_Store
