@@ -7,10 +7,25 @@ const SERVER_PORT = process.env.PORT || '3001'
 const SERVER_URL = `http://127.0.0.1:${SERVER_PORT}`
 const DEV_RENDERER_URL = process.env.ELECTRON_RENDERER_URL || ''
 const IS_DEV = Boolean(DEV_RENDERER_URL)
+const LOG_FILE_NAME = 'server.log'
 
 let mainWindow = null
 let serverProcess = null
 let isQuitting = false
+let serverLogBuffer = ''
+
+function appendServerLog(chunk) {
+  serverLogBuffer += chunk
+
+  if (IS_DEV) {
+    return
+  }
+
+  try {
+    const logPath = path.join(app.getPath('userData'), LOG_FILE_NAME)
+    fs.appendFileSync(logPath, chunk)
+  } catch {}
+}
 
 function getServerEntry() {
   if (IS_DEV) {
@@ -53,9 +68,16 @@ function startServerProcess() {
   }
 
   const serverEntry = getServerEntry()
+  const logPath = path.join(app.getPath('userData'), LOG_FILE_NAME)
   if (!fs.existsSync(serverEntry)) {
     throw new Error(`Cannot find packaged server entry: ${serverEntry}`)
   }
+
+  serverLogBuffer = ''
+
+  try {
+    fs.writeFileSync(logPath, '')
+  } catch {}
 
   serverProcess = spawn(process.execPath, [serverEntry], {
     cwd: getServerCwd(),
@@ -69,16 +91,24 @@ function startServerProcess() {
   })
 
   serverProcess.stdout.on('data', (chunk) => {
-    process.stdout.write(`[server] ${chunk}`)
+    const text = chunk.toString()
+    appendServerLog(text)
+    process.stdout.write(`[server] ${text}`)
   })
 
   serverProcess.stderr.on('data', (chunk) => {
-    process.stderr.write(`[server] ${chunk}`)
+    const text = chunk.toString()
+    appendServerLog(text)
+    process.stderr.write(`[server] ${text}`)
   })
 
   serverProcess.on('exit', (code) => {
     if (!isQuitting && code !== 0) {
-      dialog.showErrorBox('X4 Dashboard', `Bundled server stopped unexpectedly (exit code ${code ?? 'unknown'}).`)
+      const logPath = path.join(app.getPath('userData'), LOG_FILE_NAME)
+      dialog.showErrorBox(
+        'X4 Dashboard',
+        `Bundled server stopped unexpectedly (exit code ${code ?? 'unknown'}).\n\nCheck: ${logPath}`,
+      )
       app.quit()
     }
   })

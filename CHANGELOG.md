@@ -6,6 +6,12 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-03-16
+
+### Fixed
+- Included server runtime dependencies in the packaged Electron app so the portable and installer builds can boot correctly
+- Improved desktop error reporting by writing bundled server logs to a file in the Electron user data directory
+
 ## [1.1.0] - 2026-03-16
 
 ### Added
