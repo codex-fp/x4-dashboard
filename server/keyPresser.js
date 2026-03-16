@@ -12,8 +12,19 @@
  *   {UP}, {DOWN}, {LEFT}, {RIGHT}, {HOME}, {END}, {PGUP}, {PGDN}
  */
 
-const { exec } = require('child_process');
+const { exec, execFile } = require('child_process');
 const os = require('os');
+const fs = require('fs');
+const path = require('path');
+
+const WINDOWS_FORCE_ACTIVATE = process.env.X4_FORCE_ACTIVATE === 'true';
+const WINDOWS_GAME_WINDOW_MATCH = process.env.X4_WINDOW_TITLE || 'X4';
+const AUTOHOTKEY_EXECUTABLES = [
+  process.env.AUTOHOTKEY_PATH,
+  'C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey64.exe',
+  'C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey32.exe',
+  'C:\\Program Files\\AutoHotkey\\AutoHotkey.exe',
+].filter(Boolean);
 
 /**
  * Press a key on the host machine.
@@ -47,19 +58,104 @@ function press(key, modifiers = []) {
 }
 
 function pressWindows(keyString) {
-  // Escape single quotes for PowerShell string
-  const escaped = keyString.replace(/'/g, "''");
+  const ahkExecutable = getAutoHotkeyExecutable();
+  if (ahkExecutable) {
+    pressWindowsWithAutoHotkey(ahkExecutable, keyString);
+    return;
+  }
 
-  // Use System.Windows.Forms.SendKeys which sends to the active window
-  const script = `Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('${escaped}')`;
+  const escapedKey = keyString.replace(/'/g, "''");
+  const escapedWindowMatch = WINDOWS_GAME_WINDOW_MATCH.replace(/'/g, "''");
+  const script = [
+    "$ErrorActionPreference = 'Stop'",
+    '$shell = New-Object -ComObject WScript.Shell',
+    `if (${WINDOWS_FORCE_ACTIVATE ? '$true' : '$false'}) {`,
+    `  $windowMatch = '${escapedWindowMatch}'`,
+    "  $target = Get-Process | Where-Object { $_.MainWindowTitle -and $_.MainWindowTitle -like ('*' + $windowMatch + '*') } | Select-Object -First 1",
+    "  if (-not $target) { throw 'No matching game window found' }",
+    "  if (-not $shell.AppActivate($target.Id)) { throw 'Failed to activate game window' }",
+    '  Start-Sleep -Milliseconds 100',
+    '}',
+    `$shell.SendKeys('${escapedKey}')`,
+  ].filter(Boolean).join('; ');
+  const encodedScript = Buffer.from(script, 'utf16le').toString('base64');
 
-  exec(`powershell -NoProfile -NonInteractive -Command "${script}"`, (err, stdout, stderr) => {
+  exec(`powershell -NoProfile -NonInteractive -EncodedCommand ${encodedScript}`, (err, stdout, stderr) => {
     if (err) {
       console.error(`[KeyPresser] Windows key press error: ${err.message}`);
+      if (stderr && stderr.trim()) {
+        console.error(`[KeyPresser] PowerShell: ${stderr.trim()}`);
+      }
     } else {
-      console.log(`[KeyPresser] Pressed: ${keyString}`);
+      const activateNote = WINDOWS_FORCE_ACTIVATE ? ` -> ${WINDOWS_GAME_WINDOW_MATCH}` : '';
+      console.log(`[KeyPresser] Pressed: ${keyString}${activateNote}`);
     }
   });
+}
+
+function pressWindowsWithAutoHotkey(ahkExecutable, keyString) {
+  const ahkKey = toAutoHotkeyKey(keyString);
+  if (!ahkKey) {
+    console.error(`[KeyPresser] Unsupported AutoHotkey binding: ${keyString}`);
+    return;
+  }
+
+  const scriptPath = path.join(os.tmpdir(), `x4-dashboard-${Date.now()}-${Math.random().toString(36).slice(2)}.ahk`);
+  const ahkLines = [
+    '#Requires AutoHotkey v2.0',
+    'SetKeyDelay 50, 50',
+    'SetControlDelay 50',
+    'SetWinDelay 50',
+  ];
+
+  if (WINDOWS_FORCE_ACTIVATE) {
+    const escapedTitle = WINDOWS_GAME_WINDOW_MATCH.replace(/`/g, '``');
+    ahkLines.push(`if WinExist("${escapedTitle}") {`);
+    ahkLines.push(`  WinActivate("${escapedTitle}")`);
+    ahkLines.push(`  WinWaitActive("${escapedTitle}",, 1)`);
+    ahkLines.push('}');
+  }
+
+  ahkLines.push(`SendEvent "${ahkKey}"`);
+
+  fs.writeFileSync(scriptPath, ahkLines.join('\n'));
+
+  execFile(ahkExecutable, [scriptPath], (err, stdout, stderr) => {
+    try {
+      fs.unlinkSync(scriptPath);
+    } catch {}
+
+    if (err) {
+      console.error(`[KeyPresser] AutoHotkey error: ${err.message}`);
+      if (stderr && stderr.trim()) {
+        console.error(`[KeyPresser] AutoHotkey stderr: ${stderr.trim()}`);
+      }
+      return;
+    }
+
+    const activateNote = WINDOWS_FORCE_ACTIVATE ? ` -> ${WINDOWS_GAME_WINDOW_MATCH}` : '';
+    console.log(`[KeyPresser] Pressed (AutoHotkey): ${keyString}${activateNote}`);
+  });
+}
+
+function getAutoHotkeyExecutable() {
+  for (const executable of AUTOHOTKEY_EXECUTABLES) {
+    if (executable && fs.existsSync(executable)) {
+      return executable;
+    }
+  }
+
+  return null;
+}
+
+function toAutoHotkeyKey(keyString) {
+  let result = keyString;
+
+  while (result.startsWith('%')) {
+    result = '!' + result.slice(1);
+  }
+
+  return result.replace(/\{ESC\}/gi, '{Escape}').replace(/\{SPACE\}/gi, '{Space}');
 }
 
 function pressLinux(keyString) {

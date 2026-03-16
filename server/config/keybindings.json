@@ -3,25 +3,25 @@
   "note": "Key format uses Windows SendKeys notation: '{F1}'-'{F12}' for function keys, 'a'-'z' for letters, '^a' = Ctrl+A, '+a' = Shift+A, '%a' = Alt+A, '{ENTER}', '{ESC}', '{SPACE}', '{UP}', '{DOWN}', '{LEFT}', '{RIGHT}'",
   "bindings": {
     "flightAssist": {
-      "key": "{F7}",
-      "modifiers": [],
+      "key": "{SPACE}",
+      "modifiers": ["ctrl"],
       "label": "Flight Assist",
       "description": "Toggle flight assist on/off"
     },
     "seta": {
-      "key": "{F8}",
+      "key": "+4",
       "modifiers": [],
       "label": "SETA",
       "description": "Toggle SETA (time acceleration)"
     },
     "autopilot": {
-      "key": "{F6}",
+      "key": "+a",
       "modifiers": [],
       "label": "Autopilot",
       "description": "Toggle autopilot navigation"
     },
     "travelDrive": {
-      "key": "{F2}",
+      "key": "+1",
       "modifiers": [],
       "label": "Travel Drive",
       "description": "Toggle travel drive"
