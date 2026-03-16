@@ -10,6 +10,7 @@ import { NavHeadingWidget, NavSpeedometerWidget } from './Navigation'
 import {
   AutopilotToggleWidget,
   FlightAssistToggleWidget,
+  MapToggleWidget,
   SetaToggleWidget,
   TravelDriveToggleWidget,
 } from './SystemFlags'
@@ -69,6 +70,7 @@ function renderWidget(
     case 'SetaToggle':         return <SetaToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
     case 'TravelDriveToggle':  return <TravelDriveToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
     case 'AutopilotToggle':    return <AutopilotToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
+    case 'MapToggle':          return <MapToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
     case 'ActiveMission':  return <ActiveMission mission={state.activeMission} />
     case 'MissionOffers':  return <MissionOffers offers={state.missionOffers} />
     case 'Comms':          return <Comms logbook={state.logbook} />

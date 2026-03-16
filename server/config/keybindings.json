@@ -56,6 +56,12 @@
       "label": "Travel Drive",
       "description": "Toggle travel drive"
     },
+    "openMap": {
+      "key": "m",
+      "modifiers": [],
+      "label": "Map",
+      "description": "Open the in-game map"
+    },
     "silentRunning": {
       "key": "{F1}",
       "modifiers": [],

@@ -31,6 +31,7 @@ export type WidgetId =
     | 'SetaToggle'
     | 'TravelDriveToggle'
     | 'AutopilotToggle'
+    | 'MapToggle'
     | 'ActiveMission'
     | 'MissionOffers'
     | 'Comms'
@@ -182,6 +183,7 @@ export const DASHBOARDS: DashboardConfig[] = [
                         {id: 'SetaToggle', col: 2, row: 1},
                         {id: 'TravelDriveToggle', col: 1, row: 2},
                         {id: 'AutopilotToggle', col: 2, row: 2},
+                        {id: 'MapToggle', col: 1, row: 3, colSpan: 2},
                     ]
                 },
                 col: 3, row: 2, rowSpan: 2, grow: true, scale: 1.43
@@ -246,6 +248,7 @@ export const DASHBOARDS: DashboardConfig[] = [
                         {id: 'SetaToggle', col: 2, row: 1},
                         {id: 'TravelDriveToggle', col: 1, row: 2},
                         {id: 'AutopilotToggle', col: 2, row: 2},
+                        {id: 'MapToggle', col: 1, row: 3, colSpan: 2},
                     ]
                 },
                 col: 1, row: 3, colSpan: 2, grow: true, scale: 1.43

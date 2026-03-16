@@ -19,6 +19,7 @@ const FLAG_CONFIG: Record<string, FlagConfig> = {
   seta: { key: 'seta', action: 'seta', icon: '≫', label: 'SETA' },
   travelDrive: { key: 'travelDrive', action: 'travelDrive', icon: '△', label: 'Travel Drive' },
   autopilot: { action: 'autopilot', icon: '◈', label: 'Autopilot', stateless: true },
+  map: { action: 'openMap', icon: '⌖', label: 'Map', stateless: true },
 }
 
 let bindingsCache: Record<string, KeyBinding> | null = null
@@ -112,4 +113,8 @@ export function TravelDriveToggleWidget(props: Props) {
 
 export function AutopilotToggleWidget(props: Props) {
   return <SystemFlagToggle {...props} config={FLAG_CONFIG.autopilot} />
+}
+
+export function MapToggleWidget(props: Props) {
+  return <SystemFlagToggle {...props} config={FLAG_CONFIG.map} />
 }
