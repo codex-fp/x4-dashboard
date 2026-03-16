@@ -224,6 +224,7 @@ x4-dashboard/
 - Contribution guide: `CONTRIBUTING.md`
 - Security policy: `SECURITY.md`
 - Release checklist: `RELEASE.md`
+- Roadmap: `ROADMAP.md`
 - Changelog: `CHANGELOG.md`
 - Build output is ignored and regenerated locally
 - Repository line endings are normalized with `.gitattributes`
