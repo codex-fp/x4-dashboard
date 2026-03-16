@@ -9,6 +9,7 @@
 /server/.npm-cache/
 /client/dist/
 /dist/
+/release/
 /server/public/
 .env
 .env.*

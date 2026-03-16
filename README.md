@@ -79,6 +79,29 @@ npm start
 
 Open `http://localhost:3001` in your browser.
 
+## Desktop app
+
+Run the Electron desktop shell in development:
+
+```bash
+npm run desktop:dev
+```
+
+Run the desktop shell against the locally built production frontend:
+
+```bash
+npm run build
+npm run desktop:start
+```
+
+Build Windows desktop artifacts:
+
+```bash
+npm run desktop:dist
+```
+
+Generated installers are written to `release/`.
+
 Windows note:
 
 - Install AutoHotkey v2 on the same machine as the dashboard server if you want dashboard buttons to work reliably in X4.

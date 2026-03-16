@@ -16,6 +16,12 @@ To generate the distributable runtime bundle locally:
 npm run release:bundle
 ```
 
+To build Windows desktop installers locally:
+
+```bash
+npm run desktop:dist
+```
+
 4. Smoke test:
 - `npm run dev:mock`
 - `npm start` after `npm run build`
@@ -32,9 +38,11 @@ npm run release:bundle
 3. Tag the release with `vX.Y.Z`
 4. Publish GitHub release notes based on `CHANGELOG.md`
 5. Let `.github/workflows/release.yml` attach the generated `.zip` and `.tar.gz` assets
+6. Let `.github/workflows/release.yml` build and attach Windows desktop installers
 
 ## Distribution notes
 
 - `server/public/` is generated locally and should not be committed
 - The project is intended for trusted local environments
 - Remote control should stay disabled unless explicitly required
+- Desktop packaging uses Electron and bundles the built frontend plus server runtime

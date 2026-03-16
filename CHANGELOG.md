@@ -6,6 +6,17 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-03-16
+
+### Added
+- Electron desktop wrapper with local server bootstrapping for a packaged app experience
+- Desktop development and packaging scripts for local runs and installer generation
+- Windows release automation for portable and installer builds on tagged releases
+
+### Changed
+- Package versions bumped to `1.1.0`
+- Documentation expanded with desktop app usage and packaging guidance
+
 ## [1.0.1] - 2026-03-16
 
 ### Added

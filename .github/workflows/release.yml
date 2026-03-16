@@ -1,5 +1,8 @@
 name: Release Assets
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     tags:
@@ -55,3 +58,40 @@ jobs:
           files: |
             dist/x4-dashboard-${{ env.RELEASE_VERSION }}.tar.gz
             dist/x4-dashboard-${{ env.RELEASE_VERSION }}.zip
+
+  desktop-windows:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+            server/package-lock.json
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install server dependencies
+        run: npm --prefix server ci
+
+      - name: Install client dependencies
+        run: npm --prefix client ci
+
+      - name: Build Windows desktop app
+        run: npm run desktop:dist
+
+      - name: Upload desktop release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/*.exe
