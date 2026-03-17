@@ -204,6 +204,17 @@ Lives in `game-mods/mycu_external_app/`. Deploy by copying the folder to the X4 
 - Desktop installers and portable executables are written to `release/`
 - Source bundles are written to `dist/`
 
+## Roadmap / GitHub Planning
+
+- Treat `ROADMAP.md` as the source of truth for near-term and major-version planning
+- When the roadmap changes materially, reflect it in GitHub milestones and issues
+- Use milestones for release-sized groupings (for example `v1.2.0`, `v2.0.0`)
+- Create focused GitHub issues for roadmap items instead of leaving roadmap bullets untracked
+- Prefer updating existing issues when a roadmap item is already covered; create new issues only for missing scope
+- When adding new issues, write them as user- or product-facing work items with `Goal`, `Scope`, and `Why`
+- Keep roadmap, milestones, and open issues aligned so the public backlog stays understandable
+- Do not create a release, tag, or milestone closeout unless the user explicitly asks for it
+
 ## What NOT to Do
 
 - Do not enable React StrictMode — it breaks Arwes animations
