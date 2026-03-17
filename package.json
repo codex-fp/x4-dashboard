@@ -108,7 +108,8 @@
       "artifactName": "x4-dashboard-server-launcher-${version}-setup.${ext}",
       "oneClick": false,
       "perMachine": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "differentialPackage": false
     }
   }
 }

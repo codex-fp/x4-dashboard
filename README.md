@@ -104,6 +104,8 @@ npm run desktop:dist
 
 Generated launcher artifacts are written to `release/`.
 
+Note: `.blockmap` files are build metadata for differential desktop updates and are not published as user-facing release artifacts.
+
 Windows note:
 
 - Install AutoHotkey v2 on the same machine as the dashboard server if you want dashboard buttons to work reliably in X4.
