@@ -148,6 +148,17 @@ Artifacts are written to `dist/` and split into:
 - a standalone server package for browser-based clients
 - a standalone Lua mod package
 
+## Runtime settings
+
+The app now exposes the most important runtime controls in the in-app `Settings` dialog:
+
+- allow remote controls
+- AutoHotkey executable path
+- force-activate game window
+- game window title matching
+
+These settings are persisted on the server side and are the preferred configuration path for normal users.
+
 ## Environment variables
 
 | Variable | Default | Description |
@@ -158,6 +169,12 @@ Artifacts are written to `dist/` and split into:
 | `X4_FORCE_ACTIVATE` | `false` | Try to focus the game window before sending keys |
 | `X4_WINDOW_TITLE` | `X4` | Window title fragment used for focus matching |
 | `ALLOW_REMOTE_CONTROLS` | `false` | Allows remote access to `/api/keypress` and keybinding management |
+
+Precedence note:
+
+- `PORT` and `MOCK` are still startup-time settings
+- control-related settings should now be changed in the app UI instead of editing env vars directly
+- env vars act as initial defaults until the runtime settings are saved from the app
 
 ## X4 mod setup
 

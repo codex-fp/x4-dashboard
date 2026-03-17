@@ -16,15 +16,22 @@ const { exec, execFile } = require('child_process');
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
+const { readRuntimeConfig } = require('./runtimeConfigStore');
 
-const WINDOWS_FORCE_ACTIVATE = process.env.X4_FORCE_ACTIVATE === 'true';
-const WINDOWS_GAME_WINDOW_MATCH = process.env.X4_WINDOW_TITLE || 'X4';
-const AUTOHOTKEY_EXECUTABLES = [
-  process.env.AUTOHOTKEY_PATH,
-  'C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey64.exe',
-  'C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey32.exe',
-  'C:\\Program Files\\AutoHotkey\\AutoHotkey.exe',
-].filter(Boolean);
+function getWindowsRuntimeSettings() {
+  const runtimeConfig = readRuntimeConfig();
+
+  return {
+    autoHotkeyExecutables: [
+      runtimeConfig.autoHotkeyPath,
+      'C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey64.exe',
+      'C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey32.exe',
+      'C:\\Program Files\\AutoHotkey\\AutoHotkey.exe',
+    ].filter(Boolean),
+    forceActivateGameWindow: runtimeConfig.forceActivateGameWindow,
+    gameWindowTitle: runtimeConfig.gameWindowTitle,
+  };
+}
 
 /**
  * Press a key on the host machine.
@@ -39,7 +46,6 @@ function press(key, modifiers = []) {
 
   let keyString = key;
 
-  // Apply modifiers prefix (order matters: ctrl, alt, shift)
   if (modifiers.includes('alt')) keyString = '%' + keyString;
   if (modifiers.includes('shift')) keyString = '+' + keyString;
   if (modifiers.includes('ctrl') || modifiers.includes('control')) keyString = '^' + keyString;
@@ -58,18 +64,20 @@ function press(key, modifiers = []) {
 }
 
 function pressWindows(keyString) {
-  const ahkExecutable = getAutoHotkeyExecutable();
+  const settings = getWindowsRuntimeSettings();
+  const ahkExecutable = getAutoHotkeyExecutable(settings.autoHotkeyExecutables);
+
   if (ahkExecutable) {
-    pressWindowsWithAutoHotkey(ahkExecutable, keyString);
+    pressWindowsWithAutoHotkey(ahkExecutable, keyString, settings);
     return;
   }
 
   const escapedKey = keyString.replace(/'/g, "''");
-  const escapedWindowMatch = WINDOWS_GAME_WINDOW_MATCH.replace(/'/g, "''");
+  const escapedWindowMatch = settings.gameWindowTitle.replace(/'/g, "''");
   const script = [
     "$ErrorActionPreference = 'Stop'",
     '$shell = New-Object -ComObject WScript.Shell',
-    `if (${WINDOWS_FORCE_ACTIVATE ? '$true' : '$false'}) {`,
+    `if (${settings.forceActivateGameWindow ? '$true' : '$false'}) {`,
     `  $windowMatch = '${escapedWindowMatch}'`,
     "  $target = Get-Process | Where-Object { $_.MainWindowTitle -and $_.MainWindowTitle -like ('*' + $windowMatch + '*') } | Select-Object -First 1",
     "  if (-not $target) { throw 'No matching game window found' }",
@@ -77,7 +85,7 @@ function pressWindows(keyString) {
     '  Start-Sleep -Milliseconds 100',
     '}',
     `$shell.SendKeys('${escapedKey}')`,
-  ].filter(Boolean).join('; ');
+  ].join('; ');
   const encodedScript = Buffer.from(script, 'utf16le').toString('base64');
 
   exec(`powershell -NoProfile -NonInteractive -EncodedCommand ${encodedScript}`, (err, stdout, stderr) => {
@@ -87,13 +95,13 @@ function pressWindows(keyString) {
         console.error(`[KeyPresser] PowerShell: ${stderr.trim()}`);
       }
     } else {
-      const activateNote = WINDOWS_FORCE_ACTIVATE ? ` -> ${WINDOWS_GAME_WINDOW_MATCH}` : '';
+      const activateNote = settings.forceActivateGameWindow ? ` -> ${settings.gameWindowTitle}` : '';
       console.log(`[KeyPresser] Pressed: ${keyString}${activateNote}`);
     }
   });
 }
 
-function pressWindowsWithAutoHotkey(ahkExecutable, keyString) {
+function pressWindowsWithAutoHotkey(ahkExecutable, keyString, settings) {
   const ahkKey = toAutoHotkeyKey(keyString);
   if (!ahkKey) {
     console.error(`[KeyPresser] Unsupported AutoHotkey binding: ${keyString}`);
@@ -108,8 +116,8 @@ function pressWindowsWithAutoHotkey(ahkExecutable, keyString) {
     'SetWinDelay 50',
   ];
 
-  if (WINDOWS_FORCE_ACTIVATE) {
-    const escapedTitle = WINDOWS_GAME_WINDOW_MATCH.replace(/`/g, '``');
+  if (settings.forceActivateGameWindow) {
+    const escapedTitle = settings.gameWindowTitle.replace(/`/g, '``');
     ahkLines.push(`if WinExist("${escapedTitle}") {`);
     ahkLines.push(`  WinActivate("${escapedTitle}")`);
     ahkLines.push(`  WinWaitActive("${escapedTitle}",, 1)`);
@@ -133,13 +141,13 @@ function pressWindowsWithAutoHotkey(ahkExecutable, keyString) {
       return;
     }
 
-    const activateNote = WINDOWS_FORCE_ACTIVATE ? ` -> ${WINDOWS_GAME_WINDOW_MATCH}` : '';
+    const activateNote = settings.forceActivateGameWindow ? ` -> ${settings.gameWindowTitle}` : '';
     console.log(`[KeyPresser] Pressed (AutoHotkey): ${keyString}${activateNote}`);
   });
 }
 
-function getAutoHotkeyExecutable() {
-  for (const executable of AUTOHOTKEY_EXECUTABLES) {
+function getAutoHotkeyExecutable(candidates) {
+  for (const executable of candidates) {
     if (executable && fs.existsSync(executable)) {
       return executable;
     }
@@ -171,7 +179,6 @@ function pressLinux(keyString) {
 }
 
 function pressMac(keyString) {
-  // Convert SendKeys to AppleScript key name
   const appleKey = sendKeysToAppleScript(keyString);
   exec(`osascript -e 'tell application "System Events" to key code ${appleKey}'`, (err) => {
     if (err) {
@@ -182,9 +189,6 @@ function pressMac(keyString) {
   });
 }
 
-/**
- * Convert SendKeys format to xdotool key names
- */
 function sendKeysToXdotool(key) {
   const fkeyMap = {
     '{F1}': 'F1', '{F2}': 'F2', '{F3}': 'F3', '{F4}': 'F4',
@@ -202,14 +206,12 @@ function sendKeysToXdotool(key) {
   let result = key;
   let modifiers = '';
 
-  // Extract modifiers
   while (result.startsWith('^') || result.startsWith('+') || result.startsWith('%')) {
     if (result.startsWith('^')) { modifiers += 'ctrl+'; result = result.slice(1); }
     else if (result.startsWith('+')) { modifiers += 'shift+'; result = result.slice(1); }
     else if (result.startsWith('%')) { modifiers += 'alt+'; result = result.slice(1); }
   }
 
-  // Map special keys
   for (const [sendKey, xdoKey] of Object.entries(fkeyMap)) {
     if (result.toUpperCase() === sendKey) {
       return modifiers + xdoKey;
@@ -219,9 +221,6 @@ function sendKeysToXdotool(key) {
   return modifiers + result;
 }
 
-/**
- * Convert SendKeys format to AppleScript key code (simplified)
- */
 function sendKeysToAppleScript(key) {
   const fkeyMap = {
     '{F1}': '122', '{F2}': '120', '{F3}': '99', '{F4}': '118',

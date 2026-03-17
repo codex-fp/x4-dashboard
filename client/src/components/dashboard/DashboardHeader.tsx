@@ -106,7 +106,7 @@ export function DashboardHeader({
         </label>
 
         <button className="header-settings-btn" onClick={onOpenSettings}>
-          KEY BINDINGS
+          SETTINGS
         </button>
       </div>
     </header>

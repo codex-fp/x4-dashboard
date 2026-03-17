@@ -1,4 +1,4 @@
-const REMOTE_CONTROL_ENABLED = process.env.ALLOW_REMOTE_CONTROLS === 'true';
+const { readRuntimeConfig } = require('./runtimeConfigStore');
 
 const LOOPBACK_ADDRESSES = new Set([
   '127.0.0.1',
@@ -15,16 +15,17 @@ function getRequestAddress(req) {
 }
 
 function requireLocalControlRequest(req, res, next) {
-  if (REMOTE_CONTROL_ENABLED || isLoopbackAddress(getRequestAddress(req))) {
+  const runtimeConfig = readRuntimeConfig();
+
+  if (runtimeConfig.allowRemoteControls || isLoopbackAddress(getRequestAddress(req))) {
     return next();
   }
 
   return res.status(403).json({
-    error: 'Control endpoints are localhost-only by default. Set ALLOW_REMOTE_CONTROLS=true to override.',
+    error: 'Control endpoints are localhost-only by default. Enable remote controls in the app settings to override.',
   });
 }
 
 module.exports = {
-  REMOTE_CONTROL_ENABLED,
   requireLocalControlRequest,
 };

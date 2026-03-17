@@ -10,7 +10,8 @@ const MockDataSource = require('./mockData');
 const keyPresser = require('./keyPresser');
 const { normalizeData } = require('./utils/normalizeData');
 const { readKeybindings, writeKeybindings, mergeKeybindingUpdates } = require('./keybindingsStore');
-const { REMOTE_CONTROL_ENABLED, requireLocalControlRequest } = require('./requestGuards');
+const { requireLocalControlRequest } = require('./requestGuards');
+const { readRuntimeConfig, writeRuntimeConfig, mergeRuntimeConfigUpdates } = require('./runtimeConfigStore');
 
 const PORT = process.env.PORT || 3001;
 const MOCK_MODE = process.argv.includes('--mock') || process.env.MOCK === 'true';
@@ -160,6 +161,39 @@ app.put('/api/keybindings', requireLocalControlRequest, (req, res) => {
   }
 });
 
+app.get('/api/runtime-config', requireLocalControlRequest, (req, res) => {
+  try {
+    res.json({
+      config: readRuntimeConfig(),
+      startup: {
+        port: PORT,
+        mockMode: MOCK_MODE,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/runtime-config', requireLocalControlRequest, (req, res) => {
+  try {
+    const current = readRuntimeConfig();
+    const next = mergeRuntimeConfigUpdates(current, req.body?.config || {});
+
+    writeRuntimeConfig(next);
+    console.log('[RuntimeConfig] Updated runtime settings');
+    res.json({
+      config: next,
+      startup: {
+        port: PORT,
+        mockMode: MOCK_MODE,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 function registerMockToggleRoute(route, action, stateKey) {
   app.post(route, (req, res) => {
     if (!MOCK_MODE || !mock) {
@@ -197,7 +231,7 @@ server.listen({ port: PORT, host: '::', ipv6Only: false }, () => {
   if (lan) console.log(`  LAN:    http://${lan.address}:${PORT}`);
   if (!MOCK_MODE) console.log(`  Data:   POST http://localhost:${PORT}/api/data`);
   if (!fs.existsSync(publicIndexPath)) console.log('  Client: Build required (`npm run build`)');
-  console.log(`  Controls: ${REMOTE_CONTROL_ENABLED ? 'remote enabled' : 'localhost only'}`);
+  console.log(`  Controls: ${readRuntimeConfig().allowRemoteControls ? 'remote enabled' : 'localhost only'}`);
   console.log('========================================\n');
 });
 

@@ -11,6 +11,7 @@
 /dist/
 /release/
 /server/public/
+/server/config/runtime.json
 .env
 .env.*
 !.env.example
