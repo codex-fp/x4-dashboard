@@ -11,7 +11,7 @@ const keyPresser = require('./keyPresser');
 const { normalizeData } = require('./utils/normalizeData');
 const { readKeybindings, writeKeybindings, mergeKeybindingUpdates } = require('./keybindingsStore');
 const { requireLocalControlRequest } = require('./requestGuards');
-const { readRuntimeConfig, writeRuntimeConfig, mergeRuntimeConfigUpdates } = require('./runtimeConfigStore');
+const { readRuntimeConfig } = require('./runtimeConfigStore');
 
 const PORT = process.env.PORT || 3001;
 const MOCK_MODE = process.argv.includes('--mock') || process.env.MOCK === 'true';
@@ -156,39 +156,6 @@ app.put('/api/keybindings', requireLocalControlRequest, (req, res) => {
     writeKeybindings(next);
     console.log('[Keybindings] Updated:', Object.keys(updates).join(', '));
     res.json(next);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/api/runtime-config', requireLocalControlRequest, (req, res) => {
-  try {
-    res.json({
-      config: readRuntimeConfig(),
-      startup: {
-        port: PORT,
-        mockMode: MOCK_MODE,
-      },
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.put('/api/runtime-config', requireLocalControlRequest, (req, res) => {
-  try {
-    const current = readRuntimeConfig();
-    const next = mergeRuntimeConfigUpdates(current, req.body?.config || {});
-
-    writeRuntimeConfig(next);
-    console.log('[RuntimeConfig] Updated runtime settings');
-    res.json({
-      config: next,
-      startup: {
-        port: PORT,
-        mockMode: MOCK_MODE,
-      },
-    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

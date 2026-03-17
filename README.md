@@ -150,14 +150,14 @@ Artifacts are written to `dist/` and split into:
 
 ## Runtime settings
 
-The app now exposes the most important runtime controls in the in-app `Settings` dialog:
+The most important host-side runtime controls now live in the Electron `Server Launcher` instead of the browser client:
 
 - allow remote controls
 - AutoHotkey executable path
 - force-activate game window
 - game window title matching
 
-These settings are persisted on the server side and are the preferred configuration path for normal users.
+These settings are persisted on the server side and are the preferred configuration path for the machine running the server.
 
 ## Environment variables
 
@@ -173,7 +173,7 @@ These settings are persisted on the server side and are the preferred configurat
 Precedence note:
 
 - `PORT` and `MOCK` are still startup-time settings
-- control-related settings should now be changed in the app UI instead of editing env vars directly
+- control-related host settings should now be changed in the Server Launcher instead of editing env vars directly
 - env vars act as initial defaults until the runtime settings are saved from the app
 
 ## X4 mod setup

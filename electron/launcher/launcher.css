@@ -61,6 +61,69 @@ li {
   gap: 16px;
 }
 
+.config-panel {
+  margin: 16px 0;
+}
+
+.config-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.config-toggle {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.config-toggle span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.config-toggle strong,
+.config-grid span {
+  color: #e7fbff;
+  font-size: 14px;
+}
+
+.config-toggle small {
+  color: #9fc4cd;
+  line-height: 1.5;
+}
+
+.config-toggle input {
+  width: 18px;
+  height: 18px;
+}
+
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0 16px;
+}
+
+.config-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.config-grid input {
+  border: 1px solid rgba(134, 217, 234, 0.26);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(1, 8, 12, 0.92);
+  color: #d9f8ff;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -134,8 +197,14 @@ ul {
   }
 
   .status-panel,
-  .footer-panel {
+  .footer-panel,
+  .config-header,
+  .config-toggle {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .config-grid {
+    grid-template-columns: 1fr;
   }
 }

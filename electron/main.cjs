@@ -34,6 +34,20 @@ function getLogPath() {
   return path.join(app.getPath('userData'), LOG_FILE_NAME)
 }
 
+function getRuntimeConfigStorePath() {
+  if (IS_DEV) {
+    return path.join(__dirname, '..', 'server', 'runtimeConfigStore.js')
+  }
+
+  return path.join(process.resourcesPath, 'server', 'runtimeConfigStore.js')
+}
+
+function getRuntimeConfigStore() {
+  const storePath = getRuntimeConfigStorePath()
+  delete require.cache[storePath]
+  return require(storePath)
+}
+
 function getLanAddress() {
   return Object.values(os.networkInterfaces())
     .flat()
@@ -42,12 +56,18 @@ function getLanAddress() {
 
 function getLauncherState(serverRunning) {
   const lanAddress = getLanAddress()
+  const runtimeConfigStore = getRuntimeConfigStore()
 
   return {
     serverRunning,
     localUrl: IS_DEV ? DEV_RENDERER_URL : LOCAL_SERVER_URL,
     lanUrl: lanAddress ? `http://${lanAddress}:${SERVER_PORT}` : null,
     logPath: getLogPath(),
+    runtimeConfig: runtimeConfigStore.readRuntimeConfig(),
+    startup: {
+      port: Number(SERVER_PORT),
+      mockMode: process.argv.includes('--mock') || process.env.MOCK === 'true',
+    },
   }
 }
 
@@ -156,6 +176,14 @@ function registerIpc() {
   ipcMain.handle('launcher:get-state', async () => getLauncherState(await isServerReachable()))
   ipcMain.handle('launcher:open-url', async (_event, url) => shell.openExternal(url))
   ipcMain.handle('launcher:copy-text', async (_event, text) => clipboard.writeText(text))
+  ipcMain.handle('launcher:update-runtime-config', async (_event, updates) => {
+    const runtimeConfigStore = getRuntimeConfigStore()
+    const current = runtimeConfigStore.readRuntimeConfig()
+    const next = runtimeConfigStore.mergeRuntimeConfigUpdates(current, updates || {})
+
+    runtimeConfigStore.writeRuntimeConfig(next)
+    return next
+  })
   ipcMain.handle('launcher:show-log-location', async () => {
     const logPath = getLogPath()
 

@@ -150,11 +150,3 @@ export interface RuntimeConfig {
   forceActivateGameWindow: boolean;
   gameWindowTitle: string;
 }
-
-export interface RuntimeConfigResponse {
-  config: RuntimeConfig;
-  startup: {
-    port: number;
-    mockMode: boolean;
-  };
-}

@@ -53,6 +53,48 @@
         </ul>
       </section>
 
+      <section class="panel config-panel">
+        <div class="config-header">
+          <div>
+            <p class="label">Host Settings</p>
+            <p class="muted">These settings belong to the machine running the server launcher.</p>
+          </div>
+          <p id="startup-summary" class="muted">-</p>
+        </div>
+
+        <label class="config-toggle">
+          <span>
+            <strong>Allow remote controls</strong>
+            <small>Lets trusted LAN clients trigger control endpoints.</small>
+          </span>
+          <input id="allow-remote-controls" type="checkbox" />
+        </label>
+
+        <label class="config-toggle">
+          <span>
+            <strong>Force activate game window</strong>
+            <small>Attempts to focus the X4 window before sending a key press.</small>
+          </span>
+          <input id="force-activate-game-window" type="checkbox" />
+        </label>
+
+        <div class="config-grid">
+          <label>
+            <span>Game window title match</span>
+            <input id="game-window-title" type="text" placeholder="X4" />
+          </label>
+          <label>
+            <span>AutoHotkey executable path</span>
+            <input id="autohotkey-path" type="text" placeholder="Optional custom path" />
+          </label>
+        </div>
+
+        <div class="button-row">
+          <button id="save-settings">Save Host Settings</button>
+          <span id="settings-feedback" class="muted">-</span>
+        </div>
+      </section>
+
       <section class="panel footer-panel">
         <div>
           <p class="label">Server Log</p>
