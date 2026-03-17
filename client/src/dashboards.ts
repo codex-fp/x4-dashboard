@@ -205,77 +205,41 @@ export const DASHBOARDS: DashboardConfig[] = [
     },
 
     {
-        id: 'flight-vertical',
-        label: 'Vertical Flight',
-        layout: 'grid',
-        columns: '1fr 1fr',
-        panels: [
-            {
-                color: 'primary',
-                internal: {
-                    layout: 'columns', columns: [{
+        id: 'ship-controls',
+        label: 'Ship Controls',
+        layout: 'columns',
+        columns: [{
+            panels: [
+                {
+                    title: 'Systems', titleIcon: '⎔',
+                    internal: {
+                        layout: 'grid',
+                        columns: 'repeat(4, minmax(0, 1fr))',
+                        rows: 'repeat(2, minmax(0, 1fr))',
+                        gap: '6px',
+                        alignContent: 'stretch',
+                        width: '100%',
                         widgets: [
-                            {id: 'NavHeading', scale: 0.7},
-                            {id: 'NavSpeedometer', grow: true,},
+                            {id: 'TravelDriveToggle', col: 1, row: 1},
+                            {id: 'SetaToggle', col: 2, row: 1},
+                            {id: 'FlightAssistToggle', col: 3, row: 1},
+                            {id: 'AutopilotToggle', col: 4, row: 1},
+                            {id: 'ScanModeToggle', col: 1, row: 2},
+                            {id: 'LongRangeScanToggle', col: 2, row: 2},
+                            {id: 'MapToggle', col: 3, row: 2},
+                            {id: 'MissionManagerToggle', col: 4, row: 2},
                         ]
-                    }]
+                    },
+                    grow: true, scale: 1.43
                 },
-                col: 1, row: 2, grow: true, scale: 1.43
-            },
-            {
-                internal: {
-                    layout: 'columns', columns: [{
-                        widgets: [
-                            {id: 'ShipShields'},
-                            {id: 'ShipHull'},
-                        ]
-                    }]
-                },
-                col: 1, colSpan: 2, row: 5, scale: 1.43,
-            },
-            {
-                title: "Target",
-                colorFn: (s) => s.combat.target?.isHostile ? 'danger' : 'warning',
-                internal: {
-                    layout: 'columns', columns: [{
-                        widgets: [
-                            {id: 'TargetInfo', scale: 0.7},
-                            {id: 'TargetShields'},
-                            {id: 'TargetHull'},
-                        ]
-                    }]
-                },
-                col: 2, row: 2, rowSpan: 1, scale: 1.43
-            },
-            {
-                title: 'Systems', titleIcon: '⎔',
-                internal: {
-                    layout: 'grid', columns: '1fr 1fr', rows: 'repeat(4, minmax(0, 1fr))', gap: '6px', alignContent: 'start', width: '100%', widgets: [
-                        {id: 'TravelDriveToggle', col: 1, row: 1},
-                        {id: 'SetaToggle', col: 2, row: 1},
-                        {id: 'FlightAssistToggle', col: 1, row: 2},
-                        {id: 'AutopilotToggle', col: 2, row: 2},
-                        {id: 'ScanModeToggle', col: 1, row: 3},
-                        {id: 'LongRangeScanToggle', col: 2, row: 3},
-                        {id: 'MapToggle', col: 1, row: 4},
-                        {id: 'MissionManagerToggle', col: 2, row: 4},
-                    ]
-                },
-                col: 1, row: 3, colSpan: 2, grow: true, scale: 1.43
-            },
-            {
-                id: 'underAttack', frameless: true,
-                style: {zIndex: 10, alignSelf: 'start', pointerEvents: 'none'},
-                internal: {layout: 'columns', columns: [{widgets: [{id: 'UnderAttack', scale: 1.71}]}]},
-                col: 1, colSpan: 2, row: 1, scale: 1
-            },
-        ],
+            ]
+        }],
     },
 
-    // ── Missions & Comms ───────────────────────────────────────────────────────
+    // ── Operations ─────────────────────────────────────────────────────────────
     {
-        id: 'comms',
-        label: 'Missions & Comms',
+        id: 'operations',
+        label: 'Operations',
         layout: 'grid',
         columns: '1fr 1fr',
         panels: [
@@ -308,11 +272,15 @@ export const DASHBOARDS: DashboardConfig[] = [
 
 export function getDashboard(id: string): DashboardConfig {
     if (id === 'flight-horizontal') {
-        return DASHBOARDS.find(d => d.id === 'flight-vertical') ?? DASHBOARDS[0]
+        return DASHBOARDS.find(d => d.id === 'flight') ?? DASHBOARDS[0]
     }
 
     if (id === 'systems-horizontal') {
-        return DASHBOARDS.find(d => d.id === 'flight') ?? DASHBOARDS[0]
+        return DASHBOARDS.find(d => d.id === 'ship-controls') ?? DASHBOARDS[0]
+    }
+
+    if (id === 'comms') {
+        return DASHBOARDS.find(d => d.id === 'operations') ?? DASHBOARDS[0]
     }
 
     return DASHBOARDS.find(d => d.id === id) ?? DASHBOARDS[0]
