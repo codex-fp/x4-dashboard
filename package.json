@@ -55,7 +55,7 @@
   "build": {
     "appId": "com.fpiechowski.x4dashboard",
     "productName": "X4 Dashboard Server",
-    "compression": "store",
+    "compression": "maximum",
     "directories": {
       "output": "release"
     },
