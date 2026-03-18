@@ -1,71 +1,67 @@
 # X4 Dashboard
 
-A playable real-time cockpit dashboard for X4: Foundations.
+> A browser-first cockpit dashboard and server launcher for X4: Foundations.
 
-It combines a React + Arwes frontend, a small Node.js bridge server, and an X4 Lua mod that pushes game state straight into browsers on the same machine or other devices on your LAN. The project is already usable as a second-screen control panel and live status display, even though it is still evolving.
+`x4-dashboard` combines:
 
-The bundled Lua mod is a modified version of the X4 External App mod by Mycu. `x4-dashboard` keeps the game-side data export idea, but replaces the original frontend with its own Node.js server and React dashboard.
+- a React + Arwes dashboard UI
+- a Node.js server that aggregates game state
+- a Lua bridge mod for X4
+- a Windows Electron Server Launcher for easy local hosting
 
-## What it does
+The main product direction is simple: run one server, then open the dashboard from browsers on the same machine or other devices on your LAN.
 
-- Shows live ship, navigation, combat, mission, research, and logbook data.
-- Streams updates from X4 over HTTP into a unified WebSocket game state.
-- Lets you trigger selected ship actions from the dashboard through configurable key bindings.
-- Includes a mock-data mode so you can preview the UI without running the game.
+## ✨ Highlights
 
-## Screens and features
+- Live ship, combat, mission, research, and comms telemetry
+- Browser-based multi-device cockpit layouts
+- Host-side key press integration with configurable bindings
+- Mock mode for previewing the full dashboard without starting X4
+- Windows Server Launcher that shows local and LAN URLs
 
-- Ship hull and shield status.
-- Navigation speed, boost energy, travel drive, and flight-assist indicators.
-- System controls for Flight Assist, SETA, Travel Drive, and Autopilot.
-- Target and combat telemetry.
-- Mission offers and active mission details.
-- Logbook, research, faction, inventory, and transaction widgets.
-- Connection indicators for dashboard and game feed state.
+## 🖼️ Screenshots
 
-## Important safety note
+### Flight dashboard
 
-This app can simulate local key presses on the machine where the server is running.
+![Flight dashboard](docs/screenshots/dashboard-flight.png)
 
-- Keep it on a trusted local machine or private LAN only.
-- Do not expose the server directly to the public internet.
-- Control endpoints are localhost-only by default. Set `ALLOW_REMOTE_CONTROLS=true` only if you understand the risk.
-- The game window usually needs to be focused, or running borderless windowed, for key presses to land reliably.
+### Operations dashboard
 
-## Requirements
+![Operations dashboard](docs/screenshots/dashboard-operations.png)
 
-- Node.js 18+
-- X4: Foundations
-- The `djfhe_http` X4 dependency required by `game-mods/x4_dashboard_bridge/content.xml`
-- Optional: `VerboseTransactionLog` if you want richer transaction-log data
+## 🚀 Quick Start
 
-Platform notes for key simulation:
-
-- Windows: AutoHotkey v2 is recommended for reliable in-game key presses; PowerShell `SendKeys` is used as a fallback when AutoHotkey is unavailable
-- Linux: `xdotool`
-- macOS: `osascript`
-
-## Quick start
-
-Install dependencies:
+### 1. Install dependencies
 
 ```bash
 npm run install:all
 ```
 
-Preview with mock data:
+### 2. Preview with mock data
 
 ```bash
-npm run mock
+npm run dev:mock
 ```
 
 Then open `http://localhost:3001`.
 
-## Running with the real game
+### 3. Test the Server Launcher in mock mode
 
-This repository keeps source files only. The production frontend in `server/public/` is generated locally and ignored by Git.
+```bash
+npm run desktop:mock
+```
 
-Build the client before starting the server, and rebuild after frontend changes:
+This starts:
+
+- the mock server
+- the Vite client
+- the Electron Server Launcher
+
+## 🎮 Running with the Real Game
+
+This repository is source-only. The production frontend in `server/public/` is generated locally and ignored by Git.
+
+Build the frontend:
 
 ```bash
 npm run build
@@ -77,90 +73,99 @@ Start the server:
 npm start
 ```
 
-Open `http://localhost:3001` in your browser.
+Open the dashboard from:
 
-## Server launcher
+- `http://localhost:3001` on the host machine
+- `http://<your-lan-ip>:3001` on other devices in the same trusted network
 
-The Windows Electron build is now a server launcher, not a separate dashboard client. It starts the local server and shows the local/LAN URLs you can open from browsers.
+## 🖥️ Server Launcher
 
-Run the launcher in development:
+The Electron app is a **Server Launcher**, not the main dashboard client.
+
+It is responsible for:
+
+- starting the local server
+- showing local and LAN URLs
+- editing host-side settings
+- editing host-side key bindings
+- opening the server log location
+
+Run it in development:
 
 ```bash
 npm run desktop:dev
 ```
 
-Run the launcher against the locally built production frontend:
+Run it against the locally built production app:
 
 ```bash
 npm run build
 npm run desktop:start
 ```
 
-Build Windows desktop artifacts:
+Build Windows artifacts:
 
 ```bash
 npm run desktop:dist
 ```
 
-Generated launcher artifacts are written to `release/`.
+Artifacts are written to `release/`.
 
-Note: `.blockmap` files are build metadata for differential desktop updates and are not published as user-facing release artifacts.
+## 🌐 Browser-First Client Model
 
-Windows note:
+The intended usage model is:
 
-- Install AutoHotkey v2 on the same machine as the dashboard server if you want dashboard buttons to work reliably in X4.
-- The server will auto-detect common AutoHotkey install paths.
-- If needed, set `AUTOHOTKEY_PATH` to the full `AutoHotkey64.exe` path.
+1. start the server on one machine
+2. point the Lua mod at that machine
+3. open the dashboard from browsers on tablets, laptops, side monitors, or other nearby devices
 
-## Development
+That makes `x4-dashboard` much better suited to multi-screen cockpit setups than a native-client-only architecture.
 
-Hot-reload frontend and backend together:
+## 🔐 Safety Notes
 
-```bash
-npm run dev
-```
+This app can simulate local key presses on the machine where the server is running.
 
-- Vite frontend: `http://localhost:3000`
-- Node server: `http://localhost:3001`
+- Use it only on a trusted local machine or private LAN
+- Do not expose the server directly to the public internet
+- Remote control is localhost-only by default unless enabled from the Server Launcher
+- The game window may need focus or borderless mode for reliable input
 
-Validation:
+## 📦 Release Artifacts
 
-```bash
-npm run check
-```
+Current release packaging is split into separate artifacts:
 
-There is no dedicated test suite yet; TypeScript checking is the main validation step for the client.
+- `x4-dashboard-server-<version>.zip` / `.tar.gz` - standalone server package
+- `x4-dashboard-lua-mod-<version>.zip` - standalone X4 Lua mod package
+- `x4-dashboard-server-launcher-<version>-portable.exe` - portable Windows launcher
+- `x4-dashboard-server-launcher-<version>-setup.exe` - Windows installer
 
-Release validation:
-
-```bash
-npm run release:check
-```
-
-Build distributable server and Lua mod bundles:
+Build release bundles locally:
 
 ```bash
 npm run release:bundle
 ```
 
-Artifacts are written to `dist/` and split into:
+Build release validation:
 
-- a standalone server package for browser-based clients
-- a standalone Lua mod package
+```bash
+npm run release:check
+```
 
-## Runtime settings
+## ⚙️ Host Settings
 
-The most important host-side runtime controls now live in the Electron `Server Launcher` instead of the browser client:
+The following host-side settings now live in the Server Launcher:
 
 - allow remote controls
 - AutoHotkey executable path
-- force-activate game window
+- force activate game window
 - game window title matching
 - key bindings used for host-side key press simulation
 
-These settings are persisted on the server side and are the preferred configuration path for the machine running the server.
+These values are persisted server-side for the machine running the host.
 
-## Environment variables
+### Environment variables
+
+Environment variables still exist, but they should mainly be treated as startup defaults or advanced overrides.
 
 | Variable | Default | Description |
 | --- | --- | --- |
@@ -171,98 +176,97 @@ These settings are persisted on the server side and are the preferred configurat
 | `X4_WINDOW_TITLE` | `X4` | Window title fragment used for focus matching |
 | `ALLOW_REMOTE_CONTROLS` | `false` | Allows remote access to `/api/keypress` and keybinding management |
 
-Precedence note:
+Precedence notes:
 
 - `PORT` and `MOCK` are still startup-time settings
-- control-related host settings should now be changed in the Server Launcher instead of editing env vars directly
-- env vars act as initial defaults until the runtime settings are saved from the app
+- host control settings should be changed in the Server Launcher
+- env vars act as defaults until launcher-managed runtime settings are saved
 
-## X4 mod setup
+## 🧩 X4 Mod Setup
 
-The Lua integration source lives in `game-mods/x4_dashboard_bridge/`.
+The Lua bridge source lives in `game-mods/x4_dashboard_bridge/`.
 
-This Lua mod is a modified version of X4 External App. The original X4 External App Node application is not required for `x4-dashboard` to work, because this project ships its own Node.js app that replaces the original frontend/backend flow.
-
-For releases, use the dedicated Lua mod zip and copy the included folder into your X4 extensions directory so the final path looks like this:
+For releases, use the dedicated Lua mod zip and copy the included folder into your X4 extensions directory:
 
 ```text
 X4 Foundations/extensions/x4_dashboard_bridge/
 ```
 
-The mod posts data to the dashboard server on every tick. Configuration is in `ui/config.lua` inside the packaged extension folder:
+The packaged extension uses its own X4 content id, so it does not conflict with the original Mycu mod.
+
+Config inside the packaged extension:
 
 ```lua
 host = '127.0.0.1'
 port = 3001
 ```
 
-If your dashboard server runs on another machine on your LAN, update `host` accordingly.
+If your dashboard server runs on another LAN machine, point `host` to that machine.
 
-The packaged extension uses a dedicated X4 content id so it does not conflict with the original Mycu mod.
+## 🛠️ Development
 
-## Credits
+Main commands:
 
-Special thanks to Mycu, the author of X4 External App, for the original mod that made this integration path possible.
+```bash
+npm run dev            # Vite + server
+npm run dev:mock       # Vite + mock server
+npm run desktop:dev    # Vite + server + launcher
+npm run desktop:mock   # Vite + mock server + launcher
+npm run build          # build client into server/public/
+npm run typecheck      # main validation step
+npm run release:check  # typecheck + frontend build
+npm run desktop:dist   # build Windows launcher artifacts
+npm run release:bundle # build standalone server + Lua bundles
+```
 
-## Key bindings
+Current validation status:
 
-Bindings are stored in `server/config/keybindings.json` and editable from the dashboard UI.
+- no dedicated automated test suite yet
+- no linter configured yet
+- `npm run typecheck` is the main code validation command
 
-On Windows, these bindings are sent through AutoHotkey when it is available, which is more reliable for games than plain `SendKeys`.
-
-Supported key format uses SendKeys-style notation:
-
-| Format | Example | Meaning |
-| --- | --- | --- |
-| Function keys | `{F1}` | Function key |
-| Regular keys | `a` | Plain key |
-| Ctrl | `^a` | Ctrl+A |
-| Shift | `+a` | Shift+A |
-| Alt | `%a` | Alt+A |
-| Special keys | `{ENTER}` | Enter |
-| Arrow keys | `{UP}` | Up arrow |
-
-## Architecture overview
-
-The app is a single Node.js server that serves a locally built React frontend from `server/public/`.
+## 🧠 Architecture Overview
 
 Data flow:
 
-1. The X4 Lua mod posts widget payloads to `POST /api/data`.
-2. `server/utils/normalizeData.js` strips X4 formatting codes.
-3. `server/dataAggregator.js` merges partial updates into one durable game state.
-4. The server broadcasts the state to browser clients over WebSocket.
-5. Dashboard control buttons call `POST /api/keypress`, which forwards key presses to the host OS.
+1. the X4 Lua mod posts widget payloads to `POST /api/data`
+2. `server/utils/normalizeData.js` strips X4 formatting codes
+3. `server/dataAggregator.js` merges partial updates into durable game state
+4. the server broadcasts game state over WebSocket
+5. browser dashboards render the live state and call `POST /api/keypress` for host-side actions
 
-## Project layout
+## 📁 Project Layout
 
 ```text
 x4-dashboard/
-|- client/                      React + TypeScript source
-|- game-mods/x4_dashboard_bridge/ source for the packaged Lua extension
-|- server/                      Express, WebSocket, keypress bridge
-|- server/public/               Local build output (generated, ignored by Git)
-|- README.md
-|- LICENSE
+|- client/                     React + TypeScript frontend
+|- electron/                   Windows Server Launcher
+|- game-mods/x4_dashboard_bridge/ Lua bridge source
+|- server/                     Express + WebSocket backend
+|- server/public/              Generated frontend build output
+|- docs/screenshots/           README screenshots
 ```
 
-## Public repo hygiene
+## 🤝 Project Docs
 
-- Contribution guide: `CONTRIBUTING.md`
-- Security policy: `SECURITY.md`
-- Release checklist: `RELEASE.md`
-- Roadmap: `ROADMAP.md`
-- Changelog: `CHANGELOG.md`
-- Build output is ignored and regenerated locally
-- Repository line endings are normalized with `.gitattributes`
+- `CONTRIBUTING.md` - contribution guide
+- `SECURITY.md` - security policy
+- `RELEASE.md` - release checklist
+- `ROADMAP.md` - current roadmap
+- `CHANGELOG.md` - release history
+- `AGENTS.md` - instructions for coding agents
 
-## Known limitations
+## ⚠️ Known Limitations
 
-- This is a playable release, not a finished one.
-- Some systems are intentionally simple and may still change shape.
-- The server is designed for trusted local use, not hardened remote hosting.
-- There is no formal automated test suite yet.
+- The project is playable, but still evolving
+- Remote hosting is not a supported security model
+- Some launcher and LAN workflows are still being refined for `v1.2.0`
+- There is still no automated test suite
 
-## License
+## 🙏 Credits
 
-MIT. See `LICENSE`.
+Special thanks to Mycu, author of X4 External App, for the original mod that proved out this integration path.
+
+## 📄 License
+
+MIT - see `LICENSE`.
