@@ -25,6 +25,12 @@
         <button id="refresh-status" class="secondary-button">Refresh</button>
       </section>
 
+      <section id="startup-alert" class="panel alert-panel" hidden>
+        <p class="label">Startup Problem</p>
+        <strong id="startup-alert-title">Server needs attention</strong>
+        <p id="startup-alert-copy" class="muted">-</p>
+      </section>
+
       <section class="panel status-grid-panel">
         <div class="config-header">
           <div>
@@ -35,7 +41,7 @@
 
         <div class="status-grid">
           <article class="status-card">
-            <span class="status-card-label">Game Feed</span>
+            <span class="status-card-label">X4 Bridge</span>
             <strong id="game-feed-status">Checking...</strong>
             <small id="game-feed-copy">Waiting for X4 or mock data.</small>
           </article>
@@ -49,6 +55,42 @@
             <strong id="remote-controls-status">Local only</strong>
             <small id="remote-controls-copy">Dashboard viewing works over LAN either way.</small>
           </article>
+        </div>
+      </section>
+
+      <section class="panel status-grid-panel">
+        <div class="config-header">
+          <div>
+            <p class="label">First-Run Diagnostics</p>
+            <p class="muted">Use these checks to confirm the host machine is ready for real gameplay use.</p>
+          </div>
+        </div>
+
+        <div class="status-grid diagnostics-grid">
+          <article class="status-card">
+            <span class="status-card-label">AutoHotkey</span>
+            <strong id="ahk-status">Checking...</strong>
+            <small id="ahk-copy">-</small>
+          </article>
+          <article class="status-card">
+            <span class="status-card-label">LAN Detection</span>
+            <strong id="lan-detected-status">Checking...</strong>
+            <small id="lan-detected-copy">-</small>
+          </article>
+          <article class="status-card">
+            <span class="status-card-label">X4 Install Path</span>
+            <strong id="game-path-status">Checking...</strong>
+            <small id="game-path-copy">-</small>
+          </article>
+        </div>
+
+        <div class="troubleshooting-note">
+          <p class="label">Quick checklist</p>
+          <ul>
+            <li>If no X4 Bridge feed appears, check that the `x4_dashboard_bridge` extension is installed and enabled in X4.</li>
+            <li>If button presses do not work reliably, install AutoHotkey v2 or set a custom path below.</li>
+            <li>If another app already uses port 3001, the launcher can attach to the existing local server instead of starting a duplicate.</li>
+          </ul>
         </div>
       </section>
 

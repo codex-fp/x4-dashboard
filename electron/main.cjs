@@ -3,6 +3,7 @@ const path = require('path')
 const fs = require('fs')
 const os = require('os')
 const { spawn } = require('child_process')
+const { execFileSync } = require('child_process')
 
 const SERVER_PORT = process.env.PORT || '3001'
 const LOCAL_SERVER_URL = `http://localhost:${SERVER_PORT}`
@@ -14,6 +15,7 @@ let mainWindow = null
 let serverProcess = null
 let isQuitting = false
 let usingExistingServer = false
+let startupError = ''
 
 function getLauncherIconPath() {
   if (IS_DEV) {
@@ -21,6 +23,14 @@ function getLauncherIconPath() {
   }
 
   return path.join(process.resourcesPath, 'app.asar.unpacked', 'electron', 'assets', 'icon.ico')
+}
+
+function getPublicIndexPath() {
+  if (IS_DEV) {
+    return path.join(__dirname, '..', 'server', 'public', 'index.html')
+  }
+
+  return path.join(process.resourcesPath, 'server', 'public', 'index.html')
 }
 
 function getServerEntry() {
@@ -41,6 +51,89 @@ function getServerCwd() {
 
 function getLogPath() {
   return path.join(app.getPath('userData'), LOG_FILE_NAME)
+}
+
+function getAutoHotkeyCandidates(customPath) {
+  return [
+    customPath,
+    'C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey64.exe',
+    'C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey32.exe',
+    'C:\\Program Files\\AutoHotkey\\AutoHotkey.exe',
+  ].filter(Boolean)
+}
+
+function getAutoHotkeyStatus(runtimeConfig) {
+  const candidates = getAutoHotkeyCandidates(runtimeConfig.autoHotkeyPath)
+  const resolvedPath = candidates.find((candidate) => fs.existsSync(candidate)) || ''
+
+  return {
+    available: Boolean(resolvedPath),
+    resolvedPath,
+    usingCustomPath: Boolean(runtimeConfig.autoHotkeyPath),
+  }
+}
+
+function normalizeWindowsPath(value) {
+  return value ? value.replace(/\//g, '\\') : ''
+}
+
+function getSteamInstallPath() {
+  if (process.platform !== 'win32') {
+    return ''
+  }
+
+  try {
+    const output = execFileSync('powershell.exe', [
+      '-NoProfile',
+      '-Command',
+      "(Get-ItemProperty 'HKCU:\\Software\\Valve\\Steam' -ErrorAction SilentlyContinue).SteamPath",
+    ], { encoding: 'utf8' }).trim()
+
+    return normalizeWindowsPath(output)
+  } catch {
+    return ''
+  }
+}
+
+function getSteamLibraryPaths() {
+  const steamPath = getSteamInstallPath()
+  const libraries = new Set()
+
+  if (steamPath) {
+    libraries.add(steamPath)
+
+    const libraryFile = path.join(steamPath, 'steamapps', 'libraryfolders.vdf')
+    if (fs.existsSync(libraryFile)) {
+      const content = fs.readFileSync(libraryFile, 'utf8')
+      const matches = content.matchAll(/"path"\s+"([^"]+)"/g)
+      for (const match of matches) {
+        libraries.add(normalizeWindowsPath(match[1].replace(/\\\\/g, '\\')))
+      }
+    }
+  }
+
+  return Array.from(libraries)
+}
+
+function getGameInstallStatus() {
+  const candidates = []
+
+  for (const library of getSteamLibraryPaths()) {
+    candidates.push(path.join(library, 'steamapps', 'common', 'X4 Foundations'))
+  }
+
+  candidates.push(
+    'C:\\Program Files (x86)\\Steam\\steamapps\\common\\X4 Foundations',
+    'C:\\Program Files\\Steam\\steamapps\\common\\X4 Foundations',
+  )
+
+  const uniqueCandidates = Array.from(new Set(candidates.map(normalizeWindowsPath)))
+  const resolvedPath = uniqueCandidates.find((candidate) => fs.existsSync(path.join(candidate, 'X4.exe')) || fs.existsSync(path.join(candidate, 'extensions'))) || ''
+
+  return {
+    available: Boolean(resolvedPath),
+    resolvedPath,
+  }
 }
 
 function getRuntimeConfigStorePath() {
@@ -110,17 +203,25 @@ async function getLauncherState(serverRunning) {
   const lanAddress = getLanAddress()
   const runtimeConfigStore = getRuntimeConfigStore()
   const keybindingsStore = getKeybindingsStore()
+  const runtimeConfig = runtimeConfigStore.readRuntimeConfig()
   const health = await getServerHealth()
 
   return {
     serverRunning,
     usingExistingServer,
+    startupError,
     localUrl: IS_DEV ? DEV_RENDERER_URL : LOCAL_SERVER_URL,
     lanUrl: lanAddress ? `http://${lanAddress}:${SERVER_PORT}` : null,
     logPath: getLogPath(),
-    runtimeConfig: runtimeConfigStore.readRuntimeConfig(),
+    runtimeConfig,
     keybindings: keybindingsStore.readKeybindings(),
     health,
+    diagnostics: {
+      buildStatus: IS_DEV ? 'vite-dev' : (fs.existsSync(getPublicIndexPath()) ? 'bundled' : 'missing'),
+      autoHotkey: getAutoHotkeyStatus(runtimeConfig),
+      lanDetected: Boolean(lanAddress),
+      gameInstall: getGameInstallStatus(),
+    },
     startup: {
       port: Number(SERVER_PORT),
       mockMode: process.argv.includes('--mock') || process.env.MOCK === 'true',
@@ -173,10 +274,12 @@ function startServerProcess() {
   return isServerReachable().then((reachable) => {
     if (reachable) {
       usingExistingServer = true
+      startupError = ''
       return
     }
 
     usingExistingServer = false
+    startupError = ''
 
     const serverEntry = getServerEntry()
     if (!fs.existsSync(serverEntry)) {
@@ -212,16 +315,15 @@ function startServerProcess() {
 
     serverProcess.on('exit', async (code) => {
       if (!isQuitting && code !== 0) {
-        dialog.showErrorBox(
-          'X4 Dashboard Server',
-          `Bundled server stopped unexpectedly (exit code ${code ?? 'unknown'}).\n\nCheck: ${getLogPath()}`,
-        )
-        app.quit()
-        return
+        startupError = `Bundled server stopped unexpectedly (exit code ${code ?? 'unknown'}). Check: ${getLogPath()}`
       }
 
       if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send('launcher:state', await getLauncherState(await isServerReachable()))
+      }
+
+      if (!isQuitting && code !== 0) {
+        dialog.showErrorBox('X4 Dashboard Server', startupError)
       }
     })
 
@@ -315,11 +417,23 @@ app.whenReady().then(async () => {
   registerIpc()
 
   try {
-    await startServerProcess()
     createWindow()
+    await startServerProcess()
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.once('did-finish-load', async () => {
+        mainWindow.webContents.send('launcher:state', await getLauncherState(await isServerReachable()))
+      })
+    }
   } catch (error) {
-    dialog.showErrorBox('X4 Dashboard Server', error instanceof Error ? error.message : 'Failed to start the launcher.')
-    app.quit()
+    startupError = error instanceof Error ? error.message : 'Failed to start the launcher.'
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.once('did-finish-load', async () => {
+        mainWindow.webContents.send('launcher:state', await getLauncherState(false))
+      })
+    } else {
+      dialog.showErrorBox('X4 Dashboard Server', startupError)
+      app.quit()
+    }
   }
 
   app.on('activate', () => {
