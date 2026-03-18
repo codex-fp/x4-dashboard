@@ -125,6 +125,13 @@ The intended usage model is:
 
 That makes `x4-dashboard` much better suited to multi-screen cockpit setups than a native-client-only architecture.
 
+### LAN-first workflow
+
+- Start the host machine with `npm start`, `npm run desktop:start`, or the packaged Server Launcher
+- Use the **LAN URL** shown by the launcher as the default address for other devices
+- Keep the **local URL** for the host machine itself
+- Leave remote controls disabled unless you explicitly want LAN clients to trigger host-side inputs
+
 ## 🔐 Safety Notes
 
 This app can simulate local key presses on the machine where the server is running.

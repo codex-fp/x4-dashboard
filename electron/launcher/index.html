@@ -12,7 +12,7 @@
         <p class="eyebrow">X4 DASHBOARD</p>
         <h1>Server Launcher</h1>
         <p class="lede">
-          Start the dashboard server, then open the cockpit UI from browsers on this machine or other devices on your LAN.
+          Start one host, then open the cockpit UI from browsers on this machine or any other trusted device on your LAN.
         </p>
       </section>
 
@@ -24,21 +24,49 @@
         <button id="refresh-status" class="secondary-button">Refresh</button>
       </section>
 
+      <section class="panel status-grid-panel">
+        <div class="config-header">
+          <div>
+            <p class="label">LAN Runtime Status</p>
+            <p class="muted">Treat LAN access as the primary way to use tablets, side monitors, and extra cockpit screens.</p>
+          </div>
+        </div>
+
+        <div class="status-grid">
+          <article class="status-card">
+            <span class="status-card-label">Game Feed</span>
+            <strong id="game-feed-status">Checking...</strong>
+            <small id="game-feed-copy">Waiting for X4 or mock data.</small>
+          </article>
+          <article class="status-card">
+            <span class="status-card-label">Browser Clients</span>
+            <strong id="client-count">0 connected</strong>
+            <small>Open more browsers on your LAN to build a multi-screen cockpit.</small>
+          </article>
+          <article class="status-card">
+            <span class="status-card-label">Remote Controls</span>
+            <strong id="remote-controls-status">Local only</strong>
+            <small id="remote-controls-copy">Dashboard viewing works over LAN either way.</small>
+          </article>
+        </div>
+      </section>
+
       <section class="grid">
         <article class="panel url-panel">
           <p class="label">Local URL</p>
           <code id="local-url">-</code>
           <div class="button-row">
-            <button id="open-local">Open Dashboard</button>
+            <button id="open-local">Open Local Dashboard</button>
             <button id="copy-local" class="secondary-button">Copy</button>
           </div>
         </article>
 
-        <article class="panel url-panel">
+        <article class="panel url-panel recommended-panel">
           <p class="label">LAN URL</p>
+          <p class="recommended-badge">Recommended for tablets and extra screens</p>
           <code id="lan-url">Detecting...</code>
           <div class="button-row">
-            <button id="open-lan">Open in Browser</button>
+            <button id="open-lan">Open LAN Dashboard</button>
             <button id="copy-lan" class="secondary-button">Copy</button>
           </div>
         </article>
@@ -47,9 +75,10 @@
       <section class="panel notes-panel">
         <p class="label">How to use this</p>
         <ul>
-          <li>Use the local URL on the same PC.</li>
+          <li>Use the local URL on the same PC running the server.</li>
           <li>Use the LAN URL on tablets, laptops, or extra screens on the same trusted network.</li>
-          <li>The X4 Lua mod should point to the host machine running this launcher.</li>
+          <li>The Lua mod should point to the host machine running this launcher.</li>
+          <li>Viewing the dashboard over LAN works even when remote controls stay disabled.</li>
         </ul>
       </section>
 

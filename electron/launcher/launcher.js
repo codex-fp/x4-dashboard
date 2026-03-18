@@ -2,6 +2,10 @@ function getInput(id) {
   return document.getElementById(id)
 }
 
+function setText(id, value) {
+  document.getElementById(id).textContent = value
+}
+
 function renderKeybindings(keybindings) {
   const listNode = document.getElementById('keybindings-list')
   listNode.innerHTML = ''
@@ -57,10 +61,10 @@ async function loadState() {
   const localUrl = state.localUrl || '-'
   const lanUrl = state.lanUrl || 'Unavailable on this machine'
 
-  document.getElementById('local-url').textContent = localUrl
-  document.getElementById('lan-url').textContent = lanUrl
-  document.getElementById('log-path').textContent = state.logPath || '-'
-  document.getElementById('startup-summary').textContent = `Port ${state.startup.port}${state.startup.mockMode ? ' · Mock mode active' : ''}`
+  setText('local-url', localUrl)
+  setText('lan-url', lanUrl)
+  setText('log-path', state.logPath || '-')
+  setText('startup-summary', `Port ${state.startup.port}${state.startup.mockMode ? ' · Mock mode active' : ''}`)
 
   const statusNode = document.getElementById('server-status')
   statusNode.textContent = state.serverRunning ? 'Online' : 'Offline'
@@ -71,6 +75,17 @@ async function loadState() {
   document.getElementById('open-lan').disabled = !state.lanUrl
   document.getElementById('copy-lan').disabled = !state.lanUrl
 
+  const health = state.health || null
+  setText('game-feed-status', health?.externalConnected ? 'Receiving live data' : (state.startup.mockMode ? 'Mock feed active' : 'Waiting for X4'))
+  setText('game-feed-copy', health?.externalConnected
+    ? 'The server is receiving game or mock payloads.'
+    : 'Start X4 with the bridge mod, or use mock mode for previewing.')
+  setText('client-count', `${health?.wsClientCount || 0} connected`)
+  setText('remote-controls-status', health?.remoteControlsEnabled ? 'LAN enabled' : 'Local only')
+  setText('remote-controls-copy', health?.remoteControlsEnabled
+    ? 'Trusted LAN clients can trigger host-side control actions.'
+    : 'Dashboard viewing works over LAN, but control endpoints stay on the host machine.')
+
   getInput('allow-remote-controls').checked = Boolean(state.runtimeConfig.allowRemoteControls)
   getInput('force-activate-game-window').checked = Boolean(state.runtimeConfig.forceActivateGameWindow)
   getInput('game-window-title').value = state.runtimeConfig.gameWindowTitle || ''
@@ -78,8 +93,8 @@ async function loadState() {
 
   renderKeybindings(state.keybindings?.bindings)
 
-  document.getElementById('settings-feedback').textContent = 'Host settings are applied locally on this machine.'
-  document.getElementById('keybindings-feedback').textContent = 'Key bindings are stored on the host machine.'
+  setText('settings-feedback', 'Host settings are applied locally on this machine.')
+  setText('keybindings-feedback', 'Key bindings are stored on the host machine.')
 }
 
 function bindAction(id, handler) {

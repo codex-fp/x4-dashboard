@@ -82,10 +82,26 @@ function getLanAddress() {
     .find((iface) => iface && iface.family === 'IPv4' && !iface.internal)?.address || null
 }
 
-function getLauncherState(serverRunning) {
+async function getServerHealth() {
+  const healthUrl = IS_DEV ? `http://localhost:${SERVER_PORT}/api/health` : `${LOCAL_SERVER_URL}/api/health`
+
+  try {
+    const response = await fetch(healthUrl)
+    if (!response.ok) {
+      return null
+    }
+
+    return await response.json()
+  } catch {
+    return null
+  }
+}
+
+async function getLauncherState(serverRunning) {
   const lanAddress = getLanAddress()
   const runtimeConfigStore = getRuntimeConfigStore()
   const keybindingsStore = getKeybindingsStore()
+  const health = await getServerHealth()
 
   return {
     serverRunning,
@@ -94,6 +110,7 @@ function getLauncherState(serverRunning) {
     logPath: getLogPath(),
     runtimeConfig: runtimeConfigStore.readRuntimeConfig(),
     keybindings: keybindingsStore.readKeybindings(),
+    health,
     startup: {
       port: Number(SERVER_PORT),
       mockMode: process.argv.includes('--mock') || process.env.MOCK === 'true',
@@ -186,7 +203,7 @@ function startServerProcess() {
     }
 
     if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('launcher:state', getLauncherState(await isServerReachable()))
+      mainWindow.webContents.send('launcher:state', await getLauncherState(await isServerReachable()))
     }
   })
 

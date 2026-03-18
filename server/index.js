@@ -85,6 +85,18 @@ function broadcastState() {
   broadcast(serializeState());
 }
 
+function getWsClientCount() {
+  let count = 0;
+
+  for (const client of wss.clients) {
+    if (client.readyState === WebSocket.OPEN) {
+      count += 1;
+    }
+  }
+
+  return count;
+}
+
 wss.on('connection', (ws, req) => {
   console.log(`[WS] Client connected from ${req.socket.remoteAddress}`);
   ws.send(JSON.stringify(serializeState()));
@@ -183,7 +195,14 @@ app.get('/api/state', (req, res) => {
 });
 
 app.get('/api/health', (req, res) => {
-  res.json({ ok: true, externalConnected: aggregator.externalConnected });
+  res.json({
+    ok: true,
+    externalConnected: aggregator.externalConnected,
+    wsClientCount: getWsClientCount(),
+    remoteControlsEnabled: readRuntimeConfig().allowRemoteControls,
+    port: Number(PORT),
+    mockMode: MOCK_MODE,
+  });
 });
 
 // === Start server ===
