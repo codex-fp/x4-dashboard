@@ -60,6 +60,7 @@
     "directories": {
       "output": "release"
     },
+    "icon": "electron/assets/icon.ico",
     "files": [
       "electron/**/*",
       "package.json",
@@ -97,6 +98,7 @@
     ],
     "win": {
       "signAndEditExecutable": false,
+      "icon": "electron/assets/icon.ico",
       "target": [
         "portable",
         "nsis"
@@ -110,7 +112,11 @@
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "differentialPackage": false
+      "differentialPackage": false,
+      "installerHeader": "electron/assets/installer-header.bmp",
+      "installerSidebar": "electron/assets/installer-sidebar.bmp",
+      "uninstallerSidebar": "electron/assets/installer-sidebar.bmp",
+      "installerHeaderIcon": "electron/assets/icon.ico"
     }
   }
 }

@@ -69,6 +69,7 @@ async function loadState() {
   const statusNode = document.getElementById('server-status')
   statusNode.textContent = state.serverRunning ? 'Online' : 'Offline'
   statusNode.className = `status-pill ${state.serverRunning ? 'online' : 'offline'}`
+  setText('server-mode', state.usingExistingServer ? 'Connected to an already running local server on this port.' : 'Launcher is hosting its own local server process.')
 
   document.getElementById('open-local').disabled = !state.localUrl
   document.getElementById('copy-local').disabled = !state.localUrl

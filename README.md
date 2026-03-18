@@ -115,6 +115,8 @@ npm run desktop:dist
 
 Artifacts are written to `release/`.
 
+Branding assets for the launcher and installer live in `electron/assets/`.
+
 ## 🌐 Browser-First Client Model
 
 The intended usage model is:

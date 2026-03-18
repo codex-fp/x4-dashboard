@@ -13,6 +13,15 @@ const LOG_FILE_NAME = 'server.log'
 let mainWindow = null
 let serverProcess = null
 let isQuitting = false
+let usingExistingServer = false
+
+function getLauncherIconPath() {
+  if (IS_DEV) {
+    return path.join(__dirname, 'assets', 'icon.ico')
+  }
+
+  return path.join(process.resourcesPath, 'app.asar.unpacked', 'electron', 'assets', 'icon.ico')
+}
 
 function getServerEntry() {
   if (IS_DEV) {
@@ -105,6 +114,7 @@ async function getLauncherState(serverRunning) {
 
   return {
     serverRunning,
+    usingExistingServer,
     localUrl: IS_DEV ? DEV_RENDERER_URL : LOCAL_SERVER_URL,
     lanUrl: lanAddress ? `http://${lanAddress}:${SERVER_PORT}` : null,
     logPath: getLogPath(),
@@ -160,54 +170,63 @@ function startServerProcess() {
     return Promise.resolve()
   }
 
-  const serverEntry = getServerEntry()
-  if (!fs.existsSync(serverEntry)) {
-    throw new Error(`Cannot find packaged server entry: ${serverEntry}`)
-  }
-
-  try {
-    fs.writeFileSync(getLogPath(), '')
-  } catch {}
-
-  serverProcess = spawn(process.execPath, [serverEntry], {
-    cwd: getServerCwd(),
-    env: {
-      ...process.env,
-      ELECTRON_RUN_AS_NODE: '1',
-      PORT: SERVER_PORT,
-    },
-    stdio: 'pipe',
-    windowsHide: true,
-  })
-
-  serverProcess.stdout.on('data', (chunk) => {
-    const text = chunk.toString()
-    appendServerLog(text)
-    process.stdout.write(`[server] ${text}`)
-  })
-
-  serverProcess.stderr.on('data', (chunk) => {
-    const text = chunk.toString()
-    appendServerLog(text)
-    process.stderr.write(`[server] ${text}`)
-  })
-
-  serverProcess.on('exit', async (code) => {
-    if (!isQuitting && code !== 0) {
-      dialog.showErrorBox(
-        'X4 Dashboard Server',
-        `Bundled server stopped unexpectedly (exit code ${code ?? 'unknown'}).\n\nCheck: ${getLogPath()}`,
-      )
-      app.quit()
+  return isServerReachable().then((reachable) => {
+    if (reachable) {
+      usingExistingServer = true
       return
     }
 
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('launcher:state', await getLauncherState(await isServerReachable()))
-    }
-  })
+    usingExistingServer = false
 
-  return waitForServerReady()
+    const serverEntry = getServerEntry()
+    if (!fs.existsSync(serverEntry)) {
+      throw new Error(`Cannot find packaged server entry: ${serverEntry}`)
+    }
+
+    try {
+      fs.writeFileSync(getLogPath(), '')
+    } catch {}
+
+    serverProcess = spawn(process.execPath, [serverEntry], {
+      cwd: getServerCwd(),
+      env: {
+        ...process.env,
+        ELECTRON_RUN_AS_NODE: '1',
+        PORT: SERVER_PORT,
+      },
+      stdio: 'pipe',
+      windowsHide: true,
+    })
+
+    serverProcess.stdout.on('data', (chunk) => {
+      const text = chunk.toString()
+      appendServerLog(text)
+      process.stdout.write(`[server] ${text}`)
+    })
+
+    serverProcess.stderr.on('data', (chunk) => {
+      const text = chunk.toString()
+      appendServerLog(text)
+      process.stderr.write(`[server] ${text}`)
+    })
+
+    serverProcess.on('exit', async (code) => {
+      if (!isQuitting && code !== 0) {
+        dialog.showErrorBox(
+          'X4 Dashboard Server',
+          `Bundled server stopped unexpectedly (exit code ${code ?? 'unknown'}).\n\nCheck: ${getLogPath()}`,
+        )
+        app.quit()
+        return
+      }
+
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('launcher:state', await getLauncherState(await isServerReachable()))
+      }
+    })
+
+    return waitForServerReady()
+  })
 }
 
 function stopServerProcess() {
@@ -272,6 +291,7 @@ function createWindow() {
     autoHideMenuBar: true,
     backgroundColor: '#071218',
     title: 'X4 Dashboard Server',
+    icon: getLauncherIconPath(),
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
