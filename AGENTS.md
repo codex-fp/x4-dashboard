@@ -20,6 +20,7 @@ Run from the repository root.
 npm run install:all    # install client and server dependencies
 npm run dev            # Vite + server in dev mode
 npm run desktop:dev    # Vite + server + Electron
+npm run desktop:mock   # Vite + mock server + Electron launcher
 npm run dev:mock       # Vite + server mock mode
 npm run mock           # mock server only at http://localhost:3001
 npm run build          # build client into server/public/
@@ -63,7 +64,9 @@ npm --prefix client run typecheck
 
 - The Node server serves the built React app from `server/public/`.
 - In dev mode, Vite runs on port `3000` and proxies `/api` to port `3001`.
-- The Electron wrapper starts the bundled server and loads the local app URL.
+- The Electron app is a Server Launcher first, not the main dashboard client.
+- The intended client model is browser-first: one host server, many browser clients on localhost or LAN.
+- The Electron launcher starts the bundled server, shows local/LAN URLs, and manages host-only settings.
 
 Data flow:
 1. The Lua mod posts widget payloads to `POST /api/data`.
@@ -117,6 +120,7 @@ Frontend layout model:
 - Widget registration lives in `client/src/components/dashboard/widgetRegistry.tsx`.
 - Layout helpers live in `client/src/components/dashboard/DashboardLayouts.tsx`.
 - Widget components render content only; panel chrome belongs in `ArwesPanel`.
+- Current curated shipped dashboards are `Flight`, `Ship Controls`, and `Operations`.
 
 ## Arwes and Styling
 
@@ -144,8 +148,11 @@ Error-handling patterns:
 ## Key Bindings and Runtime Config
 
 - Key bindings are stored in `server/config/keybindings.json`.
+- Runtime host settings are stored in `server/config/runtime.json` when saved from the launcher.
 - When adding a new system flag or action, update both client and server mappings.
 - Current env vars include `PORT`, `MOCK`, `AUTOHOTKEY_PATH`, `X4_FORCE_ACTIVATE`, `X4_WINDOW_TITLE`, and `ALLOW_REMOTE_CONTROLS`.
+- Host-only settings and key bindings belong in the Server Launcher, not the browser dashboard.
+- Browser UI should focus on dashboard usage and client-side preferences, not host machine control config.
 - Prefer preserving current behavior unless the user asks for config model changes.
 
 ## Release and Distribution
@@ -163,6 +170,15 @@ Error-handling patterns:
 - Prefer updating existing issues before creating new ones.
 - New planning issues should use `Goal`, `Scope`, and `Why`.
 - Do not create releases, tags, or close milestones unless the user explicitly asks.
+
+## Git Workflow
+
+- You may create local commits proactively while working.
+- Do not push commits to the remote unless the user explicitly asks.
+- When the user asks for a push, first inspect recent local history and identify commits that should be squashed.
+- Prefer pushing a cleaner, squashed history for related work instead of many tiny incremental commits.
+- If the user asks to push immediately, use judgment, but still review local history before pushing.
+- Before creating a release or tag, make sure the related commits are already in a good shape for public history.
 
 ## Do Not
 
