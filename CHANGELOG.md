@@ -6,6 +6,24 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-03-19
+
+### Added
+- Server Launcher diagnostics for LAN availability, X4 bridge detection, AutoHotkey detection, and host status
+- Launcher-managed host settings for remote controls, game window activation, window title matching, and AutoHotkey path
+- Launcher-managed keybinding editing and test actions for host-side controls
+- Custom launcher branding assets for the Windows portable and installer builds
+
+### Changed
+- Promoted LAN usage to the primary multi-device workflow with clearer local/LAN URLs and updated safety guidance
+- Moved host configuration out of the browser dashboard and into the Electron Server Launcher to match the host/client architecture
+- Improved first-run launcher UX with clearer startup feedback, diagnostics, and troubleshooting guidance
+- Curated the shipped dashboard presets and refreshed public-facing documentation and screenshots
+
+### Fixed
+- Restored scrolling in the Mission Offers and Comms widgets
+- Improved operations dashboard scrollbar visibility
+
 ## [1.1.2] - 2026-03-17
 
 ### Changed
