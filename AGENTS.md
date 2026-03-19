@@ -167,10 +167,13 @@ Error-handling patterns:
 
 ## Git Workflow
 
-- You may create local commits proactively while working.
+- Create local commits proactively while working; do not wait for the user to ask for a commit once a meaningful chunk of work is complete.
+- Do not ask whether to commit the current work unless the user explicitly wants to control commit boundaries or commit messages.
 - Do not push commits to the remote unless the user explicitly asks.
+- Treat local commits as the default way to checkpoint active work, even if multiple local commits will later be squashed before push.
 - When the user asks for a push, first inspect recent local history and identify commits that should be squashed.
 - Prefer pushing a cleaner, squashed history for related work instead of many tiny incremental commits.
+- Before pushing, consolidate related local commits into a clean public history whenever practical.
 - If the user asks to push immediately, use judgment, but still review local history before pushing.
 - Before creating a release or tag, make sure the related commits are already in a good shape for public history.
 
