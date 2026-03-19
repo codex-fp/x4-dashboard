@@ -28,6 +28,13 @@ This roadmap is a lightweight public planning document for a shorter, more frequ
 - Improve release presentation with better screenshots and supporting docs where useful
 - Keep CI and release packaging polished as the project becomes easier to distribute
 
+### v1.6.0 - Native launcher migration
+- Replace the Electron-based launcher with a Tauri desktop shell to reduce startup time, bundle size, and memory usage
+- Move launcher-side host logic into Rust as the target architecture for packaging, reliability, and Windows integration
+- Keep the browser-first dashboard model intact while separating host-only desktop responsibilities more clearly
+- Rework desktop packaging and distribution so the launcher stays easy to install without bundling a full Chromium runtime
+- Preserve feature parity for settings, diagnostics, local server lifecycle, and host-side control integration before removing Electron
+
 ## Already landed in the current release train
 
 - Custom desktop app icons and installer branding
