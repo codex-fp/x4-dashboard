@@ -168,6 +168,7 @@ Error-handling patterns:
 - Keep roadmap, milestones, and open issues aligned.
 - Use milestones for release-sized groupings such as `v1.2.0` and `v2.0.0`.
 - Prefer updating existing issues before creating new ones.
+- When creating a new issue from user discussion or roadmap work, attach it to the most appropriate existing milestone if one already fits.
 - New planning issues should use `Goal`, `Scope`, and `Why`.
 - Do not create releases, tags, or close milestones unless the user explicitly asks.
 
