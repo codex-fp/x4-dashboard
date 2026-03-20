@@ -2,13 +2,7 @@
 
 This roadmap is a lightweight public planning document for a shorter, more frequent release cadence.
 
-## Release plan
-
-### v1.2.0 - Network and settings foundation
-- Make LAN access a first-class runtime mode so the app is reachable from other devices without manual setup
-- Add a dedicated settings and diagnostics surface for the current host/client model
-- Move important runtime configuration into the app UI instead of relying only on environment variables
-- Keep this release focused on the minimum foundation needed to make future setup and control work smoother
+## Current release plan
 
 ### v1.3.0 - Controls and onboarding
 - Add in-app keybinding capture by listening for keyboard input
@@ -35,7 +29,15 @@ This roadmap is a lightweight public planning document for a shorter, more frequ
 - Rework desktop packaging and distribution so the launcher stays easy to install without bundling a full Chromium runtime
 - Preserve feature parity for settings, diagnostics, local server lifecycle, and host-side control integration before removing Electron
 
-## Already landed in the current release train
+## Released
+
+### v1.2.0 - Network and settings foundation (released 2026-03-19)
+- Made LAN access a first-class runtime mode so the app is reachable from other devices without manual setup
+- Added a dedicated launcher settings and diagnostics surface for the current host/client model
+- Moved important host runtime configuration out of ad-hoc environment-variable-only setup and into the launcher UI
+- Established the host/network foundation for smoother setup and future control improvements
+
+## Already landed before v1.3.0
 
 - Custom desktop app icons and installer branding
 - Improved desktop first-run experience
