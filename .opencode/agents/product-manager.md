@@ -20,9 +20,7 @@ permission:
   bash:
     "*": ask
     "git status*": allow
-    "git diff*": allow
-    "git log*": allow
-    "git branch*": allow
+    "git diff*": allow 
     "gh issue*": allow
     "gh pr*": allow
     "gh api*": allow
