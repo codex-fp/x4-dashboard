@@ -11,6 +11,11 @@
 
 The main product direction is simple: run one server, then open the dashboard from browsers on the same machine or other devices on your LAN.
 
+## 🧭 New here?
+
+- Want the easiest packaged setup? Start with the [Player Setup Guide](docs/player-guide.md).
+- Want to run from source or contribute? Continue with the setup steps in this README.
+
 ## ✨ Highlights
 
 - Live ship, combat, mission, research, and comms telemetry
@@ -33,7 +38,7 @@ The main product direction is simple: run one server, then open the dashboard fr
 
 ![Operations dashboard](docs/screenshots/dashboard-operations.png)
 
-## 🚀 Quick Start
+## 🚀 Developer Quick Start
 
 ### 1. Install dependencies
 
@@ -62,6 +67,8 @@ This starts:
 - the Electron Server Launcher
 
 ## 🎮 Running with the Real Game
+
+If you want the packaged player setup instead of a source checkout, use the [Player Setup Guide](docs/player-guide.md).
 
 This repository is source-only. The production frontend in `server/public/` is generated locally and ignored by Git.
 
@@ -262,6 +269,7 @@ x4-dashboard/
 
 ## 🤝 Project Docs
 
+- `docs/player-guide.md` - non-technical setup and first-use guide
 - `CONTRIBUTING.md` - contribution guide
 - `SECURITY.md` - security policy
 - `RELEASE.md` - release checklist
