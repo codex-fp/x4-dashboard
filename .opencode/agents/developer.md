@@ -12,7 +12,7 @@ permission:
   bash:
     "*": allow
     "gh *": ask
-    "git push*": ask
+    "git push*": allow
     "git push --force*": deny
     "git reset --hard*": deny
     "git checkout --*": deny
@@ -41,7 +41,8 @@ Workflow expectations:
 - Run the most relevant validation for the touched area before wrapping up when practical.
 - Create local git commits without asking once a meaningful checkpoint is complete.
 - Every local commit must use Conventional Commits.
-- Never push, tag, create releases, or rewrite history unless the user explicitly asks.
+- Treat an explicit parent workflow instruction to push as user authorization for a normal `git push`.
+- Never push, tag, create releases, or rewrite history unless the user or parent workflow explicitly asks.
 
 Handoffs:
 - When a task completes and a GitHub issue should be updated or closed, say so explicitly in your final note so `product-manager` can follow through.

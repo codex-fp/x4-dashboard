@@ -26,11 +26,12 @@ description: Implement a concrete x4-dashboard task, run the right validation, a
    - use Conventional Commits
    - choose an accurate type and scope
    - commit only the files relevant to that checkpoint
-6. Report touched files, validation results, and whether `product-manager` should update or close a related issue.
+6. If the user or parent workflow explicitly asks for a push, push the current branch after the local commit and report the branch or remote result.
+7. Report touched files, validation results, and whether `product-manager` should update or close a related issue.
 
 ## Guardrails
 
-- Never push unless the user explicitly asks.
+- Never push unless the user or parent workflow explicitly asks.
 - Never rewrite history or force-push unless the user explicitly asks.
 - Work around unrelated local changes; do not revert them.
 - If the task is mostly roadmap, issues, milestones, or release planning rather than implementation, hand it off to `product-manager`.
