@@ -2,11 +2,18 @@ function getInput(id) {
   return document.getElementById(id)
 }
 
+let listeningAction = null
+let currentKeybindings = {}
+
 function isEditingHostSettings() {
+  if (listeningAction) {
+    return true
+  }
+
   const activeElement = document.activeElement
   if (!activeElement) return false
 
-  return activeElement.matches('#allow-remote-controls, #force-activate-game-window, #game-window-title, #autohotkey-path, .keybinding-input')
+  return activeElement.matches('#allow-remote-controls, #force-activate-game-window, #game-window-title, #autohotkey-path, .keybinding-input, .keybinding-clear')
 }
 
 function setText(id, value) {
@@ -72,13 +79,252 @@ function setCardState(id, status, copy, tone, linkPath = '') {
   }
 }
 
+function formatBindingDisplay(keyString) {
+  if (!keyString) return ''
+
+  let raw = keyString
+  const parts = []
+
+  while (raw.startsWith('^') || raw.startsWith('+') || raw.startsWith('%')) {
+    if (raw.startsWith('^')) {
+      parts.push('Ctrl')
+      raw = raw.slice(1)
+    } else if (raw.startsWith('+')) {
+      parts.push('Shift')
+      raw = raw.slice(1)
+    } else if (raw.startsWith('%')) {
+      parts.push('Alt')
+      raw = raw.slice(1)
+    }
+  }
+
+  const specialMap = {
+    '{SPACE}': 'Space',
+    '{ENTER}': 'Enter',
+    '{ESC}': 'Esc',
+    '{ESCAPE}': 'Esc',
+    '{TAB}': 'Tab',
+    '{BACKSPACE}': 'Backspace',
+    '{DELETE}': 'Delete',
+    '{DEL}': 'Delete',
+    '{INSERT}': 'Insert',
+    '{HOME}': 'Home',
+    '{END}': 'End',
+    '{PGUP}': 'Page Up',
+    '{PGDN}': 'Page Down',
+    '{UP}': 'Up Arrow',
+    '{DOWN}': 'Down Arrow',
+    '{LEFT}': 'Left Arrow',
+    '{RIGHT}': 'Right Arrow',
+    '{ADD}': 'Numpad +',
+    '{SUBTRACT}': 'Numpad -',
+    '{MULTIPLY}': 'Numpad *',
+    '{DIVIDE}': 'Numpad /',
+    '{DECIMAL}': 'Numpad .',
+    '{NUMPAD0}': 'Numpad 0',
+    '{NUMPAD1}': 'Numpad 1',
+    '{NUMPAD2}': 'Numpad 2',
+    '{NUMPAD3}': 'Numpad 3',
+    '{NUMPAD4}': 'Numpad 4',
+    '{NUMPAD5}': 'Numpad 5',
+    '{NUMPAD6}': 'Numpad 6',
+    '{NUMPAD7}': 'Numpad 7',
+    '{NUMPAD8}': 'Numpad 8',
+    '{NUMPAD9}': 'Numpad 9',
+  }
+
+  const normalizedRaw = raw.toUpperCase()
+  const base = specialMap[normalizedRaw] || (/^\{F(?:[1-9]|1[0-2])\}$/i.test(raw) ? raw.slice(1, -1).toUpperCase() : raw.length === 1 ? raw.toUpperCase() : raw)
+
+  parts.push(base)
+  return parts.join(' + ')
+}
+
+function normalizeCapturedKey(event) {
+  if (event.metaKey) {
+    return { error: 'The Windows/Command key is not supported for host key bindings.' }
+  }
+
+  if (event.key === 'Control' || event.key === 'Shift' || event.key === 'Alt') {
+    return { pending: true }
+  }
+
+  let baseKey = ''
+  const key = event.key
+  const code = event.code
+
+  if (/^Key[A-Z]$/.test(code)) {
+    baseKey = code.slice(3).toLowerCase()
+  } else if (/^Digit[0-9]$/.test(code)) {
+    baseKey = code.slice(5)
+  } else if (/^Numpad[0-9]$/.test(code)) {
+    baseKey = `{NUMPAD${code.slice(6)}}`
+  } else {
+    const numpadCodeMap = {
+      NumpadAdd: '{ADD}',
+      NumpadSubtract: '{SUBTRACT}',
+      NumpadMultiply: '{MULTIPLY}',
+      NumpadDivide: '{DIVIDE}',
+      NumpadDecimal: '{DECIMAL}',
+    }
+
+    const printableCodeMap = {
+      Minus: '-',
+      Equal: '=',
+      BracketLeft: '[',
+      BracketRight: ']',
+      Backslash: '\\',
+      Semicolon: ';',
+      Quote: "'",
+      Backquote: '`',
+      Comma: ',',
+      Period: '.',
+      Slash: '/',
+    }
+
+    baseKey = numpadCodeMap[code] || printableCodeMap[code] || ''
+  }
+
+  if (!baseKey && /^[a-z0-9]$/i.test(key)) {
+    baseKey = key.toLowerCase()
+  } else if (!baseKey && /^F(?:[1-9]|1[0-2])$/i.test(key)) {
+    baseKey = `{${key.toUpperCase()}}`
+  } else if (!baseKey) {
+    const specialKeys = {
+      ' ': '{SPACE}',
+      Enter: '{ENTER}',
+      Escape: '{ESC}',
+      Tab: '{TAB}',
+      Backspace: '{BACKSPACE}',
+      Delete: '{DELETE}',
+      Insert: '{INSERT}',
+      Home: '{HOME}',
+      End: '{END}',
+      PageUp: '{PGUP}',
+      PageDown: '{PGDN}',
+      ArrowUp: '{UP}',
+      ArrowDown: '{DOWN}',
+      ArrowLeft: '{LEFT}',
+      ArrowRight: '{RIGHT}',
+    }
+
+    baseKey = specialKeys[key] || ''
+  }
+
+  if (!baseKey) {
+    return { error: `Unsupported key: ${key}` }
+  }
+
+  let normalizedKey = baseKey
+
+  if (event.altKey) normalizedKey = `%${normalizedKey}`
+  if (event.shiftKey) normalizedKey = `+${normalizedKey}`
+  if (event.ctrlKey) normalizedKey = `^${normalizedKey}`
+
+  return {
+    key: normalizedKey,
+    display: formatBindingDisplay(normalizedKey),
+  }
+}
+
+function clearListeningFeedback() {
+  const node = document.getElementById('keybinding-listen-hint')
+  if (node) {
+    node.textContent = ''
+    node.hidden = true
+  }
+}
+
+function setListeningFeedback(message) {
+  const node = document.getElementById('keybinding-listen-hint')
+  if (node) {
+    node.textContent = message
+    node.hidden = !message
+  }
+}
+
+function stopListening(message = '', tone = 'info') {
+  listeningAction = null
+  clearListeningFeedback()
+  renderKeybindings(currentKeybindings)
+
+  if (message) {
+    showTemporaryFeedback('keybindings-feedback', message, tone)
+  }
+}
+
+function startListening(action) {
+  if (listeningAction === action) {
+    stopListening('Capture cancelled.', 'info')
+    return
+  }
+
+  listeningAction = action
+  const binding = currentKeybindings[action]
+  renderKeybindings(currentKeybindings)
+  setListeningFeedback(`Listening for ${binding?.label || action}. Press a key or key combination.`)
+  setFeedback('keybindings-feedback', 'Listening for keyboard input...', 'info')
+}
+
+async function applyCapturedBinding(action, key, display) {
+  let conflictAction = null
+
+  for (const [otherAction, binding] of Object.entries(currentKeybindings)) {
+    if (otherAction !== action && binding?.key === key) {
+      conflictAction = otherAction
+      currentKeybindings[otherAction] = {
+        ...binding,
+        key: '',
+      }
+      break
+    }
+  }
+
+  currentKeybindings[action] = {
+    ...currentKeybindings[action],
+    key,
+  }
+
+  listeningAction = null
+  clearListeningFeedback()
+  renderKeybindings(currentKeybindings)
+
+  const conflictLabel = conflictAction ? currentKeybindings[conflictAction]?.label || conflictAction : ''
+  const feedback = conflictAction
+    ? `Saved ${display} for ${currentKeybindings[action]?.label || action}. Cleared ${conflictLabel}.`
+    : `Saved ${display} for ${currentKeybindings[action]?.label || action}.`
+
+  try {
+    await saveKeybindings(feedback)
+  } catch {
+    // saveKeybindings already handles the visible error state
+  }
+}
+
+function clearBinding(action) {
+  const binding = currentKeybindings[action]
+  currentKeybindings[action] = {
+    ...binding,
+    key: '',
+  }
+  listeningAction = null
+  clearListeningFeedback()
+  renderKeybindings(currentKeybindings)
+  void saveKeybindings(`Cleared ${binding?.label || action}.`)
+}
+
 function renderKeybindings(keybindings) {
+  currentKeybindings = keybindings || {}
+
   const listNode = document.getElementById('keybindings-list')
   listNode.innerHTML = ''
 
   for (const [action, binding] of Object.entries(keybindings || {})) {
     const row = document.createElement('div')
     row.className = 'keybinding-row'
+    if (listeningAction === action) {
+      row.classList.add('is-listening')
+    }
 
     const meta = document.createElement('div')
     meta.className = 'keybinding-meta'
@@ -96,29 +342,32 @@ function renderKeybindings(keybindings) {
     const input = document.createElement('input')
     input.className = 'keybinding-input'
     input.type = 'text'
-    input.value = binding.key || ''
-    input.placeholder = 'e.g. {F1}'
+    input.value = listeningAction === action ? 'Listening...' : formatBindingDisplay(binding.key || '')
+    input.placeholder = 'Click and press a key'
     input.spellcheck = false
+    input.readOnly = true
     input.dataset.action = action
-    input.addEventListener('input', () => {
-      scheduleKeybindingsSave('Key bindings saved.')
+    input.dataset.key = binding.key || ''
+    input.title = listeningAction === action
+      ? 'Press a key to save, or click again to cancel'
+      : (binding.key || 'Click to capture a key binding')
+    input.addEventListener('click', () => {
+      startListening(action)
     })
 
-    const testButton = document.createElement('button')
-    testButton.className = 'secondary-button keybinding-test'
-    testButton.textContent = 'Test'
-    testButton.addEventListener('click', async () => {
-      setFeedback('keybindings-feedback', `Testing ${binding.label}...`, 'info')
+    const actions = document.createElement('div')
+    actions.className = 'keybinding-actions'
 
-      try {
-        await window.x4Desktop.testKeybinding(action)
-        showTemporaryFeedback('keybindings-feedback', `${binding.label} sent.`, 'success')
-      } catch (error) {
-        showTemporaryFeedback('keybindings-feedback', error instanceof Error ? error.message : 'Failed to test keybinding.', 'error', 5000)
-      }
+    const clearButton = document.createElement('button')
+    clearButton.className = 'secondary-button keybinding-clear'
+    clearButton.textContent = 'Clear'
+    clearButton.disabled = !binding.key
+    clearButton.addEventListener('click', () => {
+      clearBinding(action)
     })
 
-    row.append(meta, input, testButton)
+    actions.append(clearButton)
+    row.append(meta, input, actions)
     listNode.appendChild(row)
   }
 }
@@ -222,7 +471,6 @@ function bindAction(id, handler) {
 }
 
 let runtimeConfigSaveTimer = null
-let keybindingsSaveTimer = null
 
 async function saveRuntimeConfig(feedback = 'Host settings saved.') {
   setFeedback('settings-feedback', 'Saving...', 'info')
@@ -260,26 +508,17 @@ async function saveKeybindings(feedback = 'Key bindings saved.') {
   try {
     const updates = {}
     document.querySelectorAll('.keybinding-input').forEach((input) => {
-      updates[input.dataset.action] = { key: input.value }
+      updates[input.dataset.action] = { key: input.dataset.key || '' }
     })
 
-    await window.x4Desktop.updateKeybindings(updates)
+    const next = await window.x4Desktop.updateKeybindings(updates)
+    currentKeybindings = next.bindings || {}
     showTemporaryFeedback('keybindings-feedback', feedback, 'success')
     await loadState()
   } catch (error) {
     showTemporaryFeedback('keybindings-feedback', error instanceof Error ? error.message : 'Failed to save key bindings.', 'error', 5000)
+    throw error
   }
-}
-
-function scheduleKeybindingsSave(feedback = 'Key bindings saved.') {
-  if (keybindingsSaveTimer) {
-    window.clearTimeout(keybindingsSaveTimer)
-  }
-
-  keybindingsSaveTimer = window.setTimeout(() => {
-    keybindingsSaveTimer = null
-    void saveKeybindings(feedback)
-  }, 300)
 }
 
 bindAction('refresh-status', () => {
@@ -328,6 +567,38 @@ getInput('game-window-title').addEventListener('input', () => {
 
 getInput('autohotkey-path').addEventListener('input', () => {
   scheduleRuntimeConfigSave('Host settings saved.')
+})
+
+window.addEventListener('keydown', (event) => {
+  if (!listeningAction) {
+    return
+  }
+
+  event.preventDefault()
+  event.stopPropagation()
+
+  if (event.repeat) {
+    return
+  }
+
+  const captured = normalizeCapturedKey(event)
+
+  if (captured.pending) {
+    return
+  }
+
+  if (captured.error) {
+    showTemporaryFeedback('keybindings-feedback', captured.error, 'error', 5000)
+    return
+  }
+
+  void applyCapturedBinding(listeningAction, captured.key, captured.display)
+})
+
+window.addEventListener('blur', () => {
+  if (listeningAction) {
+    stopListening('Capture cancelled because the launcher lost focus.', 'info')
+  }
 })
 
 void loadState()

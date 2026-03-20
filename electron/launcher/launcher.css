@@ -231,7 +231,7 @@ li {
 .keybinding-header,
 .keybinding-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 180px 90px;
+  grid-template-columns: minmax(0, 1fr) 220px 96px;
   gap: 12px;
   align-items: center;
 }
@@ -256,6 +256,10 @@ li {
 .keybinding-row {
   padding: 10px 0;
   border-bottom: 1px solid rgba(134, 217, 234, 0.08);
+}
+
+.keybinding-row.is-listening {
+  border-bottom-color: rgba(156, 248, 199, 0.28);
 }
 
 .keybinding-meta {
@@ -283,9 +287,19 @@ li {
   background: rgba(1, 8, 12, 0.92);
   color: #d9f8ff;
   width: 100%;
+  cursor: pointer;
 }
 
-.keybinding-test {
+.keybinding-row.is-listening .keybinding-input {
+  border-color: rgba(156, 248, 199, 0.48);
+  box-shadow: 0 0 0 1px rgba(156, 248, 199, 0.18);
+}
+
+.keybinding-actions {
+  display: flex;
+}
+
+.keybinding-clear {
   width: 100%;
 }
 
@@ -431,6 +445,10 @@ ul {
 
   .keybinding-header,
   .keybinding-row {
+    grid-template-columns: 1fr;
+  }
+
+  .keybinding-actions {
     grid-template-columns: 1fr;
   }
 }

@@ -201,6 +201,11 @@ function sendKeysToXdotool(key) {
     '{UP}': 'Up', '{DOWN}': 'Down', '{LEFT}': 'Left', '{RIGHT}': 'Right',
     '{PGUP}': 'Prior', '{PGDN}': 'Next',
     '{INSERT}': 'Insert',
+    '{ADD}': 'KP_Add', '{SUBTRACT}': 'KP_Subtract',
+    '{MULTIPLY}': 'KP_Multiply', '{DIVIDE}': 'KP_Divide',
+    '{DECIMAL}': 'KP_Decimal',
+    '{NUMPAD0}': 'KP_0', '{NUMPAD1}': 'KP_1', '{NUMPAD2}': 'KP_2', '{NUMPAD3}': 'KP_3', '{NUMPAD4}': 'KP_4',
+    '{NUMPAD5}': 'KP_5', '{NUMPAD6}': 'KP_6', '{NUMPAD7}': 'KP_7', '{NUMPAD8}': 'KP_8', '{NUMPAD9}': 'KP_9',
   };
 
   let result = key;

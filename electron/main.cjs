@@ -441,19 +441,6 @@ function registerIpc() {
     keybindingsStore.writeKeybindings(next)
     return next
   })
-  ipcMain.handle('launcher:test-keybinding', async (_event, action) => {
-    const keybindingsStore = getKeybindingsStore()
-    const keyPresser = getKeyPresser()
-    const current = keybindingsStore.readKeybindings()
-    const binding = current.bindings?.[action]
-
-    if (!binding) {
-      throw new Error(`Unknown action: ${action}`)
-    }
-
-    keyPresser.press(binding.key, binding.modifiers || [])
-    return { ok: true }
-  })
   ipcMain.handle('launcher:show-log-location', async () => {
     const logPath = getLogPath()
 

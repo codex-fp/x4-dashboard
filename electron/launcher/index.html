@@ -170,7 +170,8 @@
         <div class="config-header">
           <div>
             <p class="label">Key Bindings</p>
-            <p class="muted">These control mappings belong to the host machine that sends key presses to X4.</p>
+            <p class="muted">These control mappings belong to the host machine that sends key presses to X4. Click a key field, then press the key combo you want to use.</p>
+            <p class="muted">Bindings are saved to this host. Verify them in-game from the dashboard after X4 is focused.</p>
           </div>
         </div>
 
@@ -180,11 +181,12 @@
         <div class="keybinding-header">
           <span>Action</span>
           <span>Key combo</span>
-          <span>Test</span>
+          <span>Clear</span>
         </div>
         <div id="keybindings-list" class="keybindings-list"></div>
 
         <div class="button-row">
+          <div id="keybinding-listen-hint" class="inline-feedback info" hidden></div>
           <div id="keybindings-feedback" class="inline-feedback" hidden></div>
         </div>
       </section>
