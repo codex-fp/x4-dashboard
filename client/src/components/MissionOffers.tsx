@@ -2,9 +2,11 @@ import React, { useState } from 'react'
 import { MissionOffers as MissionOffersType, MissionEntry, MissionOffer } from '../types/gameData'
 import { formatCredits, formatShortDuration } from '../utils/format'
 import { toPlainText } from '../utils/text'
+import { WidgetStateNotice } from './WidgetStateNotice'
 
 interface Props {
   offers: MissionOffersType | null
+  dataState: 'loading' | 'offline' | 'ready'
 }
 
 const DIFF_LABELS = ['', 'Trivial', 'Simple', 'Standard', 'Hard', 'Very Hard', 'Extreme']
@@ -84,13 +86,21 @@ function flattenMissionOffers(group: MissionOffer[] | undefined, type: string): 
   return missions
 }
 
-export function MissionOffers({ offers }: Props) {
+export function MissionOffers({ offers, dataState }: Props) {
+  if (dataState === 'loading') {
+    return <WidgetStateNotice tone="loading" title="Syncing mission board" detail="Collecting mission offers from the bridge." />
+  }
+
+  if (dataState === 'offline') {
+    return <WidgetStateNotice tone="offline" title="Mission board offline" detail="Live offers return when the dashboard reconnects." />
+  }
+
   const hasAny = offers && Object.values(offers).some(g => g && g.length > 0)
 
   return (
     <div className="mission-offers-list">
       {!hasAny && (
-        <div className="empty-state">No missions available</div>
+        <WidgetStateNotice tone="empty" title="No open offers" detail="No nearby stations are advertising work right now." compact />
       )}
 
       {offers && GROUPS.map(({ key, label, color }) => {
@@ -106,7 +116,7 @@ export function MissionOffers({ offers }: Props) {
               <MissionItem key={`${item.type}-${i}`} mission={item.mission} type={item.type} />
             ))}
             {allMissions.length > 10 && (
-              <div className="empty-state">+{allMissions.length - 10} more</div>
+              <div className="empty-state">+{allMissions.length - 10} more offers</div>
             )}
           </div>
         )

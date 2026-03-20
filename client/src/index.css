@@ -1225,6 +1225,78 @@ body {
   opacity: 0.6;
 }
 
+.widget-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  min-height: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--c-border-dim);
+  background: linear-gradient(180deg, rgba(0, 18, 26, 0.72), rgba(0, 8, 14, 0.92));
+}
+
+.widget-state.compact {
+  min-height: 0;
+}
+
+.widget-state-kicker {
+  font-size: 8px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--c-text-dim);
+}
+
+.widget-state-title {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--c-text-bright);
+}
+
+.widget-state-detail {
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--c-text-dim);
+}
+
+.widget-state-loading {
+  border-color: rgba(0, 229, 255, 0.14);
+}
+
+.widget-state-loading .widget-state-kicker,
+.sysflag-btn.binding-loading .sysflag-state {
+  color: var(--c-cyan-dim);
+}
+
+.widget-state-offline {
+  border-color: rgba(255, 109, 0, 0.18);
+}
+
+.widget-state-offline .widget-state-kicker,
+.sysflag-btn.binding-error .sysflag-state {
+  color: var(--c-orange);
+}
+
+.widget-state-empty {
+  border-color: rgba(84, 110, 122, 0.16);
+}
+
+.sysflag-btn.binding-loading,
+.sysflag-btn.binding-error,
+.sysflag-btn.no-binding {
+  opacity: 0.52;
+}
+
+.sysflag-btn.binding-loading {
+  border-color: rgba(0, 229, 255, 0.28);
+  background: rgba(0, 229, 255, 0.05);
+}
+
+.sysflag-btn.binding-error {
+  border-color: rgba(255, 109, 0, 0.32);
+  background: rgba(255, 109, 0, 0.06);
+}
+
 /* â”€â”€ Utility â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .flex-row { display:flex; align-items:center; gap:8px; }
 .spacer { flex:1; }

@@ -2,13 +2,25 @@ import React from 'react'
 import { ActiveMission as ActiveMissionType } from '../types/gameData'
 import { formatCredits, formatTimeRemaining } from '../utils/format'
 import { toPlainText, truncateText } from '../utils/text'
+import { WidgetStateNotice } from './WidgetStateNotice'
 
 interface Props {
   mission: ActiveMissionType | null
+  dataState: 'loading' | 'offline' | 'ready'
 }
 
-export function ActiveMission({ mission }: Props) {
-  if (!mission || !mission.name) return null
+export function ActiveMission({ mission, dataState }: Props) {
+  if (dataState === 'loading') {
+    return <WidgetStateNotice tone="loading" title="Syncing mission tracker" detail="Waiting for your active assignment." compact />
+  }
+
+  if (dataState === 'offline') {
+    return <WidgetStateNotice tone="offline" title="Mission tracker offline" detail="Reconnect to restore active mission telemetry." compact />
+  }
+
+  if (!mission || !mission.name) {
+    return <WidgetStateNotice tone="empty" title="No active mission" detail="Accept or activate a mission to track it here." compact />
+  }
 
   const isUrgent = mission.timeleft > 0 && mission.timeleft < 300
   const description = truncateText(toPlainText(mission.description || ''), 200)

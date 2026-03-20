@@ -1,14 +1,22 @@
 import React from 'react'
 import { PlayerInfo as PlayerInfoType, ShipStatus } from '../types/gameData'
 import { formatCredits } from '../utils/format'
+import { WidgetStateNotice } from './WidgetStateNotice'
 
 interface Props {
   player: PlayerInfoType
   ship: ShipStatus
+  dataState: 'loading' | 'offline' | 'ready'
 }
 
-export function PlayerInfo({ player, ship }: Props) {
-  const hasData = player.name !== '–' && player.name !== 'UNKNOWN'
+export function PlayerInfo({ player, ship, dataState }: Props) {
+  if (dataState === 'loading') {
+    return <WidgetStateNotice tone="loading" title="Syncing pilot telemetry" detail="Awaiting the first bridge update." compact />
+  }
+
+  if (dataState === 'offline') {
+    return <WidgetStateNotice tone="offline" title="Pilot feed unavailable" detail="Reconnect the dashboard host to resume live data." compact />
+  }
 
   return (
     <>
@@ -37,10 +45,6 @@ export function PlayerInfo({ player, ship }: Props) {
 
       {ship.name && (
         <div className="ship-name-badge">◆ {ship.name}{ship.type ? ` · ${ship.type}` : ''}</div>
-      )}
-
-      {!hasData && (
-        <div className="offline-hint">Waiting for game data…</div>
       )}
     </>
   )

@@ -27,18 +27,21 @@ interface RenderWidgetOptions {
   state: GameState
   onKeyPress: (action: string) => void
   scale?: number
+  isInitialLoading: boolean
+  isOffline: boolean
 }
 
 function getCombatTarget(state: GameState): CombatTarget | null {
   return hasCombatTarget(state.combat.target) ? state.combat.target : null
 }
 
-export function renderWidget({ id, state, onKeyPress, scale = 1 }: RenderWidgetOptions): React.ReactNode {
+export function renderWidget({ id, state, onKeyPress, scale = 1, isInitialLoading, isOffline }: RenderWidgetOptions): React.ReactNode {
   const target = getCombatTarget(state)
+  const dataState = isInitialLoading ? 'loading' : isOffline ? 'offline' : 'ready'
 
   switch (id) {
     case 'PlayerInfo':
-      return <PlayerInfo player={state.player} ship={state.ship} />
+      return <PlayerInfo player={state.player} ship={state.ship} dataState={dataState} />
     case 'ShipShields':
       return <ShipShieldsWidget ship={state.ship} />
     case 'ShipHull':
@@ -74,13 +77,13 @@ export function renderWidget({ id, state, onKeyPress, scale = 1 }: RenderWidgetO
     case 'MissionManagerToggle':
       return <MissionManagerToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
     case 'ActiveMission':
-      return <ActiveMission mission={state.activeMission} />
+      return <ActiveMission mission={state.activeMission} dataState={dataState} />
     case 'MissionOffers':
-      return <MissionOffers offers={state.missionOffers} />
+      return <MissionOffers offers={state.missionOffers} dataState={dataState} />
     case 'Comms':
-      return <Comms logbook={state.logbook} />
+      return <Comms logbook={state.logbook} dataState={dataState} />
     case 'Research':
-      return <Research research={state.currentResearch} />
+      return <Research research={state.currentResearch} dataState={dataState} />
     case 'UnderAttack':
       return state.combat.alertLevel === 0 ? null : (
         <UnderAttackAlert

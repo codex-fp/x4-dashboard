@@ -1,15 +1,25 @@
 import React, { useEffect, useRef } from 'react'
 import { LogbookEntry } from '../types/gameData'
+import { WidgetStateNotice } from './WidgetStateNotice'
 
 interface Props {
   logbook: { list: LogbookEntry[] } | null
+  dataState: 'loading' | 'offline' | 'ready'
 }
 
 function sanitize(html: string): string {
   return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
-export function Comms({ logbook }: Props) {
+export function Comms({ logbook, dataState }: Props) {
+  if (dataState === 'loading') {
+    return <WidgetStateNotice tone="loading" title="Opening comms buffer" detail="Waiting for the first logbook entries." />
+  }
+
+  if (dataState === 'offline') {
+    return <WidgetStateNotice tone="offline" title="Comms buffer offline" detail="Logbook updates resume after the dashboard reconnects." />
+  }
+
   const logbookEntries = logbook?.list || []
   const visibleEntries = logbookEntries.slice(-30)
   const hasLogbook = logbookEntries.length > 0
@@ -35,7 +45,7 @@ export function Comms({ logbook }: Props) {
 
   return (
     <div ref={listRef} className="comms-list" onScroll={handleScroll}>
-      {!hasLogbook && <div className="empty-state">No logbook entries</div>}
+      {!hasLogbook && <WidgetStateNotice tone="empty" title="No recent comms" detail="No logbook traffic has been recorded yet." compact />}
       {visibleEntries.map((entry, i) => (
         <div key={i} className="logbook-item">
           <div className="logbook-title">{sanitize(entry.title)}</div>

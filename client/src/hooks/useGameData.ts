@@ -20,6 +20,8 @@ const DEFAULT_STATE: GameState = {
 export function useGameData(wsUrl: string) {
   const [state, setState] = useState<GameState>(DEFAULT_STATE);
   const [wsConnected, setWsConnected] = useState(false);
+  const [hasReceivedState, setHasReceivedState] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(true);
 
   useEffect(() => {
     let ws: WebSocket | null = null;
@@ -28,6 +30,8 @@ export function useGameData(wsUrl: string) {
 
     function connect() {
       if (!active) return;
+      setIsConnecting(true);
+
       try {
         ws = new WebSocket(wsUrl);
 
@@ -40,6 +44,8 @@ export function useGameData(wsUrl: string) {
           if (!active) return;
           try {
             setState(JSON.parse(e.data));
+            setHasReceivedState(true);
+            setIsConnecting(false);
           } catch {
             // ignore parse errors
           }
@@ -48,6 +54,7 @@ export function useGameData(wsUrl: string) {
         ws.onclose = () => {
           if (!active) return;
           setWsConnected(false);
+          setIsConnecting(false);
           retryTimer = setTimeout(connect, 3000);
         };
 
@@ -55,6 +62,7 @@ export function useGameData(wsUrl: string) {
           ws?.close();
         };
       } catch {
+        setIsConnecting(false);
         retryTimer = setTimeout(connect, 3000);
       }
     }
@@ -84,5 +92,10 @@ export function useGameData(wsUrl: string) {
     }
   }, []);
 
-  return { state, wsConnected, pressKey };
+  return {
+    state,
+    wsConnected,
+    isInitialLoading: !hasReceivedState && isConnecting,
+    pressKey,
+  };
 }

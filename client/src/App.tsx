@@ -34,7 +34,7 @@ function getInitialDashboardScale(): number {
 }
 
 export function App() {
-  const { state, wsConnected, pressKey } = useGameData(getWebSocketUrl())
+  const { state, wsConnected, isInitialLoading, pressKey } = useGameData(getWebSocketUrl())
   const [dashboardId, setDashboardId] = useState(getInitialDashboard)
   const [dashboardScale, setDashboardScale] = useState(getInitialDashboardScale)
 
@@ -81,6 +81,7 @@ export function App() {
           <Dashboard
             state={state}
             wsConnected={wsConnected}
+            isInitialLoading={isInitialLoading}
             dashboardId={dashboardId}
             dashboardScale={dashboardScale}
             onKeyPress={pressKey}

@@ -7,6 +7,7 @@ import { GridLayout, ColumnsLayout } from './dashboard/DashboardLayouts'
 interface Props {
   state: GameState
   wsConnected: boolean
+  isInitialLoading: boolean
   dashboardId: string
   dashboardScale: number
   onKeyPress: (action: string) => void
@@ -17,6 +18,7 @@ interface Props {
 export function Dashboard({
   state,
   wsConnected,
+  isInitialLoading,
   dashboardId,
   dashboardScale,
   onKeyPress,
@@ -50,8 +52,8 @@ export function Dashboard({
           )}
 
           {config.layout === 'grid'
-            ? <GridLayout config={config} state={state} onKeyPress={onKeyPress} />
-            : <ColumnsLayout config={config} state={state} onKeyPress={onKeyPress} />
+            ? <GridLayout config={config} state={state} onKeyPress={onKeyPress} isInitialLoading={isInitialLoading} wsConnected={wsConnected} />
+            : <ColumnsLayout config={config} state={state} onKeyPress={onKeyPress} isInitialLoading={isInitialLoading} wsConnected={wsConnected} />
           }
         </div>
       </div>

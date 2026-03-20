@@ -7,10 +7,13 @@ import { renderWidget } from './widgetRegistry'
 interface LayoutProps {
   state: GameState
   onKeyPress: (action: string) => void
+  wsConnected: boolean
+  isInitialLoading: boolean
 }
 
-function renderPanelContent(panel: PanelDisplay, state: GameState, onKeyPress: (action: string) => void): React.ReactNode {
+function renderPanelContent(panel: PanelDisplay, state: GameState, onKeyPress: (action: string) => void, wsConnected: boolean, isInitialLoading: boolean): React.ReactNode {
   const { internal } = panel
+  const isOffline = !wsConnected && !isInitialLoading
 
   if (internal.layout === 'grid') {
     return (
@@ -43,7 +46,7 @@ function renderPanelContent(panel: PanelDisplay, state: GameState, onKeyPress: (
               ...(widget.height ? { height: widget.height } : {}),
             }}
           >
-            {renderWidget({ id: widget.id, state, onKeyPress })}
+            {renderWidget({ id: widget.id, state, onKeyPress, isInitialLoading, isOffline })}
           </div>
         ))}
       </div>
@@ -75,7 +78,7 @@ function renderPanelContent(panel: PanelDisplay, state: GameState, onKeyPress: (
                 ...(widget.grow ? { flex: 1, minHeight: 0 } : widget.height ? { height: widget.height } : {}),
               }}
             >
-              {renderWidget({ id: widget.id, state, onKeyPress, scale: widget.scale ?? 1 })}
+              {renderWidget({ id: widget.id, state, onKeyPress, scale: widget.scale ?? 1, isInitialLoading, isOffline })}
             </div>
           ))}
         </div>
@@ -84,9 +87,9 @@ function renderPanelContent(panel: PanelDisplay, state: GameState, onKeyPress: (
   )
 }
 
-function renderPanel(panel: PanelDisplay, state: GameState, onKeyPress: (action: string) => void): React.ReactNode {
+function renderPanel(panel: PanelDisplay, state: GameState, onKeyPress: (action: string) => void, wsConnected: boolean, isInitialLoading: boolean): React.ReactNode {
   const color = panel.colorFn ? panel.colorFn(state) : (panel.color ?? 'primary')
-  const content = renderPanelContent(panel, state, onKeyPress)
+  const content = renderPanelContent(panel, state, onKeyPress, wsConnected, isInitialLoading)
 
   if (panel.frameless) return content
 
@@ -97,11 +100,11 @@ function renderPanel(panel: PanelDisplay, state: GameState, onKeyPress: (action:
   )
 }
 
-export function GridLayout({ config, state, onKeyPress }: LayoutProps & { config: GridDashboard }) {
+export function GridLayout({ config, state, onKeyPress, wsConnected, isInitialLoading }: LayoutProps & { config: GridDashboard }) {
   return (
     <div className="dashboard-grid" style={{ gridTemplateColumns: config.columns }}>
       {config.panels.map((panel) => {
-        const content = renderPanel(panel, state, onKeyPress)
+        const content = renderPanel(panel, state, onKeyPress, wsConnected, isInitialLoading)
         if (content === null) return null
 
         return (
@@ -125,7 +128,7 @@ export function GridLayout({ config, state, onKeyPress }: LayoutProps & { config
   )
 }
 
-export function ColumnsLayout({ config, state, onKeyPress }: LayoutProps & { config: ColumnsDashboard }) {
+export function ColumnsLayout({ config, state, onKeyPress, wsConnected, isInitialLoading }: LayoutProps & { config: ColumnsDashboard }) {
   return (
     <div className="dashboard-columns">
       {config.columns.map((column, columnIndex) => (
@@ -135,7 +138,7 @@ export function ColumnsLayout({ config, state, onKeyPress }: LayoutProps & { con
           style={column.width ? { width: column.width, flexShrink: 0 } : { flex: 1 }}
         >
           {column.panels.map((panel, panelIndex) => {
-            const content = renderPanel(panel, state, onKeyPress)
+            const content = renderPanel(panel, state, onKeyPress, wsConnected, isInitialLoading)
             if (content === null) return null
 
             return (

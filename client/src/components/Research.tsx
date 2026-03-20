@@ -1,13 +1,25 @@
 import React from 'react'
 import { CurrentResearch } from '../types/gameData'
 import { clampPercentage, formatShortDuration } from '../utils/format'
+import { WidgetStateNotice } from './WidgetStateNotice'
 
 interface Props {
   research: CurrentResearch | null
+  dataState: 'loading' | 'offline' | 'ready'
 }
 
-export function Research({ research }: Props) {
-  if (!research || research.name === null) return null
+export function Research({ research, dataState }: Props) {
+  if (dataState === 'loading') {
+    return <WidgetStateNotice tone="loading" title="Syncing research queue" detail="Waiting for current project data." compact />
+  }
+
+  if (dataState === 'offline') {
+    return <WidgetStateNotice tone="offline" title="Research feed offline" detail="Reconnect to inspect current laboratory progress." compact />
+  }
+
+  if (!research || research.name === null) {
+    return <WidgetStateNotice tone="empty" title="No active research" detail="Start a project to monitor progress and resources here." compact />
+  }
 
   const pct = clampPercentage(research.percentageCompleted)
 

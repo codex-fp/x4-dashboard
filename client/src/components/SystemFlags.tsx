@@ -33,12 +33,17 @@ function loadBindings(): Promise<Record<string, KeyBinding>> {
 
   if (!bindingsRequest) {
     bindingsRequest = fetch('/api/keybindings')
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error('Unable to load key bindings')
+        return r.json()
+      })
       .then((data: KeyBindings) => {
         bindingsCache = data.bindings || {}
         return bindingsCache
       })
-      .catch(() => ({}))
+      .finally(() => {
+        bindingsRequest = null
+      })
   }
 
   return bindingsRequest
@@ -46,24 +51,38 @@ function loadBindings(): Promise<Record<string, KeyBinding>> {
 
 function useSystemFlagBindings() {
   const [bindings, setBindings] = useState<Record<string, KeyBinding>>(bindingsCache || {})
+  const [loading, setLoading] = useState(!bindingsCache)
+  const [loadFailed, setLoadFailed] = useState(false)
 
   useEffect(() => {
     let active = true
 
-    loadBindings().then(data => {
-      if (active) setBindings(data)
-    })
+    setLoading(!bindingsCache)
+    setLoadFailed(false)
+
+    loadBindings()
+      .then(data => {
+        if (!active) return
+        setBindings(data)
+        setLoading(false)
+      })
+      .catch(() => {
+        if (!active) return
+        setBindings({})
+        setLoading(false)
+        setLoadFailed(true)
+      })
 
     return () => {
       active = false
     }
   }, [])
 
-  return bindings
+  return { bindings, loading, loadFailed }
 }
 
 function SystemFlagToggle({ flight, onKeyPress, config }: Props & { config: FlagConfig }) {
-  const bindings = useSystemFlagBindings()
+  const { bindings, loading, loadFailed } = useSystemFlagBindings()
   const [pressing, setPressing] = useState<string | null>(null)
   const { key, action, icon, label, stateless } = config
 
@@ -79,9 +98,25 @@ function SystemFlagToggle({ flight, onKeyPress, config }: Props & { config: Flag
   const binding = bindings[action]
   const hasBinding = Boolean(binding?.key)
   const isPressed = pressing === action
-  const stateLabel = stateless ? '◌ CMD' : isOn ? '● ON' : '○ OFF'
+  const stateLabel = loading
+    ? '… SYNC'
+    : loadFailed
+      ? '◌ HOST'
+      : !hasBinding
+        ? '∅ UNSET'
+        : stateless
+          ? '◌ CMD'
+          : isOn ? '● ON' : '○ OFF'
 
   function getTitle(): string {
+    if (loading) {
+      return `${label}: Loading key binding from the Server Launcher.`
+    }
+
+    if (loadFailed) {
+      return `${label}: Key bindings unavailable. Check the Server Launcher connection.`
+    }
+
     if (!hasBinding) {
       return `${label}: No key binding. Configure it in the Server Launcher.`
     }
@@ -91,9 +126,9 @@ function SystemFlagToggle({ flight, onKeyPress, config }: Props & { config: Flag
 
   return (
     <button
-      className={`sysflag-btn ${isOn ? 'on' : 'off'} ${stateless ? 'stateless' : ''} ${!hasBinding ? 'no-binding' : ''}`}
+      className={`sysflag-btn ${isOn ? 'on' : 'off'} ${stateless ? 'stateless' : ''} ${loading ? 'binding-loading' : ''} ${loadFailed ? 'binding-error' : ''} ${!loading && !loadFailed && !hasBinding ? 'no-binding' : ''}`}
       onClick={handlePress}
-      disabled={!hasBinding}
+      disabled={loading || loadFailed || !hasBinding}
       title={getTitle()}
       style={isPressed ? { transform: 'scale(0.92)', opacity: 0.65 } : undefined}
     >
