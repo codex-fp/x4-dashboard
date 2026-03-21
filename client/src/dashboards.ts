@@ -137,7 +137,7 @@ export const DASHBOARDS: DashboardConfig[] = [
         id: 'flight',
         label: 'Flight',
         layout: 'grid',
-        columns: '30% 40% 30%',
+        columns: '60% 40%',
         panels: [
             {
                 color: 'primary',
@@ -149,7 +149,7 @@ export const DASHBOARDS: DashboardConfig[] = [
                         ]
                     }]
                 },
-                col: 2, row: 2, rowSpan: 2, grow: true, scale: 1.43
+                col: 1, row: 2, rowSpan: 2, grow: true, scale: 1.43
             },
             {
                 internal: {
@@ -160,21 +160,7 @@ export const DASHBOARDS: DashboardConfig[] = [
                         ]
                     }]
                 },
-                col: 1, colSpan: 3, row: 4, scale: 1.43,
-            },
-            {
-                title: "Target",
-                colorFn: (s) => s.combat.target?.isHostile ? 'danger' : 'warning',
-                internal: {
-                    layout: 'columns', columns: [{
-                        widgets: [
-                            {id: 'TargetInfo', scale: 0.7},
-                            {id: 'TargetShields'},
-                            {id: 'TargetHull'},
-                        ]
-                    }]
-                },
-                col: 1, row: 2, rowSpan: 2, scale: 1.43
+                col: 1, colSpan: 2, row: 4, scale: 1.43,
             },
             {
                 titleIcon: '⎔',
@@ -195,13 +181,13 @@ export const DASHBOARDS: DashboardConfig[] = [
                         {id: 'MissionManagerToggle', col: 2, row: 4},
                     ]
                 },
-                col: 3, row: 2, rowSpan: 2, grow: true, scale: 1.43
+                col: 2, row: 2, rowSpan: 2, grow: true, scale: 1.43
             },
             {
                 id: 'underAttack', frameless: true,
                 style: {zIndex: 10, alignSelf: 'start', pointerEvents: 'none'},
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'UnderAttack', scale: 1.71}]}]},
-                col: 1, colSpan: 3, row: 1, scale: 1
+                col: 1, colSpan: 2, row: 1, scale: 1
             },
         ],
     },
