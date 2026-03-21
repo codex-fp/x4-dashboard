@@ -20,11 +20,13 @@ function mergeKeybindingUpdates(current, updates) {
       continue;
     }
 
-    const nextKey = typeof update?.key === 'string' ? update.key.trim() : nextBindings[action].key;
+    const hasExplicitKey = typeof update?.key === 'string';
+    const nextKey = hasExplicitKey ? update.key.trim() : nextBindings[action].key;
 
     nextBindings[action] = {
       ...nextBindings[action],
       key: nextKey,
+      modifiers: hasExplicitKey ? [] : nextBindings[action].modifiers,
     };
   }
 

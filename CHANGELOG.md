@@ -8,6 +8,7 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ### Added
 - Non-technical player setup guide covering packaged installation, Lua bridge setup, launcher-based control configuration, LAN access, and first-action verification for new users
+- Launcher flow to detect supported X4 key bindings from local Windows profiles, review them, and import matched actions into the host keybinding store
 
 ## [1.2.0] - 2026-03-19
 

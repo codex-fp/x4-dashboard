@@ -253,6 +253,10 @@ li {
   margin-bottom: 16px;
 }
 
+.keybinding-import-row {
+  margin-bottom: 16px;
+}
+
 .keybinding-row {
   padding: 10px 0;
   border-bottom: 1px solid rgba(134, 217, 234, 0.08);
@@ -301,6 +305,71 @@ li {
 
 .keybinding-clear {
   width: 100%;
+}
+
+.import-review {
+  margin-bottom: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(134, 217, 234, 0.18);
+  background: rgba(1, 8, 12, 0.56);
+}
+
+.import-review-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.import-review-header strong {
+  display: block;
+  font-size: 20px;
+  color: #e7fbff;
+}
+
+.import-review-source {
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+
+.import-review-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.import-review-metrics article,
+.import-review-item {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(134, 217, 234, 0.14);
+  background: rgba(7, 18, 24, 0.72);
+}
+
+.import-review-metrics span,
+.import-review-item span {
+  display: block;
+  color: #9fc4cd;
+  line-height: 1.5;
+}
+
+.import-review-metrics strong,
+.import-review-item strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #e7fbff;
+}
+
+.import-review-list {
+  display: grid;
+  gap: 8px;
+}
+
+.import-review-skipped {
+  margin-top: 16px;
 }
 
 .grid {
@@ -434,7 +503,8 @@ ul {
   .status-panel,
   .footer-panel,
   .config-header,
-  .config-toggle {
+  .config-toggle,
+  .import-review-header {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -449,6 +519,10 @@ ul {
   }
 
   .keybinding-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .import-review-metrics {
     grid-template-columns: 1fr;
   }
 }

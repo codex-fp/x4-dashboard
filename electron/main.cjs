@@ -196,6 +196,16 @@ function getKeyPresser() {
   return require(modulePath)
 }
 
+function getX4KeybindingsImportPath() {
+  return path.join(__dirname, 'x4KeybindingsImport.cjs')
+}
+
+function getX4KeybindingsImport() {
+  const modulePath = getX4KeybindingsImportPath()
+  delete require.cache[modulePath]
+  return require(modulePath)
+}
+
 function getLanAddress() {
   return Object.values(os.networkInterfaces())
     .flat()
@@ -441,6 +451,7 @@ function registerIpc() {
     keybindingsStore.writeKeybindings(next)
     return next
   })
+  ipcMain.handle('launcher:detect-x4-keybindings', async () => getX4KeybindingsImport().detectX4KeybindingImport())
   ipcMain.handle('launcher:show-log-location', async () => {
     const logPath = getLogPath()
 

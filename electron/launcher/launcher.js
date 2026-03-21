@@ -4,6 +4,7 @@ function getInput(id) {
 
 let listeningAction = null
 let currentKeybindings = {}
+let x4ImportPreview = null
 
 function isEditingHostSettings() {
   if (listeningAction) {
@@ -313,6 +314,78 @@ function clearBinding(action) {
   void saveKeybindings(`Cleared ${binding?.label || action}.`)
 }
 
+function getActionLabel(action) {
+  return currentKeybindings[action]?.label || action
+}
+
+function createImportReviewItem(title, description) {
+  const item = document.createElement('article')
+  item.className = 'import-review-item'
+
+  const titleNode = document.createElement('strong')
+  titleNode.textContent = title
+
+  const descriptionNode = document.createElement('span')
+  descriptionNode.textContent = description
+
+  item.append(titleNode, descriptionNode)
+  return item
+}
+
+function dismissX4ImportReview() {
+  x4ImportPreview = null
+  document.getElementById('x4-import-review').hidden = true
+}
+
+function renderX4ImportReview(result) {
+  x4ImportPreview = result || null
+
+  const reviewNode = document.getElementById('x4-import-review')
+  const matchedList = document.getElementById('x4-import-matched-list')
+  const skippedList = document.getElementById('x4-import-skipped-list')
+  const matchedEmpty = document.getElementById('x4-import-matched-empty')
+  const skippedSection = document.getElementById('x4-import-skipped-section')
+  const sourceNode = document.getElementById('x4-import-source')
+  const applyButton = document.getElementById('apply-x4-import')
+
+  if (!result) {
+    dismissX4ImportReview()
+    return
+  }
+
+  reviewNode.hidden = false
+  setText('x4-import-status', result.status === 'ready' ? 'Ready to import' : 'No changes applied')
+  setText('x4-import-message', result.message || '')
+  setText('x4-import-matched-count', String(result.matched?.length || 0))
+  setText('x4-import-skipped-count', String(result.skipped?.length || 0))
+
+  if (result.configPath) {
+    sourceNode.hidden = false
+    sourceNode.textContent = `Detected profile: ${result.configPath}`
+  } else {
+    sourceNode.hidden = true
+    sourceNode.textContent = ''
+  }
+
+  matchedList.innerHTML = ''
+  for (const item of result.matched || []) {
+    matchedList.appendChild(createImportReviewItem(
+      getActionLabel(item.action),
+      `${formatBindingDisplay(item.key)} from ${item.rawCode}`,
+    ))
+  }
+
+  matchedEmpty.hidden = Boolean(result.matched?.length)
+
+  skippedList.innerHTML = ''
+  for (const item of result.skipped || []) {
+    skippedList.appendChild(createImportReviewItem(getActionLabel(item.action), item.reason))
+  }
+
+  skippedSection.hidden = !(result.skipped && result.skipped.length > 0)
+  applyButton.hidden = !(result.status === 'ready' && result.matched && result.matched.length > 0)
+}
+
 function renderKeybindings(keybindings) {
   currentKeybindings = keybindings || {}
 
@@ -521,6 +594,57 @@ async function saveKeybindings(feedback = 'Key bindings saved.') {
   }
 }
 
+async function detectX4Import() {
+  if (listeningAction) {
+    stopListening('Capture cancelled before scanning X4 bindings.', 'info')
+  }
+
+  const button = document.getElementById('import-x4')
+  button.disabled = true
+  setFeedback('keybindings-feedback', 'Scanning X4 profiles...', 'info')
+
+  try {
+    const result = await window.x4Desktop.detectX4Keybindings()
+    renderX4ImportReview(result)
+    setFeedback('keybindings-feedback', '')
+  } catch (error) {
+    renderX4ImportReview({
+      status: 'unreadableConfig',
+      message: error instanceof Error ? error.message : 'Failed to scan X4 key bindings.',
+      matched: [],
+      skipped: [],
+    })
+    showTemporaryFeedback('keybindings-feedback', 'Failed to scan X4 key bindings.', 'error', 5000)
+  } finally {
+    button.disabled = false
+  }
+}
+
+async function applyX4Import() {
+  const matched = x4ImportPreview?.matched || []
+  if (!matched.length) {
+    return
+  }
+
+  const updates = {}
+  for (const item of matched) {
+    updates[item.action] = { key: item.key }
+  }
+
+  setFeedback('keybindings-feedback', 'Importing X4 bindings...', 'info')
+
+  try {
+    const next = await window.x4Desktop.updateKeybindings(updates)
+    currentKeybindings = next.bindings || {}
+    renderKeybindings(currentKeybindings)
+    dismissX4ImportReview()
+    showTemporaryFeedback('keybindings-feedback', `Imported ${matched.length} X4 binding${matched.length === 1 ? '' : 's'}.`, 'success')
+    await loadState()
+  } catch (error) {
+    showTemporaryFeedback('keybindings-feedback', error instanceof Error ? error.message : 'Failed to import X4 key bindings.', 'error', 5000)
+  }
+}
+
 bindAction('refresh-status', () => {
   void loadState()
 })
@@ -551,6 +675,18 @@ bindAction('copy-lan', async () => {
 
 bindAction('open-log', () => {
   void window.x4Desktop.showLogLocation()
+})
+
+bindAction('import-x4', () => {
+  void detectX4Import()
+})
+
+bindAction('apply-x4-import', () => {
+  void applyX4Import()
+})
+
+bindAction('dismiss-x4-import', () => {
+  dismissX4ImportReview()
 })
 
 getInput('allow-remote-controls').addEventListener('change', () => {

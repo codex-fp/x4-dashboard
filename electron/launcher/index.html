@@ -185,6 +185,45 @@
         </div>
         <div id="keybindings-list" class="keybindings-list"></div>
 
+        <div class="button-row keybinding-import-row">
+          <button id="import-x4" class="secondary-button">Import from X4</button>
+        </div>
+
+        <section id="x4-import-review" class="import-review" hidden>
+          <div class="import-review-header">
+            <div>
+              <p class="label">X4 Import Review</p>
+              <strong id="x4-import-status">Waiting for scan</strong>
+            </div>
+            <div class="button-row">
+              <button id="apply-x4-import" hidden>Apply Imported Bindings</button>
+              <button id="dismiss-x4-import" class="secondary-button">Dismiss</button>
+            </div>
+          </div>
+
+          <p id="x4-import-message" class="muted">-</p>
+          <p id="x4-import-source" class="muted import-review-source" hidden></p>
+
+          <div class="import-review-metrics">
+            <article>
+              <span>Matched</span>
+              <strong id="x4-import-matched-count">0</strong>
+            </article>
+            <article>
+              <span>Skipped</span>
+              <strong id="x4-import-skipped-count">0</strong>
+            </article>
+          </div>
+
+          <div id="x4-import-matched-empty" class="muted">No supported launcher bindings are ready to import.</div>
+          <div id="x4-import-matched-list" class="import-review-list"></div>
+
+          <div id="x4-import-skipped-section" class="import-review-skipped" hidden>
+            <p class="label">Skipped Actions</p>
+            <div id="x4-import-skipped-list" class="import-review-list"></div>
+          </div>
+        </section>
+
         <div class="button-row">
           <div id="keybinding-listen-hint" class="inline-feedback info" hidden></div>
           <div id="keybindings-feedback" class="inline-feedback" hidden></div>
