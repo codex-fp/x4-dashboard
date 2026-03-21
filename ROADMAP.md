@@ -9,6 +9,7 @@ This roadmap is a lightweight public planning document for a shorter, more frequ
 - Investigate automatic import of X4 key bindings from local game settings
 - Write a non-technical installation and usage guide for new players
 - Reduce friction between first launch, setup, and the first successful control action by shipping concrete improvements in setup docs and keybinding flow issues rather than a standalone umbrella tracker
+- Ensure `shipStatus`-based widgets use the controlled ship only and fall back to a dimmed inactive state when the player is aboard but not actively controlling a ship
 
 ### v1.4.0 - Widget reliability and data coverage
 - Improve empty, loading, and disconnected states across widgets
