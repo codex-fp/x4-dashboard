@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { FlightState, KeyBinding, KeyBindings } from '../types/gameData'
+import { FlightState, KeyBinding, KeyBindings, ShipControlState } from '../types/gameData'
+import { isShipTelemetryLive } from '../utils/gameState'
 
 interface Props {
   flight: FlightState
+  control: ShipControlState
   onKeyPress: (action: string) => void
 }
 
@@ -81,34 +83,41 @@ function useSystemFlagBindings() {
   return { bindings, loading, loadFailed }
 }
 
-function SystemFlagToggle({ flight, onKeyPress, config }: Props & { config: FlagConfig }) {
+function SystemFlagToggle({ flight, control, onKeyPress, config }: Props & { config: FlagConfig }) {
   const { bindings, loading, loadFailed } = useSystemFlagBindings()
   const [pressing, setPressing] = useState<string | null>(null)
   const { key, action, icon, label, stateless } = config
+  const isLive = isShipTelemetryLive(control)
 
   function handlePress() {
-    if (!bindings[action]) return
+    if (!isLive || !bindings[action]) return
 
     setPressing(action)
     onKeyPress(action)
     setTimeout(() => setPressing(null), 200)
   }
 
-  const isOn = key ? !!flight[key] : false
+  const isOn = isLive && key ? !!flight[key] : false
   const binding = bindings[action]
   const hasBinding = Boolean(binding?.key)
   const isPressed = pressing === action
-  const stateLabel = loading
-    ? '… SYNC'
-    : loadFailed
-      ? '◌ HOST'
-      : !hasBinding
-        ? '∅ UNSET'
-        : stateless
-          ? '◌ CMD'
-          : isOn ? '● ON' : '○ OFF'
+  const stateLabel = !isLive
+    ? '◌ IDLE'
+    : loading
+      ? '… SYNC'
+      : loadFailed
+        ? '◌ HOST'
+        : !hasBinding
+          ? '∅ UNSET'
+          : stateless
+            ? '◌ CMD'
+            : isOn ? '● ON' : '○ OFF'
 
   function getTitle(): string {
+    if (!isLive) {
+      return `${label}: Ship controls inactive until a ship is under control.`
+    }
+
     if (loading) {
       return `${label}: Loading key binding from the Server Launcher.`
     }
@@ -126,9 +135,9 @@ function SystemFlagToggle({ flight, onKeyPress, config }: Props & { config: Flag
 
   return (
     <button
-      className={`sysflag-btn ${isOn ? 'on' : 'off'} ${stateless ? 'stateless' : ''} ${loading ? 'binding-loading' : ''} ${loadFailed ? 'binding-error' : ''} ${!loading && !loadFailed && !hasBinding ? 'no-binding' : ''}`}
+      className={`sysflag-btn ${isOn ? 'on' : 'off'} ${stateless ? 'stateless' : ''} ${isLive ? '' : 'inactive-control'} ${loading ? 'binding-loading' : ''} ${loadFailed ? 'binding-error' : ''} ${!loading && !loadFailed && !hasBinding ? 'no-binding' : ''}`}
       onClick={handlePress}
-      disabled={loading || loadFailed || !hasBinding}
+      disabled={!isLive || loading || loadFailed || !hasBinding}
       title={getTitle()}
       style={isPressed ? { transform: 'scale(0.92)', opacity: 0.65 } : undefined}
     >

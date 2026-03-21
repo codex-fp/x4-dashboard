@@ -142,17 +142,52 @@ function normalizeCombatPayload(raw) {
   };
 }
 
+function normalizeShipControlPayload(raw) {
+  const shipStatus = raw && typeof raw === 'object' ? raw : {};
+  const occupied = getBoolean(
+    shipStatus.occupied,
+    shipStatus.hasOccupiedShip,
+    shipStatus.playerOccupied,
+    shipStatus.playeroccupied
+  );
+  const controlled = getBoolean(
+    shipStatus.controlled,
+    shipStatus.hasControlledShip,
+    shipStatus.playerControlled,
+    shipStatus.playercontrolled
+  );
+
+  return {
+    occupied: occupied ?? false,
+    controlled: controlled ?? false,
+  };
+}
+
 function mergeShipStatus(previous, next) {
   const prevShipStatus = previous && typeof previous === 'object' ? previous : {};
   const nextShipStatus = next && typeof next === 'object' ? next : {};
   const merged = { ...prevShipStatus, ...nextShipStatus };
   const combat = normalizeCombatPayload(nextShipStatus);
+  const nextOccupied = getBoolean(
+    nextShipStatus.occupied,
+    nextShipStatus.hasOccupiedShip,
+    nextShipStatus.playerOccupied,
+    nextShipStatus.playeroccupied
+  );
+  const nextControlled = getBoolean(
+    nextShipStatus.controlled,
+    nextShipStatus.hasControlledShip,
+    nextShipStatus.playerControlled,
+    nextShipStatus.playercontrolled
+  );
 
   merged.alertLevel = combat.alertLevel;
   merged.attackerCount = combat.attackerCount;
   merged.incomingMissiles = combat.incomingMissiles;
   merged.missileIncoming = combat.missileIncoming;
   merged.missileLockingOn = combat.missileLockingOn;
+  merged.occupied = nextOccupied ?? prevShipStatus.occupied ?? false;
+  merged.controlled = nextControlled ?? prevShipStatus.controlled ?? false;
 
   return merged;
 }
@@ -280,10 +315,12 @@ class DataAggregator {
     const ext = this.external;
     const es  = ext.shipStatus;
     const profile = ext.playerProfile;
+    const control = normalizeShipControlPayload(es);
+    const hasLiveShipTelemetry = control.controlled;
 
-    const hull    = es?.hull    ?? 100;
-    const shields = es?.shields ?? 100;
-    const speed   = es?.speed   ?? 0;
+    const hull    = hasLiveShipTelemetry ? (es?.hull ?? 100) : 0;
+    const shields = hasLiveShipTelemetry ? (es?.shields ?? 100) : 0;
+    const speed   = hasLiveShipTelemetry ? (es?.speed ?? 0) : 0;
 
     const player = {
       name:        profile?.name        || 'UNKNOWN',
@@ -294,30 +331,30 @@ class DataAggregator {
     };
 
     const ship = {
-      name:             es?.name     || '',
-      type:             es?.shipSize || '',
+      name:             hasLiveShipTelemetry ? (es?.name || '') : '',
+      type:             hasLiveShipTelemetry ? (es?.shipSize || '') : '',
       hull:             Math.max(0, Math.min(100, hull)),
       shields:          Math.max(0, Math.min(100, shields)),
-      isDockedOrLanded: es?.docked   ?? false,
+      isDockedOrLanded: hasLiveShipTelemetry ? (es?.docked ?? false) : false,
     };
 
     const flight = {
       speed,
-      maxSpeed:      es?.maxSpeed      ?? 0,
-      maxBoostSpeed: es?.maxBoostSpeed ?? 0,
-      maxTravelSpeed: es?.maxTravelSpeed ?? 0,
-      boostEnergy:   es?.boostEnergy   ?? 100,
-      boosting:      es?.boosting      ?? false,
-      travelDrive:   es?.travelMode    ?? false,
-      flightAssist:  es?.flightAssist  ?? true,
-      seta:          es?.seta          ?? false,
-      autopilot:     es?.autopilot     ?? false,
-      scanMode:      es?.scanMode      ?? false,
-      longRangeScan: es?.longRangeScan ?? false,
+      maxSpeed:      hasLiveShipTelemetry ? (es?.maxSpeed ?? 0) : 0,
+      maxBoostSpeed: hasLiveShipTelemetry ? (es?.maxBoostSpeed ?? 0) : 0,
+      maxTravelSpeed: hasLiveShipTelemetry ? (es?.maxTravelSpeed ?? 0) : 0,
+      boostEnergy:   hasLiveShipTelemetry ? (es?.boostEnergy ?? 100) : 0,
+      boosting:      hasLiveShipTelemetry ? (es?.boosting ?? false) : false,
+      travelDrive:   hasLiveShipTelemetry ? (es?.travelMode ?? false) : false,
+      flightAssist:  hasLiveShipTelemetry ? (es?.flightAssist ?? true) : false,
+      seta:          hasLiveShipTelemetry ? (es?.seta ?? false) : false,
+      autopilot:     hasLiveShipTelemetry ? (es?.autopilot ?? false) : false,
+      scanMode:      hasLiveShipTelemetry ? (es?.scanMode ?? false) : false,
+      longRangeScan: hasLiveShipTelemetry ? (es?.longRangeScan ?? false) : false,
     };
 
     const ti = ext.targetInfo;
-    const combatTarget = (ti && ti.hasTarget) ? {
+    const combatTarget = (hasLiveShipTelemetry && ti && ti.hasTarget) ? {
       name:        ti.name        || '',
       shipName:    ti.shipName    || '',
       hull:        Math.max(0, Math.min(100, ti.hull    ?? 100)),
@@ -330,7 +367,15 @@ class DataAggregator {
       bounty:      ti.bounty      ?? 0,
     } : null;
 
-    const combat = normalizeCombatPayload(es);
+    const combat = hasLiveShipTelemetry
+      ? normalizeCombatPayload(es)
+      : {
+          alertLevel: 0,
+          attackerCount: 0,
+          incomingMissiles: 0,
+          missileIncoming: false,
+          missileLockingOn: false,
+        };
 
     return {
       _meta: {
@@ -338,6 +383,7 @@ class DataAggregator {
         externalConnected: this.externalConnected,
       },
       player,
+      control,
       ship,
       flight,
       combat: {

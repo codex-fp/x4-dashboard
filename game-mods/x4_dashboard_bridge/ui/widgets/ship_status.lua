@@ -59,10 +59,17 @@ local output = {}
 function output.handle()
     local occupiedShipId = C.GetPlayerOccupiedShipID()
     local controlledShipId = C.GetPlayerControlledShipID()
-    local shipId = occupiedShipId
-    if shipId == 0 then
-        return nil
+    local hasOccupiedShip = occupiedShipId ~= 0
+    local hasControlledShip = controlledShipId ~= 0
+
+    if not hasControlledShip then
+        return {
+            occupied = hasOccupiedShip,
+            controlled = false,
+        }
     end
+
+    local shipId = controlledShipId
 
     local hull, shields = GetPlayerShipHullShield()
     local _, _, speedPerSecond, boosting, travelMode = GetPlayerSpeed()
@@ -94,6 +101,8 @@ function output.handle()
     local playerActivity = GetPlayerActivity() or "none"
 
     return {
+        occupied      = hasOccupiedShip,
+        controlled    = true,
         name         = shipName,
         hull         = hull or 0,
         shields      = shields or 0,
@@ -105,7 +114,7 @@ function output.handle()
         travelMode   = travelMode or false,
         flightAssist = C.IsFlightAssistActive(),
         boostEnergy  = math.floor(C.GetBoostEnergyPercentage()),
-        docked       = C.IsShipAtExternalDock(C.GetPlayerControlledShipID()),
+        docked       = C.IsShipAtExternalDock(shipId),
         seta         = C.IsSetaActive(),
         autopilot    = autopilot,
         scanMode     = playerActivity == "scan",

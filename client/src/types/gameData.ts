@@ -20,6 +20,11 @@ export interface ShipStatus {
   isDockedOrLanded: boolean;
 }
 
+export interface ShipControlState {
+  occupied: boolean;
+  controlled: boolean;
+}
+
 export interface FlightState {
   speed: number;          // current m/s
   maxSpeed: number;       // normal speed cap m/s
@@ -129,6 +134,7 @@ export interface GenericListItem {
 export interface GameState {
   _meta: ConnectionMeta;
   player: PlayerInfo;
+  control: ShipControlState;
   ship: ShipStatus;
   flight: FlightState;
   combat: CombatState;

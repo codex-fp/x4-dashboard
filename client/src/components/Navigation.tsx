@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { PlayerInfo, FlightState } from '../types/gameData'
+import { PlayerInfo, FlightState, ShipControlState } from '../types/gameData'
+import { getShipTelemetryNotice, isShipTelemetryLive } from '../utils/gameState'
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value))
@@ -375,13 +376,17 @@ function CircularSpeedometer({
 
 // ── NavHeadingWidget ──────────────────────────────────────────────────────────
 
-export function NavHeadingWidget({ player, flight }: { player: PlayerInfo; flight: FlightState }) {
+export function NavHeadingWidget({ player, flight, control }: { player: PlayerInfo; flight: FlightState; control: ShipControlState }) {
+  const isLive = isShipTelemetryLive(control)
+  const notice = getShipTelemetryNotice(control)
+
   return (
     <>
       <div className="nav-heading-compact">
-        <div className={`nav-sector-name ${flight.travelDrive ? 'travel' : ''}`} style={{ fontSize: '13px', marginTop: 0 }}>
-          {player.sector || '–'}
+        <div className={`nav-sector-name ${isLive && flight.travelDrive ? 'travel' : ''}${isLive ? '' : ' nav-sector-name-inactive'}`} style={{ fontSize: '13px', marginTop: 0 }}>
+          {isLive ? (player.sector || '–') : notice.title}
         </div>
+        {!isLive && <div className="nav-heading-inactive-detail">{notice.detail}</div>}
       </div>
 
 
@@ -391,7 +396,7 @@ export function NavHeadingWidget({ player, flight }: { player: PlayerInfo; fligh
 
 // ── NavSpeedometerWidget ──────────────────────────────────────────────────────
 
-export function NavSpeedometerWidget({ flight, scale = 1 }: { flight: FlightState; scale?: number }) {
+export function NavSpeedometerWidget({ flight, control, scale = 1 }: { flight: FlightState; control: ShipControlState; scale?: number }) {
   const [speedMode, setSpeedMode] = useState<'bars' | 'gauge'>(() => {
     if (typeof window === 'undefined') {
       return 'bars'
@@ -405,20 +410,25 @@ export function NavSpeedometerWidget({ flight, scale = 1 }: { flight: FlightStat
     window.localStorage.setItem('navSpeedometerMode', speedMode)
   }, [speedMode])
 
+  const isLive = isShipTelemetryLive(control)
+  const notice = getShipTelemetryNotice(control)
+
   return (
-    <div className="nav-speed-wrapper">
+    <div className={`nav-speed-wrapper${isLive ? '' : ' nav-speed-wrapper-inactive'}`}>
       <div className="nav-speed-header">
-        <div className={`nav-speed-toggle${flight.travelDrive ? ' travel' : ''}`}>
+        <div className={`nav-speed-toggle${isLive && flight.travelDrive ? ' travel' : ''}`}>
           <button
             className={`nav-speed-toggle-btn${speedMode === 'bars' ? ' active' : ''}`}
+            disabled={!isLive}
             onClick={() => setSpeedMode('bars')}
           >BAR</button>
           <button
             className={`nav-speed-toggle-btn${speedMode === 'gauge' ? ' active' : ''}`}
+            disabled={!isLive}
             onClick={() => setSpeedMode('gauge')}
           >ARC</button>
         </div>
-        {flight.travelDrive && (
+        {isLive && flight.travelDrive && (
           <Chip
             label="Travel Drive"
             color="#ea80fc"
@@ -427,18 +437,25 @@ export function NavSpeedometerWidget({ flight, scale = 1 }: { flight: FlightStat
           />
         )}
       </div>
-      {speedMode === 'bars'
-        ? <RetroSpeedometer
-            speed={flight.speed} maxSpeed={flight.maxSpeed}
-            maxBoostSpeed={flight.maxBoostSpeed ?? 0} maxTravelSpeed={flight.maxTravelSpeed ?? 0}
-            boosting={flight.boosting} inTravel={flight.travelDrive} boostEnergy={flight.boostEnergy}
-          />
-        : <CircularSpeedometer
-            speed={flight.speed} maxSpeed={flight.maxSpeed}
-            maxBoostSpeed={flight.maxBoostSpeed ?? 0} maxTravelSpeed={flight.maxTravelSpeed ?? 0}
-            boosting={flight.boosting} inTravel={flight.travelDrive} boostEnergy={flight.boostEnergy}
-          />
-      }
+      {isLive
+        ? (speedMode === 'bars'
+            ? <RetroSpeedometer
+                speed={flight.speed} maxSpeed={flight.maxSpeed}
+                maxBoostSpeed={flight.maxBoostSpeed ?? 0} maxTravelSpeed={flight.maxTravelSpeed ?? 0}
+                boosting={flight.boosting} inTravel={flight.travelDrive} boostEnergy={flight.boostEnergy}
+              />
+            : <CircularSpeedometer
+                speed={flight.speed} maxSpeed={flight.maxSpeed}
+                maxBoostSpeed={flight.maxBoostSpeed ?? 0} maxTravelSpeed={flight.maxTravelSpeed ?? 0}
+                boosting={flight.boosting} inTravel={flight.travelDrive} boostEnergy={flight.boostEnergy}
+              />)
+        : (
+            <div className="nav-speed-inactive-panel">
+              <div className="nav-speed-inactive-kicker">{notice.title}</div>
+              <div className="nav-speed-inactive-value">-- m/s</div>
+              <div className="nav-speed-inactive-detail">{notice.detail}</div>
+            </div>
+          )}
     </div>
   )
 }

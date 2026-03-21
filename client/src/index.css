@@ -721,6 +721,21 @@ body {
 
 /* No key binding indicator */
 .sysflag-btn.no-binding { opacity: 0.35; cursor: default; }
+.sysflag-btn.inactive-control {
+  opacity: 0.32;
+  border-color: rgba(84,110,122,0.24);
+  box-shadow: none;
+}
+.sysflag-btn.inactive-control::before {
+  opacity: 0;
+}
+.sysflag-btn.inactive-control .sysflag-icon,
+.sysflag-btn.inactive-control .sysflag-name,
+.sysflag-btn.inactive-control .sysflag-state,
+.sysflag-btn.inactive-control .sysflag-key {
+  color: var(--c-text-dim);
+  text-shadow: none;
+}
 .sysflag-key {
   font-size: 8px;
   color: var(--c-text-dim);
@@ -1960,6 +1975,10 @@ body {
   min-height: 0;
 }
 
+.nav-speed-wrapper-inactive {
+  opacity: 0.78;
+}
+
 .nav-speed-header {
   display: flex;
   justify-content: space-between;
@@ -1984,6 +2003,11 @@ body {
   text-transform: uppercase;
   transition: border-color 0.15s, color 0.15s, background 0.15s, box-shadow 0.15s;
   outline: none;
+}
+
+.nav-speed-toggle-btn:disabled {
+  cursor: default;
+  opacity: 0.38;
 }
 
 .nav-speed-toggle-btn:hover {
@@ -2026,6 +2050,55 @@ body {
   height: 100%;
   display: block;
   min-height: 0;
+}
+
+.nav-sector-name-inactive {
+  color: var(--c-text-dim);
+  text-shadow: none;
+}
+
+.nav-heading-inactive-detail {
+  margin-top: 3px;
+  font-size: 8px;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: var(--c-text-dim);
+}
+
+.nav-speed-inactive-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid rgba(84, 110, 122, 0.24);
+  background: linear-gradient(180deg, rgba(10, 14, 18, 0.88) 0%, rgba(4, 8, 12, 0.96) 100%);
+}
+
+.nav-speed-inactive-kicker {
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--c-text-dim);
+}
+
+.nav-speed-inactive-value {
+  font-family: var(--font-ui);
+  font-size: 22px;
+  font-weight: 700;
+  color: rgba(178, 235, 242, 0.36);
+  letter-spacing: 1px;
+}
+
+.nav-speed-inactive-detail {
+  max-width: 220px;
+  text-align: center;
+  font-size: 8px;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: var(--c-text-dim);
 }
 
 
@@ -2225,6 +2298,26 @@ body {
   transition: width 220ms ease-out;
 }
 
+.health-bar-wrap-inactive {
+  opacity: 0.72;
+}
+
+.health-bar-fill-inactive {
+  background: linear-gradient(90deg, rgba(84, 110, 122, 0.18) 0%, rgba(84, 110, 122, 0.3) 100%);
+}
+
+.svg-bar-value.inactive {
+  color: var(--c-text-dim);
+}
+
+.ship-widget-inactive-note {
+  margin-top: 6px;
+  font-size: 8px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--c-text-dim);
+}
+
 .shields-fill {
   background: linear-gradient(90deg, rgba(0, 229, 255, 0.72) 0%, rgba(0, 229, 255, 0.92) 70%, rgba(128, 245, 255, 1) 100%);
   box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.25);
@@ -2252,6 +2345,11 @@ body {
   border: 1px solid var(--c-border-dim);
   background: rgba(0, 8, 14, 0.55);
   padding: 8px;
+}
+
+.ship-side-card-inactive {
+  background: rgba(6, 10, 14, 0.7);
+  border-color: rgba(84, 110, 122, 0.22);
 }
 
 .ship-side-label {

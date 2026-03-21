@@ -44,13 +44,13 @@ export function renderWidget({ id, state, onKeyPress, scale = 1, isInitialLoadin
     case 'PlayerInfo':
       return <PlayerInfo player={state.player} ship={state.ship} dataState={dataState} />
     case 'ShipShields':
-      return <ShipShieldsWidget ship={state.ship} />
+      return <ShipShieldsWidget ship={state.ship} control={state.control} />
     case 'ShipHull':
-      return <ShipHullWidget ship={state.ship} />
+      return <ShipHullWidget ship={state.ship} control={state.control} />
     case 'ShipCargo':
-      return <ShipCargoWidget ship={state.ship} />
+      return <ShipCargoWidget ship={state.ship} control={state.control} />
     case 'ShipStatus':
-      return <ShipStatusWidget ship={state.ship} />
+      return <ShipStatusWidget ship={state.ship} control={state.control} />
     case 'TargetShields':
       return target ? <TargetShieldsWidget target={target} /> : null
     case 'TargetHull':
@@ -58,25 +58,25 @@ export function renderWidget({ id, state, onKeyPress, scale = 1, isInitialLoadin
     case 'TargetInfo':
       return <TargetInfoWidget target={target} />
     case 'NavHeading':
-      return <NavHeadingWidget player={state.player} flight={state.flight} />
+      return <NavHeadingWidget player={state.player} flight={state.flight} control={state.control} />
     case 'NavSpeedometer':
-      return <NavSpeedometerWidget flight={state.flight} scale={scale} />
+      return <NavSpeedometerWidget flight={state.flight} control={state.control} scale={scale} />
     case 'FlightAssistToggle':
-      return <FlightAssistToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
+      return <FlightAssistToggleWidget flight={state.flight} control={state.control} onKeyPress={onKeyPress} />
     case 'SetaToggle':
-      return <SetaToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
+      return <SetaToggleWidget flight={state.flight} control={state.control} onKeyPress={onKeyPress} />
     case 'TravelDriveToggle':
-      return <TravelDriveToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
+      return <TravelDriveToggleWidget flight={state.flight} control={state.control} onKeyPress={onKeyPress} />
     case 'AutopilotToggle':
-      return <AutopilotToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
+      return <AutopilotToggleWidget flight={state.flight} control={state.control} onKeyPress={onKeyPress} />
     case 'MapToggle':
-      return <MapToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
+      return <MapToggleWidget flight={state.flight} control={state.control} onKeyPress={onKeyPress} />
     case 'ScanModeToggle':
-      return <ScanModeToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
+      return <ScanModeToggleWidget flight={state.flight} control={state.control} onKeyPress={onKeyPress} />
     case 'LongRangeScanToggle':
-      return <LongRangeScanToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
+      return <LongRangeScanToggleWidget flight={state.flight} control={state.control} onKeyPress={onKeyPress} />
     case 'MissionManagerToggle':
-      return <MissionManagerToggleWidget flight={state.flight} onKeyPress={onKeyPress} />
+      return <MissionManagerToggleWidget flight={state.flight} control={state.control} onKeyPress={onKeyPress} />
     case 'ActiveMission':
       return <ActiveMission mission={state.activeMission} dataState={dataState} />
     case 'MissionOffers':
@@ -88,7 +88,7 @@ export function renderWidget({ id, state, onKeyPress, scale = 1, isInitialLoadin
     case 'Factions':
       return <Factions factions={state.factions} dataState={dataState} />
     case 'UnderAttack':
-      return !state.combat.missileIncoming && !state.combat.missileLockingOn ? null : (
+      return !state.control.controlled || (!state.combat.missileIncoming && !state.combat.missileLockingOn) ? null : (
         <UnderAttackAlert
           missileIncoming={state.combat.missileIncoming}
           missileLockingOn={state.combat.missileLockingOn}
