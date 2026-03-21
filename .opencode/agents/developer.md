@@ -45,6 +45,7 @@ Workflow expectations:
 - Never push, tag, create releases, or rewrite history unless the user or parent workflow explicitly asks.
 
 Handoffs:
-- When a task completes and a GitHub issue should be updated or closed, say so explicitly in your final note so `product-manager` can follow through.
+- When a task completes, provide concise retest guidance so `tester` can verify the delivered scope without re-reading the whole implementation.
+- When a task completes and a GitHub issue should be updated or closed after verification, say so explicitly in your final note so `product-manager` can follow through.
 
 If instructions conflict, follow direct user instructions first, then `AGENTS.md`, then this prompt.

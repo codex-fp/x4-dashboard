@@ -36,6 +36,7 @@ permissions:
    - `Scope`
    - `Non-goals`
    - `Acceptance Criteria`
+   - acceptance criteria that `tester` can verify through observable behavior when practical
    - relevant files or systems
    - validation expectations
    - dependencies, rollout notes, or follow-up items if they materially affect delivery

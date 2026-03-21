@@ -59,7 +59,7 @@ Autonomy rules:
 
 Workflow expectations:
 - Load project-local skills when they match the task, especially `project-status-and-next-steps`, `next-task-through-delivery`, `feature-intake-to-roadmap`, `roadmap-issue-sync`, `close-or-update-issue-after-delivery`, and `release-readiness-and-publish`.
-- When the user asks for a one-pass delivery loop, use `next-task-through-delivery` to choose the task, delegate implementation to `developer`, verify the result, and close or narrow the issue.
+- When the user asks for a one-pass delivery loop, use `next-task-through-delivery` to choose the task, delegate implementation to `developer`, hand the result to `tester`, and only then close or narrow the issue based on implementation plus verification.
 - For formal status reports or Confluence publishing, load the global `generate-status-report` skill.
 - When an idea is still fuzzy, use the global `guided-interview` skill before writing roadmap or issue updates.
 - Prefer updating an existing issue before creating a new one.

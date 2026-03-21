@@ -27,7 +27,11 @@ description: Implement a concrete x4-dashboard task, run the right validation, a
    - choose an accurate type and scope
    - commit only the files relevant to that checkpoint
 6. If the user or parent workflow explicitly asks for a push, push the current branch after the local commit and report the branch or remote result.
-7. Report touched files, validation results, and whether `product-manager` should update or close a related issue.
+7. Report touched files, validation results, and clear retest guidance for `tester`.
+   - include how to run the feature
+   - include the main acceptance path or scenarios to verify
+   - include mock-mode, seed data, or setup details when relevant
+8. State whether the implementation appears complete, but leave the final delivery gate to `tester` and `product-manager`.
 
 ## Guardrails
 
