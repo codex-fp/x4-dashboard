@@ -13,7 +13,7 @@ function getWebSocketUrl(): string {
 
   const currentUrl = new URL(window.location.href)
   const protocol = currentUrl.protocol === 'https:' ? 'wss:' : 'ws:'
-  const port = ['3000', '5173'].includes(currentUrl.port) ? '3001' : currentUrl.port
+  const port = currentUrl.port === '3000' ? '3001' : currentUrl.port
 
   return `${protocol}//${currentUrl.hostname}${port ? `:${port}` : ''}`
 }

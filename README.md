@@ -58,7 +58,7 @@ This starts:
 - the Vite client
 - the Electron Server Launcher
 
-Use the launcher to open the dashboard, or go directly to `http://localhost:5173`.
+Use the launcher to open the dashboard, or go directly to `http://localhost:3000`.
 
 The mock buttons and simulated data are available only in this mode.
 

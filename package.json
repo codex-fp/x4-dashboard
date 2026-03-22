@@ -25,8 +25,8 @@
   },
   "scripts": {
     "install:all": "npm --prefix server install && npm --prefix client install",
-    "dev": "concurrently -k -n server,client,launcher -c cyan,magenta,yellow \"npm --prefix server run dev\" \"cross-env VITE_WS_URL=ws://localhost:3001 npm --prefix client run dev\" \"cross-env ELECTRON_RENDERER_URL=http://localhost:5173 electron .\"",
-    "dev:mock": "concurrently -k -n server,client,launcher -c cyan,magenta,yellow \"npm --prefix server run dev:mock\" \"cross-env VITE_WS_URL=ws://localhost:3001 npm --prefix client run dev\" \"cross-env ELECTRON_RENDERER_URL=http://localhost:5173 MOCK=true electron .\"",
+    "dev": "concurrently -k -n server,client,launcher -c cyan,magenta,yellow \"npm --prefix server run dev\" \"cross-env VITE_WS_URL=ws://localhost:3001 npm --prefix client run dev\" \"cross-env ELECTRON_RENDERER_URL=http://localhost:3000 electron .\"",
+    "dev:mock": "concurrently -k -n server,client,launcher -c cyan,magenta,yellow \"npm --prefix server run dev:mock\" \"cross-env VITE_WS_URL=ws://localhost:3001 npm --prefix client run dev\" \"cross-env ELECTRON_RENDERER_URL=http://localhost:3000 MOCK=true electron .\"",
     "build": "npm --prefix client run build",
     "start": "electron .",
     "serve": "node server/index.js",
