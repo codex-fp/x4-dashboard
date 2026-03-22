@@ -326,7 +326,7 @@ export const DASHBOARDS: DashboardConfig[] = [
     // ── Operations ─────────────────────────────────────────────────────────────
     {
         id: 'operations',
-        label: 'Operations',
+        label: 'Operations / Overview',
         layout: 'grid',
         columns: '0.9fr 1.2fr 0.88fr 1fr',
         panels: [
@@ -374,6 +374,69 @@ export const DASHBOARDS: DashboardConfig[] = [
             },
         ],
     },
+
+    {
+        id: 'operations-intel',
+        label: 'Operations / Intel',
+        layout: 'grid',
+        columns: 'minmax(0, 0.9fr) minmax(0, 1.1fr)',
+        panels: [
+            {
+                title: 'Comms', titleIcon: '◈',
+                style: {flex: 1, minHeight: 0},
+                internal: {layout: 'columns', columns: [{widgets: [{id: 'Comms', grow: true}]}]},
+                col: 1, row: 1, grow: true, scale: 1.14
+            },
+            {
+                title: 'Factions', titleIcon: '⬢',
+                style: {flex: 1, minHeight: 0},
+                internal: {layout: 'columns', columns: [{widgets: [{id: 'Factions', grow: true}]}]},
+                col: 2, row: 1, grow: true, scale: 1.14
+            },
+        ],
+    },
+
+    {
+        id: 'operations-missions',
+        label: 'Operations / Missions',
+        layout: 'grid',
+        columns: 'minmax(280px, 0.95fr) minmax(320px, 1.05fr)',
+        panels: [
+            {
+                title: 'Active Mission', titleIcon: '◆',
+                colorFn: (s) => s.activeMission?.completed ? 'success'
+                    : (s.activeMission && s.activeMission.timeleft > 0 && s.activeMission.timeleft < 300 ? 'danger' : 'primary'),
+                internal: {layout: 'columns', columns: [{widgets: [{id: 'ActiveMission'}]}]},
+                col: 1, row: 1, scale: 1.14
+            },
+            {
+                title: 'Mission Offers', titleIcon: '◈',
+                style: {flex: 1, minHeight: 0},
+                internal: {layout: 'columns', columns: [{widgets: [{id: 'MissionOffers', grow: true}]}]},
+                col: 2, row: 1, rowSpan: 2, grow: true, scale: 1.14
+            },
+            {
+                title: 'Research', titleIcon: '⬡', color: 'purple',
+                internal: {layout: 'columns', columns: [{widgets: [{id: 'Research'}]}]},
+                col: 1, row: 2, scale: 1.14
+            },
+        ],
+    },
+
+    {
+        id: 'operations-trade',
+        label: 'Operations / Trade',
+        layout: 'grid',
+        columns: 'minmax(120px, 0.34fr) minmax(0, 1fr)',
+        panels: [
+            {
+                title: 'Transaction Log', titleIcon: '¤', color: 'warning',
+                style: {flex: 1, minHeight: 0},
+                internal: {layout: 'columns', columns: [{widgets: [{id: 'TransactionLog', grow: true}]}]},
+                col: 2, row: 1, grow: true, scale: 1.14
+            },
+        ],
+    },
 ]
 
 export function getDashboard(id: string): DashboardConfig {
@@ -386,7 +449,19 @@ export function getDashboard(id: string): DashboardConfig {
     }
 
     if (id === 'comms') {
-        return DASHBOARDS.find(d => d.id === 'operations') ?? DASHBOARDS[0]
+        return DASHBOARDS.find(d => d.id === 'operations-intel') ?? DASHBOARDS[0]
+    }
+
+    if (id === 'intel') {
+        return DASHBOARDS.find(d => d.id === 'operations-intel') ?? DASHBOARDS[0]
+    }
+
+    if (id === 'missions') {
+        return DASHBOARDS.find(d => d.id === 'operations-missions') ?? DASHBOARDS[0]
+    }
+
+    if (id === 'trade') {
+        return DASHBOARDS.find(d => d.id === 'operations-trade') ?? DASHBOARDS[0]
     }
 
     return DASHBOARDS.find(d => d.id === id) ?? DASHBOARDS[0]

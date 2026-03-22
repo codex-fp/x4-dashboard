@@ -1557,11 +1557,17 @@ body {
 }
 
 @media (max-width: 900px) {
-  .dashboard-grid-operations {
+  .dashboard-grid-operations,
+  .dashboard-grid-operations-intel,
+  .dashboard-grid-operations-missions,
+  .dashboard-grid-operations-trade {
     grid-template-columns: 1fr !important;
   }
 
-  .dashboard-grid-operations > .dashboard-grid-cell {
+  .dashboard-grid-operations > .dashboard-grid-cell,
+  .dashboard-grid-operations-intel > .dashboard-grid-cell,
+  .dashboard-grid-operations-missions > .dashboard-grid-cell,
+  .dashboard-grid-operations-trade > .dashboard-grid-cell {
     grid-column: auto !important;
     grid-row: auto !important;
     height: auto !important;
