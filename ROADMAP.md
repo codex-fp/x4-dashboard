@@ -5,17 +5,18 @@ This roadmap is a lightweight public planning document for a shorter, more frequ
 ## Current release plan
 
 ### v1.3.0 - Controls and onboarding
-- Add in-app keybinding capture by listening for keyboard input
-- Investigate automatic import of X4 key bindings from local game settings
-- Write a non-technical installation and usage guide for new players
-- Reduce friction between first launch, setup, and the first successful control action by shipping concrete improvements in setup docs and keybinding flow issues rather than a standalone umbrella tracker
-- Ensure `shipStatus`-based widgets use the controlled ship only and fall back to a dimmed inactive state when the player is aboard but not actively controlling a ship
+- Ship in-launcher keybinding capture for faster host setup
+- Ship automatic import for supported X4 key bindings from local game settings
+- Ship a non-technical installation and usage guide for new players
+- Reduce friction between first launch, setup, and the first successful control action with a clearer launcher-first flow
+- Include the controlled-ship `shipStatus` fix so affected widgets dim cleanly when the player is not actively piloting
+- Roll in the latest combat and situational-awareness additions already on `master`, including factions, target, transaction log, and missile warning improvements
 
 ### v1.4.0 - Widget reliability and data coverage
-- Improve empty, loading, and disconnected states across widgets
+- Improve empty, loading, and disconnected states across the remaining widgets that still need polish after the recent dashboard pass
 - Complete typed support for the remaining secondary game data areas after shipping factions and transaction log
 - Add the remaining secondary-data follow-up widgets for agents and inventory, with inventory depending on confirmed bridge coverage
-- Verify UnderAttack widget data flow and close any remaining game-state coverage gaps
+- Verify live UnderAttack and broader combat data flow in gameplay and close any remaining bridge coverage gaps
 
 ### v1.5.0 - Quality and release presentation
 - Add an initial automated test suite to protect the most important flows

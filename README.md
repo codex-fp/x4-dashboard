@@ -281,7 +281,7 @@ x4-dashboard/
 
 - The project is playable, but still evolving
 - Remote hosting is not a supported security model
-- Some launcher and LAN workflows are still being refined for `v1.2.0`
+- Some launcher and LAN workflows are still being refined for `v1.3.0`
 - There is still no automated test suite
 
 ## 🙏 Credits

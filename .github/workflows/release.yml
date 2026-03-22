@@ -45,11 +45,8 @@ jobs:
       - name: Validate release
         run: npm run release:check
 
-      - name: Build server bundle
-        run: npm run dist:server-bundle -- ${{ env.RELEASE_VERSION }}
-
-      - name: Build Lua mod bundle
-        run: npm run dist:lua-mod -- ${{ env.RELEASE_VERSION }}
+      - name: Build release bundles
+        run: npm run release:bundle -- ${{ env.RELEASE_VERSION }}
 
       - name: Archive release packages
         run: |

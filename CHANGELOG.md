@@ -6,9 +6,25 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-03-22
+
 ### Added
 - Non-technical player setup guide covering packaged installation, Lua bridge setup, launcher-based control configuration, LAN access, and first-action verification for new users
+- Launcher flow to capture host control bindings directly from keyboard input instead of manual key-code entry
 - Launcher flow to detect supported X4 key bindings from local Windows profiles, review them, and import matched actions into the host keybinding store
+- Standings widget for faction reputation visibility
+- Missile lock warning state in the Under Attack widget
+- Target dashboard preset and transaction log widget for broader moment-to-moment ship awareness
+
+### Changed
+- Simplified launcher-first app scripts around `npm run dev`, `npm run dev:mock`, and `npm start`
+- Refined the setup and first-action path so launcher onboarding, keybinding review, and player docs work together more cleanly
+- Refreshed the flight-oriented dashboard presets, including the restored classic flight layout
+
+### Fixed
+- `shipStatus`-driven widgets now use the actively controlled ship and dim correctly when the player is aboard but not piloting
+- Widget loading and empty states behave more consistently across the dashboard
+- Under Attack combat state handling is more resilient and the missile warning copy is clearer
 
 ## [1.2.0] - 2026-03-19
 
