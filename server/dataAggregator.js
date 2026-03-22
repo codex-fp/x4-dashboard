@@ -487,11 +487,16 @@ class DataAggregator {
     if (!this.externalConnected) return;
     const { _connected, ...rest } = data;
     const previousShipStatus = this.external.shipStatus;
+    const normalizedAgents = rest.agents !== undefined ? (normalizeAgents(rest.agents) ?? []) : undefined;
     // Merge so partial updates (e.g. ship-only ticks) don't wipe mission data
     this.external = { ...this.external, ...rest };
 
     if (rest.shipStatus !== undefined) {
       this.external.shipStatus = mergeShipStatus(previousShipStatus, rest.shipStatus);
+    }
+
+    if (normalizedAgents !== undefined) {
+      this.external.agents = normalizedAgents;
     }
   }
 
@@ -583,7 +588,7 @@ class DataAggregator {
       logbook:         normalizeLogbook(ext.logbook),
       currentResearch: ext.currentResearch || null,
       factions:        normalizeFactions(ext.factions),
-      agents:          normalizeAgents(ext.agents),
+      agents:          Array.isArray(ext.agents) ? ext.agents : normalizeAgents(ext.agents),
       inventory:       ext.inventory       || null,
       transactionLog:  normalizeTransactionLog(ext.transactionLog),
     };
