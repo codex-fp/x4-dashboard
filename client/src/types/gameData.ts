@@ -114,6 +114,25 @@ export interface LogbookEntry {
   factionname: string;
 }
 
+export interface TransactionLogEntry {
+  id: string;
+  eventType: string;
+  eventLabel: string;
+  partnerName: string | null;
+  itemName: string | null;
+  amount: number | null;
+  unitPrice: number | null;
+  value: number | null;
+  time: number | null;
+  timeText: string | null;
+  description: string;
+  destroyedPartner: boolean;
+}
+
+export interface TransactionLog {
+  list: TransactionLogEntry[];
+}
+
 export interface FactionStanding {
   id: string;
   name: string;
@@ -145,7 +164,7 @@ export interface GameState {
   factions: FactionStanding[] | null;
   agents: GenericListItem[] | null;
   inventory: GenericDataRecord | null;
-  transactionLog: { list: GenericListItem[] } | null;
+  transactionLog: TransactionLog | null;
 }
 
 export interface KeyBinding {

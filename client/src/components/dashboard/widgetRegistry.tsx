@@ -20,6 +20,7 @@ import { ActiveMission } from '../ActiveMission'
 import { Comms } from '../Comms'
 import { Factions } from '../Factions'
 import { Research } from '../Research'
+import { TransactionLog } from '../TransactionLog'
 import { UnderAttackAlert } from '../UnderAttackAlert'
 import { hasCombatTarget } from '../../utils/gameState'
 
@@ -87,6 +88,8 @@ export function renderWidget({ id, state, onKeyPress, scale = 1, isInitialLoadin
       return <Research research={state.currentResearch} dataState={dataState} />
     case 'Factions':
       return <Factions factions={state.factions} dataState={dataState} />
+    case 'TransactionLog':
+      return <TransactionLog transactionLog={state.transactionLog} dataState={dataState} />
     case 'UnderAttack':
       return !state.control.controlled || (!state.combat.missileIncoming && !state.combat.missileLockingOn) ? null : (
         <UnderAttackAlert

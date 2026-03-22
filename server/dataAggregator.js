@@ -58,6 +58,19 @@ function getFiniteNumber(...candidates) {
   return null;
 }
 
+function getOptionalFiniteNumber(...candidates) {
+  for (const candidate of candidates) {
+    if (candidate === null || candidate === undefined || candidate === '') continue;
+
+    const value = Number(candidate);
+    if (Number.isFinite(value)) {
+      return value;
+    }
+  }
+
+  return null;
+}
+
 function getBoolean(...candidates) {
   for (const candidate of candidates) {
     if (typeof candidate === 'boolean') {
@@ -292,6 +305,77 @@ function normalizeFactions(raw) {
   return factions.sort((a, b) => a.name.localeCompare(b.name));
 }
 
+function formatElapsedTime(seconds) {
+  const value = getOptionalFiniteNumber(seconds);
+
+  if (value === null || value < 0) return null;
+
+  const totalSeconds = Math.round(value);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const remainingSeconds = totalSeconds % 60;
+
+  if (hours > 0) return `T+${hours}h ${minutes}m`;
+  if (minutes > 0) return `T+${minutes}m ${remainingSeconds}s`;
+  return `T+${remainingSeconds}s`;
+}
+
+function normalizeTransactionEntry(entry, index) {
+  if (!entry || typeof entry !== 'object') return null;
+
+  const id = normalizeText(entry.id) || normalizeText(entry.entryid) || `transaction-${index + 1}`;
+  const rawEventType = normalizeText(entry.eventType) || normalizeText(entry.eventtype) || normalizeText(entry.type);
+  const rawEventLabel = normalizeText(entry.eventLabel) || normalizeText(entry.eventlabel) || normalizeText(entry.eventtypename);
+  const partnerName = normalizeText(entry.partnerName) || normalizeText(entry.partnername) || normalizeText(entry.partnerLabel) || normalizeText(entry.partnerlabel);
+  const itemName = normalizeText(entry.itemName) || normalizeText(entry.itemname) || normalizeText(entry.wareName) || normalizeText(entry.warename) || normalizeText(entry.ware);
+  const description = normalizeText(entry.description);
+  const time = getOptionalFiniteNumber(entry.time, entry.timestamp, entry.gameTime, entry.gametime);
+  const timeText = normalizeText(entry.timeText) || normalizeText(entry.timetext) || normalizeText(entry.timeLabel) || normalizeText(entry.timelabel) || formatElapsedTime(time);
+  const value = getOptionalFiniteNumber(entry.value, entry.money, entry.credits);
+  const amount = getOptionalFiniteNumber(entry.amount, entry.quantity);
+  const unitPrice = getOptionalFiniteNumber(entry.unitPrice, entry.unitprice, entry.price);
+  const destroyedPartner = getBoolean(entry.destroyedPartner, entry.destroyedpartner) ?? false;
+
+  return {
+    id,
+    eventType: rawEventType ? rawEventType.toLowerCase() : 'transaction',
+    eventLabel: rawEventLabel || formatLabel(rawEventType) || 'Transaction',
+    partnerName: partnerName || null,
+    itemName: itemName || null,
+    amount,
+    unitPrice,
+    value,
+    time,
+    timeText: timeText || null,
+    description,
+    destroyedPartner,
+  };
+}
+
+function normalizeTransactionLog(raw) {
+  if (!raw) return null;
+
+  const source = Array.isArray(raw)
+    ? raw
+    : Array.isArray(raw.list)
+      ? raw.list
+      : [];
+
+  const list = source
+    .map((entry, index) => normalizeTransactionEntry(entry, index))
+    .filter(Boolean)
+    .sort((a, b) => {
+      if (a.time === null && b.time === null) return 0;
+      if (a.time === null) return 1;
+      if (b.time === null) return -1;
+      return b.time - a.time;
+    });
+
+  if (!list.length) return null;
+
+  return { list };
+}
+
 class DataAggregator {
   constructor() {
     this.external = {};
@@ -401,7 +485,7 @@ class DataAggregator {
       factions:        normalizeFactions(ext.factions),
       agents:          ext.agents          || null,
       inventory:       ext.inventory       || null,
-      transactionLog:  ext.transactionLog  || null,
+      transactionLog:  normalizeTransactionLog(ext.transactionLog),
     };
   }
 }

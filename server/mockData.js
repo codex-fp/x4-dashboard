@@ -76,6 +76,69 @@ const MOCK_FACTIONS = [
   { id: 'xenon', name: 'Xenon', shortName: 'XEN', relationLabel: 'Enemy', relationValue: -20, licenseLabels: [] },
 ];
 
+const MOCK_TRANSACTION_LOG = [
+  {
+    entryid: 'tx-ore-sale',
+    eventtype: 'trade',
+    eventtypename: 'Ore Sale',
+    partnername: 'ARG Mineral Exchange (ARG-12)',
+    ware: 'Ore',
+    amount: 640,
+    price: 142,
+    money: 90880,
+    timeOffset: 95,
+    description: 'Sold 640 Ore to ARG Mineral Exchange at 142 Cr each.',
+  },
+  {
+    entryid: 'tx-hullparts-buy',
+    eventtype: 'trade',
+    eventtypename: 'Hull Parts Purchase',
+    partnername: 'TEL Wharf Supply (TEL-04)',
+    ware: 'Hull Parts',
+    amount: 180,
+    price: 232,
+    money: -41760,
+    timeOffset: 260,
+    description: 'Purchased 180 Hull Parts from TEL Wharf Supply.',
+  },
+  {
+    entryid: 'tx-station-fee',
+    eventtype: 'maintenance',
+    eventtypename: 'Station Service Fee',
+    partnername: 'Segaris Dockyard',
+    money: -12500,
+    timeOffset: 420,
+    description: 'Docking and service charges applied while resupplying.',
+  },
+  {
+    entryid: 'tx-ship-sale',
+    eventtype: 'sellship',
+    eventtypename: 'Ship Sale',
+    partnername: 'Pioneer Shipyard (PIO-07)',
+    money: 486000,
+    timeOffset: 730,
+    description: 'Transferred a captured Minotaur Raider to Pioneer Shipyard.',
+  },
+  {
+    entryid: 'tx-salvage',
+    eventtype: 'salvage',
+    eventtypename: 'Salvage Recovery',
+    ware: 'Advanced Electronics',
+    amount: 24,
+    money: 0,
+    timeOffset: 980,
+    description: 'Recovered cargo from battlefield debris.',
+  },
+  {
+    entryid: 'tx-legacy',
+    eventtype: 'transfer',
+    eventtypename: 'Crew Transfer',
+    partnername: '',
+    money: null,
+    timeOffset: 1240,
+  },
+];
+
 function cloneMissionGroup(group, prefix, copies) {
   const result = [];
 
@@ -128,6 +191,16 @@ function createGeneratedLogbookEntries(count, tick) {
   }
 
   return result;
+}
+
+function createMockTransactionLog(tick) {
+  const currentTime = 54000 + tick * 3;
+
+  return MOCK_TRANSACTION_LOG.map((entry, index) => ({
+    ...entry,
+    time: currentTime - entry.timeOffset,
+    timeText: index === 0 ? 'just now' : `${Math.max(1, Math.round((entry.timeOffset + tick % 30) / 60))}m ago`,
+  })).sort((a, b) => b.time - a.time);
 }
 
 // ── State evolution ───────────────────────────────────────────────────────────
@@ -251,6 +324,7 @@ class MockDataSource extends EventEmitter {
           percentageCompleted: Math.min(99.9, MOCK_RESEARCH.percentageCompleted + this.tick * 0.001),
         },
         factions: MOCK_FACTIONS,
+        transactionLog: createMockTransactionLog(this.tick),
       });
     }
 

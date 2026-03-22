@@ -40,6 +40,7 @@ export type WidgetId =
     | 'Comms'
     | 'Research'
     | 'Factions'
+    | 'TransactionLog'
     | 'UnderAttack'
 
 // ── Panel internal layout types ───────────────────────────────────────────────
@@ -353,10 +354,16 @@ export const DASHBOARDS: DashboardConfig[] = [
                 col: 2, row: 2, grow: true, scale: 1.14
             },
             {
+                title: 'Transaction Log', titleIcon: '¤', color: 'warning',
+                style: {flex: 1, minHeight: 0},
+                internal: {layout: 'columns', columns: [{widgets: [{id: 'TransactionLog', grow: true}]}]},
+                col: 1, colSpan: 2, row: 3, grow: true, scale: 1.14
+            },
+            {
                 title: 'Factions', titleIcon: '⬢',
                 style: {flex: 1, minHeight: 0},
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'Factions', grow: true}]}]},
-                col: 3, row: 1, rowSpan: 2, grow: true, scale: 1.14
+                col: 3, row: 1, rowSpan: 3, grow: true, scale: 1.14
             },
         ],
     },
