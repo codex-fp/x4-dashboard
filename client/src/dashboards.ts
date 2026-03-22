@@ -135,7 +135,7 @@ export const DASHBOARDS: DashboardConfig[] = [
     // ── Ship Controls ──────────────────────────────────────────────────────────
     {
         id: 'flight',
-        label: 'Flight',
+        label: 'Flight (No Target)',
         layout: 'grid',
         columns: '60% 40%',
         panels: [
@@ -188,6 +188,79 @@ export const DASHBOARDS: DashboardConfig[] = [
                 style: {zIndex: 10, alignSelf: 'start', pointerEvents: 'none'},
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'UnderAttack', scale: 1.71}]}]},
                 col: 1, colSpan: 2, row: 1, scale: 1
+            },
+        ],
+    },
+
+    {
+        id: 'flight-classic',
+        label: 'Flight',
+        layout: 'grid',
+        columns: '30% 40% 30%',
+        panels: [
+            {
+                color: 'primary',
+                internal: {
+                    layout: 'columns', columns: [{
+                        widgets: [
+                            {id: 'NavHeading', scale: 0.7},
+                            {id: 'NavSpeedometer', grow: true},
+                        ]
+                    }]
+                },
+                col: 2, row: 2, rowSpan: 2, grow: true, scale: 1.43
+            },
+            {
+                internal: {
+                    layout: 'columns', columns: [{
+                        widgets: [
+                            {id: 'ShipShields'},
+                            {id: 'ShipHull'},
+                        ]
+                    }]
+                },
+                col: 1, colSpan: 3, row: 4, scale: 1.43,
+            },
+            {
+                title: 'Target',
+                colorFn: (s) => s.combat.target?.isHostile ? 'danger' : 'warning',
+                internal: {
+                    layout: 'columns', columns: [{
+                        widgets: [
+                            {id: 'TargetInfo', scale: 0.7},
+                            {id: 'TargetShields'},
+                            {id: 'TargetHull'},
+                        ]
+                    }]
+                },
+                col: 1, row: 2, rowSpan: 2, scale: 1.43
+            },
+            {
+                titleIcon: '⎔',
+                internal: {
+                    layout: 'grid',
+                    columns: '1fr 1fr',
+                    rows: 'repeat(4, minmax(0, 1fr))',
+                    gap: '6px',
+                    width: '100%',
+                    widgets: [
+                        {id: 'TravelDriveToggle', col: 1, row: 1},
+                        {id: 'SetaToggle', col: 2, row: 1},
+                        {id: 'FlightAssistToggle', col: 1, row: 2},
+                        {id: 'AutopilotToggle', col: 2, row: 2},
+                        {id: 'ScanModeToggle', col: 1, row: 3},
+                        {id: 'LongRangeScanToggle', col: 2, row: 3},
+                        {id: 'MapToggle', col: 1, row: 4},
+                        {id: 'MissionManagerToggle', col: 2, row: 4},
+                    ]
+                },
+                col: 3, row: 2, rowSpan: 2, grow: true, scale: 1.43
+            },
+            {
+                id: 'underAttack', frameless: true,
+                style: {zIndex: 10, alignSelf: 'start', pointerEvents: 'none'},
+                internal: {layout: 'columns', columns: [{widgets: [{id: 'UnderAttack', scale: 1.71}]}]},
+                col: 1, colSpan: 3, row: 1, scale: 1
             },
         ],
     },
