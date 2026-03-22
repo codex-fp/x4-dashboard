@@ -346,31 +346,31 @@ export const DASHBOARDS: DashboardConfig[] = [
                 title: 'Comms', titleIcon: '◈',
                 style: {flex: 1, minHeight: 0},
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'Comms', grow: true}]}]},
-                col: 2, row: 1, rowSpan: 2, grow: true, height: '380px', scale: 1.14
+                col: 2, row: 1, rowSpan: 2, grow: true, scale: 1.14
             },
             {
                 title: 'Transaction Log', titleIcon: '¤', color: 'warning',
                 style: {flex: 1, minHeight: 0},
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'TransactionLog', grow: true}]}]},
-                col: 3, row: 1, rowSpan: 2, grow: true, height: '380px', scale: 1.14
+                col: 3, row: 1, rowSpan: 2, grow: true, scale: 1.14
             },
             {
                 title: 'Mission Offers', titleIcon: '◈',
                 style: {flex: 1, minHeight: 0},
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'MissionOffers', grow: true}]}]},
-                col: 4, row: 1, rowSpan: 3, grow: true, height: '640px', scale: 1.14
+                col: 4, row: 1, rowSpan: 3, grow: true, scale: 1.14
             },
             {
                 title: 'Agents', titleIcon: '◌', color: 'success',
                 style: {flex: 1, minHeight: 0},
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'Agents', grow: true}]}]},
-                col: 1, row: 3, grow: true, height: '250px', scale: 1.14
+                col: 1, row: 3, grow: true, scale: 1.14
             },
             {
                 title: 'Factions', titleIcon: '⬢',
                 style: {flex: 1, minHeight: 0},
                 internal: {layout: 'columns', columns: [{widgets: [{id: 'Factions', grow: true}]}]},
-                col: 2, colSpan: 2, row: 3, grow: true, height: '250px', scale: 1.14
+                col: 2, colSpan: 2, row: 3, grow: true, scale: 1.14
             },
         ],
     },
