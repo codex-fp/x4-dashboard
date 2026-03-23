@@ -428,22 +428,10 @@ function createMockTransactionLog(tick, density) {
   })).sort((a, b) => b.time - a.time);
 }
 
-function createMockInventory(tick, density) {
-  const emptyCycle = Math.floor(tick / 36) % 3 === 2;
-
-  if (emptyCycle) {
-    return { list: [] };
-  }
-
-  const extraCount = Math.max(0, density - 1);
+function createMockInventory(density) {
+  const extraCount = Math.max(0, (density - 1) * 2);
   const sourceItems = [...MOCK_INVENTORY_ITEMS, ...EXTRA_MOCK_INVENTORY_ITEMS.slice(0, extraCount)];
-
-  return {
-    list: sourceItems.map((item, index) => ({
-      ...item,
-      amount: Math.max(0, item.amount + ((tick + index * 3) % 5) - 2),
-    })).filter((item) => item.amount > 0),
-  };
+  return { list: sourceItems.filter((item) => item.amount > 0) };
 }
 
 // ── State evolution ───────────────────────────────────────────────────────────
@@ -568,7 +556,7 @@ class MockDataSource extends EventEmitter {
         },
         factions: createMockFactions(this.contentDensity),
         agents: createMockAgents(this.tick),
-        inventory: createMockInventory(this.tick, this.contentDensity),
+        inventory: createMockInventory(this.contentDensity),
         transactionLog: createMockTransactionLog(this.tick, this.contentDensity),
       });
     }
