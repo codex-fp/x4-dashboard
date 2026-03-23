@@ -16,7 +16,8 @@ This roadmap is a lightweight public planning document for a shorter, more frequ
 - Improve empty, loading, and disconnected states across the remaining widgets that still need polish after the recent dashboard pass
 - Close out the remaining secondary game data coverage work after shipping factions, transaction log, and agents
 - Resolve inventory bridge coverage and, if feasible, ship the remaining secondary-data follow-up widget slice
-- Verify live UnderAttack and broader combat data flow in gameplay and close any remaining bridge coverage gaps
+- ~~Verify live UnderAttack and broader combat data flow in gameplay and close any remaining bridge coverage gaps~~ *(partially done — inventory delivered; combat data gaps remain)*
+- **Delivered in this cycle:** inventory bridge export, typed contract, and Operations/Trade dashboard integration
 
 ### v1.5.0 - Quality and release presentation
 - Add an initial automated test suite to protect the most important flows
