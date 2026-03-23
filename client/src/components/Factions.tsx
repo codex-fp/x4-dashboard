@@ -27,18 +27,6 @@ function formatRelationValue(value: number | null): string | null {
   return `${value > 0 ? '+' : ''}${value}`
 }
 
-function getRelationMeterFill(faction: FactionStanding): number {
-  if (typeof faction.relationValue === 'number') {
-    return Math.max(0, Math.min(100, ((faction.relationValue + 30) / 60) * 100))
-  }
-
-  const tone = getRelationTone(faction)
-  if (tone === 'positive') return 78
-  if (tone === 'negative') return 22
-  if (tone === 'neutral') return 50
-  return 50
-}
-
 function getFactionMonogram(faction: FactionStanding): string {
   const source = faction.shortName || faction.name || 'Faction'
   const alnum = source.replace(/[^A-Za-z0-9 ]+/g, ' ').trim()
@@ -67,19 +55,6 @@ export function Factions({ factions, dataState }: Props) {
     return <WidgetStateNotice tone="empty" title="No faction standings" detail="Faction telemetry appears here when the bridge provides standings data." compact />
   }
 
-  const summary = factions.reduce((totals, faction) => {
-    const tone = getRelationTone(faction)
-
-    if (tone === 'positive') totals.positive += 1
-    else if (tone === 'negative') totals.negative += 1
-    else if (tone === 'neutral') totals.neutral += 1
-    else totals.unknown += 1
-
-    if ((faction.licenseLabels || []).length > 0) totals.licensed += 1
-
-    return totals
-  }, { positive: 0, neutral: 0, negative: 0, unknown: 0, licensed: 0 })
-
   const sortedFactions = [...factions].sort((a, b) => {
     const aValue = typeof a.relationValue === 'number' ? a.relationValue : 0
     const bValue = typeof b.relationValue === 'number' ? b.relationValue : 0
@@ -88,30 +63,10 @@ export function Factions({ factions, dataState }: Props) {
 
   return (
     <div className="factions-list">
-      <div className="factions-summary-grid">
-        <div className="factions-summary-card tone-positive">
-          <span className="factions-summary-label">Allied</span>
-          <strong>{summary.positive}</strong>
-        </div>
-        <div className="factions-summary-card tone-neutral">
-          <span className="factions-summary-label">Neutral</span>
-          <strong>{summary.neutral}</strong>
-        </div>
-        <div className="factions-summary-card tone-negative">
-          <span className="factions-summary-label">Hostile</span>
-          <strong>{summary.negative}</strong>
-        </div>
-        <div className="factions-summary-card tone-unknown">
-          <span className="factions-summary-label">Licences</span>
-          <strong>{summary.licensed}</strong>
-        </div>
-      </div>
-
       <div className="factions-card-grid">
         {sortedFactions.map((faction) => {
           const relationValue = formatRelationValue(faction.relationValue)
           const relationTone = getRelationTone(faction)
-          const meterFill = getRelationMeterFill(faction)
           const shortName = faction.shortName && faction.shortName !== faction.name ? faction.shortName : null
           const name = faction.name || 'Unknown Faction'
           const relationLabel = faction.relationLabel || 'Unknown'
@@ -126,10 +81,12 @@ export function Factions({ factions, dataState }: Props) {
 
           return (
             <div key={faction.id || name} className={`faction-card faction-card-${relationTone}`}>
+              <div className={`faction-card-fill faction-card-fill-${relationTone}`} aria-hidden="true" />
+
               <div className="faction-card-top">
                 <div className={`faction-monogram faction-monogram-${relationTone}`}>{monogram}</div>
                 <div className={`faction-card-signal faction-card-signal-${relationTone}`}>
-                  <span>Rep</span>
+                  <span>REP</span>
                   <strong>{signalValue}</strong>
                 </div>
               </div>
@@ -138,12 +95,6 @@ export function Factions({ factions, dataState }: Props) {
                 <div className="faction-card-heading-main">
                   <div className="faction-name">{name}</div>
                   {shortName && <div className="faction-short-name">{shortName}</div>}
-                </div>
-              </div>
-
-              <div className="faction-relation-meter" aria-hidden="true">
-                <div className="faction-relation-meter-track">
-                  <div className={`faction-relation-meter-fill faction-relation-meter-fill-${relationTone}`} style={{ width: `${meterFill}%` }} />
                 </div>
               </div>
 

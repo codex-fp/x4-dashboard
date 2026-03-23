@@ -1053,19 +1053,18 @@ body {
 }
 
 .faction-card {
-  width: 164px;
-  min-width: 164px;
-  aspect-ratio: 1 / 1;
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 11px;
+  gap: 8px;
+  min-height: 118px;
+  padding: 9px;
   border: 1px solid rgba(0, 229, 255, 0.12);
   background:
     linear-gradient(180deg, rgba(0, 22, 30, 0.92), rgba(0, 10, 16, 0.96)),
     var(--c-bg-deep);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  scroll-snap-align: start;
+  overflow: hidden;
 }
 
 .factions-summary-grid,
@@ -1079,35 +1078,35 @@ body {
 }
 
 .factions-card-grid {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
   flex: 1;
   min-height: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 2px 2px 8px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2px 6px 2px 0;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 229, 255, 0.65) rgba(0, 10, 16, 0.65);
-  scroll-snap-type: x proximity;
 }
 
 .factions-card-grid::-webkit-scrollbar {
-  height: 10px;
+  width: 10px;
 }
 
 .factions-card-grid::-webkit-scrollbar-track {
   background: rgba(0, 10, 16, 0.65);
-  border-top: 1px solid rgba(0, 229, 255, 0.12);
+  border-left: 1px solid rgba(0, 229, 255, 0.12);
 }
 
 .factions-card-grid::-webkit-scrollbar-thumb {
-  background: linear-gradient(90deg, rgba(0, 229, 255, 0.72), rgba(0, 168, 255, 0.72));
+  background: linear-gradient(180deg, rgba(0, 229, 255, 0.72), rgba(0, 168, 255, 0.72));
   border: 1px solid rgba(0, 10, 16, 0.8);
   border-radius: 999px;
 }
 
 .factions-card-grid::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(90deg, rgba(110, 244, 255, 0.9), rgba(0, 194, 255, 0.9));
+  background: linear-gradient(180deg, rgba(110, 244, 255, 0.9), rgba(0, 194, 255, 0.9));
 }
 
 .factions-summary-card {
@@ -1133,27 +1132,46 @@ body {
 }
 
 .factions-summary-card.tone-positive strong,
-.faction-monogram-positive,
-.faction-relation-meter-fill-positive {
+.faction-monogram-positive {
   color: var(--c-green);
 }
 
 .factions-summary-card.tone-neutral strong,
-.faction-monogram-neutral,
-.faction-relation-meter-fill-neutral {
+.faction-monogram-neutral {
   color: var(--c-cyan);
 }
 
 .factions-summary-card.tone-negative strong,
-.faction-monogram-negative,
-.faction-relation-meter-fill-negative {
+.faction-monogram-negative {
   color: var(--c-orange);
 }
 
 .factions-summary-card.tone-unknown strong,
-.faction-monogram-unknown,
-.faction-relation-meter-fill-unknown {
+.faction-monogram-unknown {
   color: var(--c-text);
+}
+
+.faction-card-fill {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  pointer-events: none;
+}
+
+.faction-card-fill-positive {
+  background: linear-gradient(180deg, rgba(130, 225, 96, 0.2), rgba(130, 225, 96, 0.06) 50%, rgba(0, 10, 16, 0));
+}
+
+.faction-card-fill-neutral {
+  background: linear-gradient(180deg, rgba(0, 229, 255, 0.18), rgba(0, 229, 255, 0.05) 50%, rgba(0, 10, 16, 0));
+}
+
+.faction-card-fill-negative {
+  background: linear-gradient(180deg, rgba(255, 152, 0, 0.2), rgba(255, 152, 0, 0.06) 50%, rgba(0, 10, 16, 0));
+}
+
+.faction-card-fill-unknown {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02) 50%, rgba(0, 10, 16, 0));
 }
 
 .faction-card-signal-positive,
@@ -1193,13 +1211,15 @@ body {
 }
 
 .faction-card-top {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 10px;
+  gap: 8px;
 }
 
 .faction-card-heading {
+  position: relative;
   flex: 1;
   min-width: 0;
 }
@@ -1212,13 +1232,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border: 1px solid currentColor;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(0, 12, 18, 0.42);
   clip-path: polygon(0 8px, 8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px));
   font-family: var(--font-ui);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
   flex-shrink: 0;
@@ -1241,13 +1261,13 @@ body {
 
 .faction-card-signal strong {
   font-family: var(--font-ui);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0;
 }
 
 .faction-name {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--c-text-bright);
   line-height: 1.3;
   display: -webkit-box;
@@ -1258,41 +1278,19 @@ body {
 
 .faction-short-name {
   margin-top: 2px;
-  font-size: 8px;
-  letter-spacing: 2px;
+  font-size: 7px;
+  letter-spacing: 1.7px;
   text-transform: uppercase;
   color: var(--c-text-dim);
 }
 
-.faction-relation-meter {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: auto;
-}
-
-.faction-relation-meter-track {
-  position: relative;
-  height: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background:
-    linear-gradient(90deg, rgba(255, 152, 0, 0.16), rgba(0, 229, 255, 0.12), rgba(130, 225, 96, 0.16)),
-    rgba(0, 0, 0, 0.45);
-  overflow: hidden;
-}
-
-.faction-relation-meter-fill {
-  height: 100%;
-  background: currentColor;
-  box-shadow: 0 0 10px currentColor;
-  opacity: 0.8;
-}
-
 .faction-card-footer {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
+  margin-top: auto;
 }
 
 .faction-relation-pill,
@@ -1320,12 +1318,13 @@ body {
 }
 
 .faction-license-mini {
+  position: relative;
   font-size: 8px;
-  line-height: 1.45;
+  line-height: 1.35;
   color: var(--c-text-dim);
   display: -webkit-box;
   overflow: hidden;
-  min-height: 22px;
+  min-height: 20px;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
@@ -1582,12 +1581,12 @@ body {
   }
 
   .factions-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
 
   .faction-card {
-    width: 148px;
-    min-width: 148px;
+    min-height: 112px;
   }
 }
 

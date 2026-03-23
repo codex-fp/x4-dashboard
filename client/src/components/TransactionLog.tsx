@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { TransactionLog as TransactionLogData, TransactionLogEntry } from '../types/gameData'
 import { formatCredits } from '../utils/format'
 import { toPlainText, truncateText } from '../utils/text'
@@ -34,16 +34,36 @@ export function TransactionLog({ transactionLog, dataState }: Props) {
     return <WidgetStateNotice tone="offline" title="Transaction feed offline" detail="Reconnect to inspect recent credits, trade, and transfer activity." compact />
   }
 
-  const entries = [...(transactionLog?.list || [])]
-    .sort((a, b) => (b.time ?? Number.NEGATIVE_INFINITY) - (a.time ?? Number.NEGATIVE_INFINITY))
-    .slice(0, 14)
+  const allEntries = [...(transactionLog?.list || [])]
+    .sort((a, b) => (a.time ?? Number.NEGATIVE_INFINITY) - (b.time ?? Number.NEGATIVE_INFINITY))
+
+  const entries = allEntries.slice(-14)
+  const listRef = useRef<HTMLDivElement | null>(null)
+  const shouldStickToBottomRef = useRef(true)
+
+  function handleScroll() {
+    if (!listRef.current) return
+
+    const { scrollTop, scrollHeight, clientHeight } = listRef.current
+    const distanceFromBottom = scrollHeight - clientHeight - scrollTop
+
+    shouldStickToBottomRef.current = distanceFromBottom < 24
+  }
+
+  useEffect(() => {
+    if (!listRef.current) return
+
+    if (shouldStickToBottomRef.current) {
+      listRef.current.scrollTop = listRef.current.scrollHeight
+    }
+  }, [transactionLog])
 
   if (!entries.length) {
     return <WidgetStateNotice tone="empty" title="No recent transactions" detail="Trading, sales, and transfer events appear here once the bridge exports them." compact />
   }
 
   return (
-    <div className="transaction-log-list">
+    <div ref={listRef} className="transaction-log-list" onScroll={handleScroll}>
       {entries.map((entry) => {
         const value = formatValue(entry.value)
         const context = formatContext(entry)

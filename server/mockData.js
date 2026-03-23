@@ -76,6 +76,17 @@ const MOCK_FACTIONS = [
   { id: 'xenon', name: 'Xenon', shortName: 'XEN', relationLabel: 'Enemy', relationValue: -20, licenseLabels: [] },
 ];
 
+const EXTRA_MOCK_FACTIONS = [
+  { id: 'paranid', name: 'Godrealm of the Paranid', shortName: 'PAR', relationLabel: 'Neutral', relationValue: 4, licenseLabels: ['Trade'] },
+  { id: 'segaris', name: 'Segaris Pioneers', shortName: 'PIO', relationLabel: 'Friend', relationValue: 14, licenseLabels: ['Trade', 'Police'] },
+  { id: 'hatikvah', name: 'Hatikvah Free League', shortName: 'HAT', relationLabel: 'Neutral', relationValue: 7, licenseLabels: [] },
+  { id: 'ministry', name: 'Ministry of Finance', shortName: 'MIN', relationLabel: 'Friend', relationValue: 11, licenseLabels: ['Trade'] },
+  { id: 'terran', name: 'Terran Protectorate', shortName: 'TER', relationLabel: 'Ally', relationValue: 20, licenseLabels: ['Military'] },
+  { id: 'scale-plate', name: 'Scale Plate Pact', shortName: 'SCA', relationLabel: 'Enemy', relationValue: -14, licenseLabels: [] },
+  { id: 'fallensplit', name: 'Fallen Families', shortName: 'FAF', relationLabel: 'Hostile', relationValue: -18, licenseLabels: [] },
+  { id: 'court', name: 'Court of Curbs', shortName: 'CUC', relationLabel: 'Neutral', relationValue: 2, licenseLabels: ['Trade'] },
+];
+
 const MOCK_TRANSACTION_LOG = [
   {
     entryid: 'tx-ore-sale',
@@ -136,6 +147,99 @@ const MOCK_TRANSACTION_LOG = [
     partnername: '',
     money: null,
     timeOffset: 1240,
+  },
+];
+
+const EXTRA_MOCK_TRANSACTION_LOG = [
+  {
+    entryid: 'tx-medical-sale',
+    eventtype: 'trade',
+    eventtypename: 'Medical Supply Sale',
+    partnername: 'ANT Medlab Exchange',
+    ware: 'Medical Supplies',
+    amount: 220,
+    price: 188,
+    money: 41360,
+    timeOffset: 1450,
+    description: 'Sold 220 Medical Supplies to ANT Medlab Exchange.',
+  },
+  {
+    entryid: 'tx-energy-buy',
+    eventtype: 'trade',
+    eventtypename: 'Energy Cell Purchase',
+    partnername: 'PIO Solar Annex',
+    ware: 'Energy Cells',
+    amount: 1800,
+    price: 16,
+    money: -28800,
+    timeOffset: 1710,
+    description: 'Purchased Energy Cells ahead of long-range deployment.',
+  },
+  {
+    entryid: 'tx-marine-transfer',
+    eventtype: 'transfer',
+    eventtypename: 'Marine Transfer',
+    partnername: 'Boarding Wing Sigma',
+    money: -6400,
+    timeOffset: 1940,
+    description: 'Transferred veteran marines to the boarding detachment.',
+  },
+  {
+    entryid: 'tx-silicon-sale',
+    eventtype: 'trade',
+    eventtypename: 'Silicon Wafer Sale',
+    partnername: 'TEL Component Hub',
+    ware: 'Silicon Wafers',
+    amount: 340,
+    price: 221,
+    money: 75140,
+    timeOffset: 2270,
+    description: 'Sold Silicon Wafers into a temporary production shortage.',
+  },
+  {
+    entryid: 'tx-missile-restock',
+    eventtype: 'maintenance',
+    eventtypename: 'Missile Restock',
+    partnername: 'ARG Equipment Dock',
+    ware: 'Guided Missiles',
+    amount: 42,
+    price: 918,
+    money: -38556,
+    timeOffset: 2540,
+    description: 'Restocked guided missiles for patrol and interception duties.',
+  },
+  {
+    entryid: 'tx-claytronics-buy',
+    eventtype: 'trade',
+    eventtypename: 'Claytronics Purchase',
+    partnername: 'MIN Fabrication Node',
+    ware: 'Claytronics',
+    amount: 96,
+    price: 1485,
+    money: -142560,
+    timeOffset: 2860,
+    description: 'Purchased Claytronics for station expansion staging.',
+  },
+  {
+    entryid: 'tx-nividium-sale',
+    eventtype: 'trade',
+    eventtypename: 'Nividium Sale',
+    partnername: 'Black Market Broker',
+    ware: 'Nividium',
+    amount: 18,
+    price: 12240,
+    money: 220320,
+    timeOffset: 3190,
+    description: 'Liquidated a recovered Nividium cache through private channels.',
+  },
+  {
+    entryid: 'tx-drone-service',
+    eventtype: 'maintenance',
+    eventtypename: 'Drone Bay Service',
+    partnername: 'TEL Ship Technologies',
+    money: -9400,
+    timeOffset: 3510,
+    description: 'Completed maintenance cycle for repair and cargo drones.',
   },
 ];
 
@@ -307,16 +411,22 @@ function createGeneratedLogbookEntries(count, tick) {
   return result;
 }
 
-function createMockTransactionLog(tick) {
-  const currentTime = 54000 + tick * 3;
+function createMockFactions(density) {
+  const extraCount = Math.max(0, (density - 1) * 2);
+  return [...MOCK_FACTIONS, ...EXTRA_MOCK_FACTIONS.slice(0, extraCount)];
+}
 
-  return MOCK_TRANSACTION_LOG.map((entry, index) => ({
+function createMockTransactionLog(tick, density) {
+  const currentTime = 54000 + tick * 3;
+  const extraCount = Math.max(0, (density - 1) * 2);
+  const sourceEntries = [...MOCK_TRANSACTION_LOG, ...EXTRA_MOCK_TRANSACTION_LOG.slice(0, extraCount)];
+
+  return sourceEntries.map((entry, index) => ({
     ...entry,
     time: currentTime - entry.timeOffset,
     timeText: index === 0 ? 'just now' : `${Math.max(1, Math.round((entry.timeOffset + tick % 30) / 60))}m ago`,
   })).sort((a, b) => b.time - a.time);
 }
-
 
 function createMockInventory(tick, density) {
   const emptyCycle = Math.floor(tick / 36) % 3 === 2;
@@ -379,7 +489,7 @@ class MockDataSource extends EventEmitter {
     this.activeMissionTimeLeft = 5400;
     this.intervals             = [];
     this.missionOfferDensity   = 1;
-    this.logbookDensity        = 1;
+    this.contentDensity        = 1;
   }
 
   emit_data(shipOnly = false) {
@@ -448,18 +558,18 @@ class MockDataSource extends EventEmitter {
         },
         logbook:        {
           list: [
-            ...cloneLogbookEntries(MOCK_LOGBOOK, this.logbookDensity),
-            ...createGeneratedLogbookEntries(this.logbookDensity * 8, this.tick),
+            ...cloneLogbookEntries(MOCK_LOGBOOK, this.contentDensity),
+            ...createGeneratedLogbookEntries(this.contentDensity * 8, this.tick),
           ],
         },
         currentResearch: {
           ...MOCK_RESEARCH,
           percentageCompleted: Math.min(99.9, MOCK_RESEARCH.percentageCompleted + this.tick * 0.001),
         },
-        factions: MOCK_FACTIONS,
+        factions: createMockFactions(this.contentDensity),
         agents: createMockAgents(this.tick),
-        inventory: createMockInventory(this.tick, this.logbookDensity),
-        transactionLog: createMockTransactionLog(this.tick),
+        inventory: createMockInventory(this.tick, this.contentDensity),
+        transactionLog: createMockTransactionLog(this.tick, this.contentDensity),
       });
     }
 
@@ -650,8 +760,8 @@ class MockDataSource extends EventEmitter {
 
   adjustContentDensity(delta) {
     this.missionOfferDensity = Math.max(1, Math.min(5, this.missionOfferDensity + delta));
-    this.logbookDensity = Math.max(1, Math.min(5, this.logbookDensity + delta));
-    console.log(`[Mock] Mission density ${this.missionOfferDensity}, logbook density ${this.logbookDensity}`);
+    this.contentDensity = Math.max(1, Math.min(5, this.contentDensity + delta));
+    console.log(`[Mock] Mission density ${this.missionOfferDensity}, content density ${this.contentDensity}`);
     this.emit_data(false);
   }
 
