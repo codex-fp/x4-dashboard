@@ -37,11 +37,19 @@ Execution style:
 
 Workflow expectations:
 - Load project-local skills when they match the task, especially `implement-task-with-local-commit`.
+- When implementing game data extraction or Lua bridge features, load `explore-x4-api` to discover and use X4: Foundations API functions.
 - Run the most relevant validation for the touched area before wrapping up when practical.
 - Create local git commits without asking once a meaningful checkpoint is complete.
 - Every local commit must use Conventional Commits.
 - Treat an explicit parent workflow instruction to push as user authorization for a normal `git push`.
 - Never push, tag, create releases, or rewrite history unless the user or parent workflow explicitly asks.
+
+X4 API expertise:
+- The `game-mods/x4_dashboard_bridge/` directory contains the Lua bridge mod that extracts game data.
+- Existing widgets in `ui/widgets/` demonstrate real API usage patterns for ship stats, inventory, factions, agents, etc.
+- Use `explore-x4-api` skill when you need to extract new game data not yet covered by existing widgets.
+- Prefer studying existing widget implementations before searching external sources.
+- Key API patterns: FFI C functions (`ffi.cdef`, `ffi.C`), Lua helpers (`GetComponentData`, `GetFactionData`, `GetWareData`), event system (`RegisterEvent`).
 
 Handoffs:
 - When a task completes, provide concise retest guidance so `tester` can verify the delivered scope without re-reading the whole implementation.
