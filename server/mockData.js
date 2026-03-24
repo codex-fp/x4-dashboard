@@ -4,6 +4,15 @@
  * Emits 'data' events matching X4 External App format (including shipStatus).
  *
  * Usage: node index.js --mock
+ *
+ * Toggle Controls (HTTP GET endpoints):
+ *   /api/mock/combat     - Cycle alert states (normal → alert → combat → normal)
+ *   /api/mock/missile   - Cycle missile states (none → lock → incoming → none)
+ *   /api/mock/travel    - Toggle travel drive on/off
+ *   /api/mock/boost    - Toggle boost on/off
+ *   /api/mock/controlled - Toggle player control (true/false) - useful for testing dimming behavior
+ *   /api/mock/content-more - Increase content density
+ *   /api/mock/content-less - Decrease content density
  */
 
 const EventEmitter = require('events');
@@ -723,6 +732,12 @@ class MockDataSource extends EventEmitter {
       this.clearCombatState();
       console.log('[Mock] Combat ended manually');
     }
+    this.emit_data(true);
+  }
+
+  toggleControlled() {
+    this.controlled = !this.controlled;
+    console.log(`[Mock] Ship controlled: ${this.controlled}`);
     this.emit_data(true);
   }
 

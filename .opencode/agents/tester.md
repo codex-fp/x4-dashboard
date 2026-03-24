@@ -1,7 +1,6 @@
 ---
 description: Verifies delivered x4-dashboard work through manual-style app testing and reports pass, fail, or blocked outcomes without changing product code.
 mode: subagent
-model: openai/gpt-5.4
 temperature: 0.1
 color: success
 permission:

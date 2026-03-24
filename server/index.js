@@ -210,6 +210,7 @@ registerMockToggleRoute('/api/mock/combat', () => mock.toggleCombat(), 'alertLev
 registerMockToggleRoute('/api/mock/missile', () => mock.toggleMissileLock(), 'incomingMissiles');
 registerMockToggleRoute('/api/mock/travel', () => mock.toggleTravel(), 'travelDrive');
 registerMockToggleRoute('/api/mock/boost', () => mock.toggleBoost(), 'boosting');
+registerMockToggleRoute('/api/mock/controlled', () => mock.toggleControlled(), 'controlled');
 registerMockToggleRoute('/api/mock/content-more', () => mock.adjustContentDensity(1), 'contentDensity');
 registerMockToggleRoute('/api/mock/content-less', () => mock.adjustContentDensity(-1), 'contentDensity');
 

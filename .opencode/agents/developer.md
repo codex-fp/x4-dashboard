@@ -1,7 +1,6 @@
 ---
 description: Implements x4-dashboard tasks, validates the result, and creates local Conventional Commit checkpoints without asking.
 mode: subagent
-model: openai/gpt-5.4
 temperature: 0.1
 color: primary
 permission:

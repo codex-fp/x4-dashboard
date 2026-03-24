@@ -1,7 +1,6 @@
 ---
 description: Owns roadmap, GitHub issues, milestones, and release planning for x4-dashboard, and keeps them updated without unnecessary permission prompts.
 mode: subagent
-model: openai/gpt-5.4
 temperature: 0.1
 color: accent
 permission:

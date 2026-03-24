@@ -1,7 +1,7 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "openai/gpt-5.4",
-  "small_model": "openai/gpt-5-nano",
+  "model": "opencode/minimax-m2.5-free",
+  "small_model": "opencode/minimax-m2.5-free",
   "share": "manual",
   "instructions": [
     "AGENTS.md"
@@ -44,7 +44,6 @@
   },
   "agent": {
     "build": {
-      "model": "openai/gpt-5.4",
       "temperature": 0.1,
       "permission": {
         "bash": {
@@ -74,7 +73,6 @@
       }
     },
     "plan": {
-      "model": "openai/gpt-5.4",
       "temperature": 0.1,
       "permission": {
         "edit": "ask",

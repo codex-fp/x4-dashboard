@@ -35,6 +35,14 @@ This roadmap is a lightweight public planning document for a shorter, more frequ
 
 ## Released
 
+### v1.3.0 - Controls and onboarding (released 2026-03-22)
+- Ship in-launcher keybinding capture for faster host setup
+- Ship automatic import for supported X4 key bindings from local game settings
+- Ship a non-technical installation and usage guide for new players
+- Reduce friction between first launch, setup, and the first successful control action with a clearer launcher-first flow
+- Include the controlled-ship `shipStatus` fix so affected widgets dim cleanly when the player is not actively piloting
+- Roll in the latest combat and situational-awareness additions already on `master`, including factions, target, transaction log, and missile warning improvements
+
 ### v1.2.0 - Network and settings foundation (released 2026-03-19)
 - Made LAN access a first-class runtime mode so the app is reachable from other devices without manual setup
 - Added a dedicated launcher settings and diagnostics surface for the current host/client model
