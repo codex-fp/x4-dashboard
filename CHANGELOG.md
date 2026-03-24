@@ -6,6 +6,21 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-03-24
+
+### Added
+- Inventory bridge export for player-owned inventory items (ships, goods, materials, warehouse)
+- Typed contract for inventory data with Operations and Trade dashboard integration
+- Faction standings widget with reputation levels and faction filtering
+
+### Changed
+- Improved empty, loading, and disconnected states across dashboard widgets
+- Reset game state to default when bridge disconnects for cleaner reconnection flow
+
+### Fixed
+- UnderAttack widget data flow verified and gaps closed
+- shipStatus-driven widgets dim correctly when player is aboard but not piloting the controlled ship
+
 ## [1.3.0] - 2026-03-22
 
 ### Added
