@@ -17,29 +17,12 @@
     ]
   },
   "permission": {
-    "bash": {
-      "*": "allow",
-      "git status*": "allow",
-      "git diff*": "allow",
-      "git log*": "allow",
-      "git show*": "allow",
-      "git branch*": "allow",
-      "git add*": "allow",
-      "git commit*": "allow",
-      "gh *": "allow",
-      "gh release view*": "allow",
-      "gh release list*": "allow",
-      "gh release create*": "ask",
-      "gh release edit*": "ask",
-      "gh release delete*": "deny",
-      "git push*": "ask",
-      "git push --force*": "deny",
-      "git tag*": "ask",
-      "git reset --hard*": "deny",
-      "git checkout --*": "deny",
-      "git clean*": "ask",
-      "git rebase -i*": "deny",
-      "git commit --amend*": "ask"
+    "skill": {
+      "capture-tasks-from-meeting-notes": "deny",
+      "generate-status-report": "deny",
+      "search-company-knowledge": "deny",
+      "spec-to-backlog": "deny",
+      "triage-issue": "deny"
     }
   },
   "agent": {
@@ -48,26 +31,16 @@
       "permission": {
         "bash": {
           "*": "allow",
-          "git status*": "allow",
-          "git diff*": "allow",
-          "git log*": "allow",
-          "git show*": "allow",
-          "git branch*": "allow",
-          "git add*": "allow",
-          "git commit*": "allow",
-          "gh *": "allow",
-          "gh release view*": "allow",
-          "gh release list*": "allow",
+          "git push --force*": "deny",
+          "git reset --hard*": "deny",
+          "git checkout --*": "deny",
+          "git rebase -i*": "deny",
           "gh release create*": "ask",
           "gh release edit*": "ask",
           "gh release delete*": "deny",
           "git push*": "ask",
-          "git push --force*": "deny",
           "git tag*": "ask",
-          "git reset --hard*": "deny",
-          "git checkout --*": "deny",
           "git clean*": "ask",
-          "git rebase -i*": "deny",
           "git commit --amend*": "ask"
         }
       }

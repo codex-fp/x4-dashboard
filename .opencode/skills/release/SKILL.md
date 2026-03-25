@@ -1,9 +1,10 @@
 ---
-name: release-readiness-and-publish
+name: release
 description: Assess release readiness, prepare release artifacts and notes, and publish a release for x4-dashboard when explicitly requested.
+compatibility: opencode
 ---
 
-# Release Readiness And Publish
+# Release
 
 ## Use this when
 
@@ -17,32 +18,32 @@ description: Assess release readiness, prepare release artifacts and notes, and 
 1. Read the relevant release context on demand:
    - `RELEASE.md`
    - `CHANGELOG.md`
-   - the relevant section of `ROADMAP.md`
+   - The relevant section of `ROADMAP.md`
 2. Inspect the current state:
-   - local git status and recent commits
-   - relevant open and recently closed GitHub issues
-   - milestone scope and whether unfinished work still blocks release confidence
+   - Local git status and recent commits
+   - Relevant open and recently closed GitHub issues
+   - Milestone scope and whether unfinished work still blocks release confidence
 3. Determine which mode applies:
-   - readiness audit only
-   - preparation only
-   - full publish requested explicitly by the user
+   - Readiness audit only
+   - Preparation only
+   - Full publish requested explicitly by the user
 4. For readiness audits, produce a concrete checklist:
-   - changelog completeness
-   - release notes readiness
-   - milestone and issue hygiene
-   - validation still needed, such as `npm run release:check`, `npm run release:bundle`, or `npm run desktop:dist`
-   - blocking risks or unfinished work
+   - Changelog completeness
+   - Release notes readiness
+   - Milestone and issue hygiene
+   - Validation still needed, such as `npm run release:check`, `npm run release:bundle`, or `npm run desktop:dist`
+   - Blocking risks or unfinished work
 5. For preparation work, update the needed local artifacts:
    - `CHANGELOG.md`
    - `RELEASE.md` if the documented release process changed
-   - roadmap or issues if the release picture needs cleanup
+   - Roadmap or issues if the release picture needs cleanup
 6. When local files change during preparation, create a local Conventional Commit without asking.
 7. Only if the user explicitly asks to publish, execute the release actions in a controlled order:
-   - confirm the intended version and release scope from the current context
-   - run the most relevant validation commands that are practical
-   - create the tag if requested
-   - create or update the GitHub release notes from `CHANGELOG.md`
-   - report the resulting tag, release URL, and any follow-up actions
+   - Confirm the intended version and release scope from the current context
+   - Run the most relevant validation commands that are practical
+   - Create the tag if requested
+   - Create or update the GitHub release notes from `CHANGELOG.md`
+   - Report the resulting tag, release URL, and any follow-up actions
 8. After release work, update or close related issues when their state is now clear, and leave milestone closure to an explicit user request.
 
 ## Output

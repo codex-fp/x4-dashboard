@@ -149,3 +149,20 @@ npm run release:bundle # build release bundles into dist/
 - Do not use `enum` where an `interface` is sufficient.
 - Do not mix CommonJS and ESM.
 - Do not use destructive git commands unless explicitly requested.
+
+## Skill Usage
+
+Project-local skills are loaded on-demand when the task matches:
+
+- `delivery-pipeline` - Full delivery loop orchestration (task selection → implementation → verification → issue closure)
+- `implement-task` - Implementation workflow with local commit
+- `verify-task` - Manual-style verification of delivered work
+- `refine-task` - Turn vague tasks into implementation-ready issues
+- `feature-intake` - Turn rough feature ideas into roadmap updates
+- `release` - Release readiness and publish workflow
+- `explore-x4-api` - X4: Foundations Lua API discovery
+
+Agent skill permissions are configured per-agent:
+- `developer`: `implement-task`, `explore-x4-api`, `refine-task`
+- `tester`: `verify-task`
+- `product-manager`: `delivery-pipeline`, `feature-intake`, `release`, `refine-task`
