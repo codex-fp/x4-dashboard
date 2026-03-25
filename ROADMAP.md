@@ -23,6 +23,7 @@ This roadmap is a lightweight public planning document for a shorter, more frequ
 - Add an initial automated test suite to protect the most important flows
 - Capture screenshots for under-attack and active-target states
 - Add separate dashboard zoom and text scaling controls so players can tune widget readability without resizing the top title bar
+- Build a public landing page using Arwes framework to showcase the project on GitHub Pages
 - Improve release presentation with better screenshots and supporting docs where useful
 - Keep CI and release packaging polished as the project becomes easier to distribute
 
