@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Animator, Animated, Text, FrameCorners } from '@arwes/react'
 import './ScreenshotCarousel.css'
 
