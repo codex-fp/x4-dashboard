@@ -60,14 +60,16 @@ export function Dashboard({
 
       <div className="dashboard-scale-frame">
         <div className="dashboard-scale-content" style={scaledLayoutStyle}>
-          {ship.isDockedOrLanded && (
-            <div className="docked-banner">DOCKED</div>
-          )}
+          <div className="dashboard-font-frame">
+            {ship.isDockedOrLanded && (
+              <div className="docked-banner">DOCKED</div>
+            )}
 
-          {config.layout === 'grid'
-            ? <GridLayout config={config} state={state} onKeyPress={onKeyPress} isInitialLoading={isInitialLoading} wsConnected={wsConnected} />
-            : <ColumnsLayout config={config} state={state} onKeyPress={onKeyPress} isInitialLoading={isInitialLoading} wsConnected={wsConnected} />
-          }
+            {config.layout === 'grid'
+              ? <GridLayout config={config} state={state} onKeyPress={onKeyPress} isInitialLoading={isInitialLoading} wsConnected={wsConnected} />
+              : <ColumnsLayout config={config} state={state} onKeyPress={onKeyPress} isInitialLoading={isInitialLoading} wsConnected={wsConnected} />
+            }
+          </div>
         </div>
       </div>
     </div>

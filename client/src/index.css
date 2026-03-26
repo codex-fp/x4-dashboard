@@ -261,7 +261,16 @@ body {
   height: 100%;
   width: 100%;
   zoom: var(--dashboard-scale, 1);
-  font-size: calc(1em * var(--dashboard-font-scale, 1));
+}
+
+.dashboard-font-frame {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: var(--gap);
+  height: 100%;
+  width: 100%;
+  font-size: calc(var(--base-font-size, 12px) * var(--dashboard-font-scale, 1));
 }
 
 /* â”€â”€ Main Grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
