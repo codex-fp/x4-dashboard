@@ -1,4 +1,4 @@
-import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Animator, Animated, Text, FrameCorners } from '@arwes/react'
 import ReactMarkdown from 'react-markdown'
 import './GuidePage.css'
@@ -8,6 +8,7 @@ interface GuidePageProps {
 }
 
 export function GuidePage({ content }: GuidePageProps) {
+  const navigate = useNavigate()
   return (
     <div className="guide-page">
       <div className="guide-container">
@@ -184,7 +185,10 @@ export function GuidePage({ content }: GuidePageProps) {
             animated={['fade']}
             style={{ animationDelay: '0.2s' }}
           >
-            <a href="/" className="guide-back-link">
+            <button
+              onClick={() => navigate('/')}
+              className="guide-back-link"
+            >
               <Text
                 as="span"
                 manager="sequence"
@@ -199,7 +203,7 @@ export function GuidePage({ content }: GuidePageProps) {
               >
                 ← Back to Home
               </Text>
-            </a>
+            </button>
           </Animated>
         </Animator>
       </div>

@@ -39,8 +39,13 @@ function AppContent() {
 
   useEffect(() => {
     // Fetch the player guide markdown content
-    fetch('/docs/player-guide.md')
-      .then((res) => res.text())
+    fetch('/player-guide.md')
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Failed to load guide')
+        }
+        return res.text()
+      })
       .then((text) => setGuideContent(text))
       .catch(() => {
         // Fallback content if fetch fails

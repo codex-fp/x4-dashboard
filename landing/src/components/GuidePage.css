@@ -127,6 +127,9 @@
   border: 1px solid hsl(191deg 100% 50% / 50%);
   border-radius: 4px;
   transition: all 0.2s ease;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .guide-back-link:hover {
