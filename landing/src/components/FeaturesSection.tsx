@@ -71,7 +71,7 @@ export function FeaturesSection() {
               Everything You Need
             </Text>
             <Text
-              as="p"
+              as="span"
               manager="sequence"
               fixed
               contentStyle={{

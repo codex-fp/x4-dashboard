@@ -43,6 +43,7 @@ export const HeroSection: FC<HeroSectionProps> = ({ onGuideClick }) => {
             style={{ animationDelay: '0.1s' }}
           >
             <Text
+              as="span"
               manager="sequence"
               fixed
               contentStyle={{
@@ -61,7 +62,7 @@ export const HeroSection: FC<HeroSectionProps> = ({ onGuideClick }) => {
 
         <Animator>
           <Animated
-            as="p"
+            as="div"
             className="hero-subtitle"
             animated={['fade', ['y', 20, 0]]}
             style={{ animationDelay: '0.2s' }}
