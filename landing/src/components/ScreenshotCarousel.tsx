@@ -56,8 +56,8 @@ export function ScreenshotCarousel() {
       <Animated
         as="div"
         className="carousel-container"
-        animated={['fade', ['scale', 0.95, 1]]}
-        style={{ animationDelay: '0.4s' }}
+        animated={['fade']}
+        style={{ opacity: 1 }}
       >
         <FrameCorners
           style={{
