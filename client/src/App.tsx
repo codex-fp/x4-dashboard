@@ -5,7 +5,6 @@ import { Dashboard } from './components/Dashboard'
 import { DASHBOARDS, getDashboard } from './dashboards'
 
 const DASHBOARD_SCALE_STORAGE_KEY = 'dashboardScale'
-const DASHBOARD_FONT_SCALE_STORAGE_KEY = 'dashboardFontScale'
 const DEFAULT_DASHBOARD_ID = DASHBOARDS[0]?.id ?? 'flight'
 
 function getWebSocketUrl(): string {
@@ -34,21 +33,10 @@ function getInitialDashboardScale(): number {
   return 1
 }
 
-function getInitialDashboardFontScale(): number {
-  const savedScale = Number(window.localStorage.getItem(DASHBOARD_FONT_SCALE_STORAGE_KEY))
-
-  if (Number.isFinite(savedScale) && savedScale > 0) {
-    return savedScale
-  }
-
-  return 1
-}
-
 export function App() {
   const { state, wsConnected, bridgeConnected, lastDataTimestamp, isInitialLoading, pressKey } = useGameData(getWebSocketUrl())
   const [dashboardId, setDashboardId] = useState(getInitialDashboard)
   const [dashboardScale, setDashboardScale] = useState(getInitialDashboardScale)
-  const [dashboardFontScale, setDashboardFontScale] = useState(getInitialDashboardFontScale)
 
   function handleChangeDashboard(id: string) {
     const url = new URL(window.location.href)
@@ -60,11 +48,6 @@ export function App() {
   function handleChangeDashboardScale(scale: number) {
     window.localStorage.setItem(DASHBOARD_SCALE_STORAGE_KEY, String(scale))
     setDashboardScale(scale)
-  }
-
-  function handleChangeDashboardFontScale(scale: number) {
-    window.localStorage.setItem(DASHBOARD_FONT_SCALE_STORAGE_KEY, String(scale))
-    setDashboardFontScale(scale)
   }
 
   return (
@@ -103,11 +86,9 @@ export function App() {
             isInitialLoading={isInitialLoading}
             dashboardId={dashboardId}
             dashboardScale={dashboardScale}
-            dashboardFontScale={dashboardFontScale}
             onKeyPress={pressKey}
             onChangeDashboard={handleChangeDashboard}
             onChangeDashboardScale={handleChangeDashboardScale}
-            onChangeDashboardFontScale={handleChangeDashboardFontScale}
           />
         </div>
       </Animator>

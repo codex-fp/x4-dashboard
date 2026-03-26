@@ -10,16 +10,13 @@ interface Props {
   lastDataTimestamp: number
   dashboardId: string
   dashboardScale: number
-  dashboardFontScale: number
   flight: FlightState
   combat: CombatState
   onChangeDashboard: (id: string) => void
   onChangeDashboardScale: (scale: number) => void
-  onChangeDashboardFontScale: (scale: number) => void
 }
 
 const DASHBOARD_SCALE_OPTIONS = [0.5, 0.6, 0.75, 0.85, 1, 1.1, 1.25, 1.4, 1.6, 1.8, 2]
-const DASHBOARD_FONT_SCALE_OPTIONS = DASHBOARD_SCALE_OPTIONS
 
 function postMockAction(endpoint: string) {
   void fetch(endpoint, { method: 'POST' }).catch(() => {})
@@ -32,12 +29,10 @@ export function DashboardHeader({
   lastDataTimestamp,
   dashboardId,
   dashboardScale,
-  dashboardFontScale,
   flight,
   combat,
   onChangeDashboard,
   onChangeDashboardScale,
-  onChangeDashboardFontScale,
 }: Props) {
   const lastSyncText = (() => {
     if (lastDataTimestamp === 0 || bridgeConnected) return null
@@ -148,21 +143,6 @@ export function DashboardHeader({
             onChange={(event) => onChangeDashboardScale(Number(event.target.value))}
           >
             {DASHBOARD_SCALE_OPTIONS.map((scale) => (
-              <option key={scale} value={String(scale)}>
-                {Math.round(scale * 100)}%
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="dashboard-scale-control">
-          <span className="dashboard-scale-label">Font</span>
-          <select
-            className="dashboard-selector dashboard-scale-selector"
-            value={String(dashboardFontScale)}
-            onChange={(event) => onChangeDashboardFontScale(Number(event.target.value))}
-          >
-            {DASHBOARD_FONT_SCALE_OPTIONS.map((scale) => (
               <option key={scale} value={String(scale)}>
                 {Math.round(scale * 100)}%
               </option>
