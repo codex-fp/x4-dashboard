@@ -112,6 +112,27 @@ export const HeroSection: FC<HeroSectionProps> = ({ onGuideClick }) => {
                 Download
               </Text>
             </a>
+            <a
+              href="https://x4-dashboard.piechowski.pro/mock"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cta-button secondary"
+            >
+              <Text
+                as="span"
+                manager="sequence"
+                fixed
+                contentStyle={{
+                  fontSize: '14px',
+                  letterSpacing: '2px',
+                  textTransform: 'uppercase',
+                  fontWeight: 600,
+                  fontFamily: "'Exo 2', sans-serif",
+                }}
+              >
+                Live Demo
+              </Text>
+            </a>
             <button
               onClick={onGuideClick}
               className="cta-button secondary"
