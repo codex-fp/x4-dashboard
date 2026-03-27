@@ -1,0 +1,19 @@
+# Dependencies
+**/node_modules
+
+# Build outputs
+**/dist
+**/release
+**/.vite
+server/public
+
+# VCS and tooling
+.git
+.gitignore
+.idea
+.codex
+.opencode
+
+# Logs and temp files
+*.log
+nul
