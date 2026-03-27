@@ -27,6 +27,16 @@ const aggregator = new DataAggregator();
 let mock = null;
 
 // === Express + static client ===
+app.use((req, res, next) => {
+  // Support reverse proxies which forward a fixed subpath (for example "/mock")
+  // while this server expects to run at "/".
+  if (req.url === '/mock' || req.url.startsWith('/mock/')) {
+    req.url = req.url.slice('/mock'.length) || '/';
+  }
+
+  next();
+});
+
 app.use(express.json({ limit: '10mb' }));
 
 function registerClientRoutes() {
