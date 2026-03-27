@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import { Animator, Animated, Text } from '@arwes/react'
 import { HeroSection } from './components/HeroSection'
 import { FeaturesSection } from './components/FeaturesSection'
@@ -270,9 +270,9 @@ Once this works, you can keep the launcher running on the host PC and use the da
 
 function App() {
   return (
-    <BrowserRouter basename="/">
+    <HashRouter>
       <AppContent />
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 
