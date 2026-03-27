@@ -8,6 +8,7 @@
 /client/.npm-cache/
 /server/.npm-cache/
 /client/dist/
+/landing/dist/
 /landing/node_modules/
 /dist/
 /release/
