@@ -30,6 +30,7 @@ Guidance for coding agents working in this repository.
 - Root project skills live in `.agents/skills/`:
   - `propose`
   - `refine`
+  - `deliver`
   - `implement`
   - `verify`
   - `deploy`
