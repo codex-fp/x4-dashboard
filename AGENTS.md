@@ -8,7 +8,7 @@ Guidance for coding agents working in this repository.
 - Main areas:
   - `client/` - main dashboard frontend in React + TypeScript
   - `server/` - Express + WebSocket backend in CommonJS
-  - `electron/` - Windows host-side Server Launcher
+  - `launcher/` - Windows host-side Server Launcher
   - `game-mods/x4_dashboard_bridge/` - Lua bridge mod for the game
   - `landing/` - public project landing page
 - `server/public/` is generated build output from `client/`; do not edit it directly.

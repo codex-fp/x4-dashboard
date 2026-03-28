@@ -2,7 +2,7 @@
   "name": "x4-dashboard",
   "version": "1.4.0",
   "description": "X4: Foundations server launcher and cockpit dashboard",
-  "main": "electron/main.cjs",
+  "main": "launcher/main.cjs",
   "author": "Filip Piechowski",
   "license": "MIT",
   "repository": {
@@ -55,9 +55,9 @@
     "directories": {
       "output": "release"
     },
-    "icon": "electron/assets/icon.ico",
+    "icon": "launcher/assets/icon.ico",
     "files": [
-      "electron/**/*",
+      "launcher/**/*",
       "package.json",
       "LICENSE",
       "README.md"
@@ -89,11 +89,11 @@
       }
     ],
     "asarUnpack": [
-      "electron/**/*"
+      "launcher/**/*"
     ],
     "win": {
       "signAndEditExecutable": false,
-      "icon": "electron/assets/icon.ico",
+      "icon": "launcher/assets/icon.ico",
       "target": [
         "portable",
         "nsis"
@@ -108,10 +108,10 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "differentialPackage": false,
-      "installerHeader": "electron/assets/installer-header.bmp",
-      "installerSidebar": "electron/assets/installer-sidebar.bmp",
-      "uninstallerSidebar": "electron/assets/installer-sidebar.bmp",
-      "installerHeaderIcon": "electron/assets/icon.ico"
+      "installerHeader": "launcher/assets/installer-header.bmp",
+      "installerSidebar": "launcher/assets/installer-sidebar.bmp",
+      "uninstallerSidebar": "launcher/assets/installer-sidebar.bmp",
+      "installerHeaderIcon": "launcher/assets/icon.ico"
     }
   }
 }

@@ -5,7 +5,7 @@ Server-specific guidance for the Express and WebSocket backend.
 ## Scope
 
 - `server/` owns HTTP routes, WebSocket broadcasts, game-state aggregation, runtime config, and mock data.
-- Keep browser-only UI concerns in `client/` and host launcher concerns in `electron/`.
+- Keep browser-only UI concerns in `client/` and host launcher concerns in `launcher/`.
 
 ## Module Rules
 

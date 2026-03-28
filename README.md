@@ -122,7 +122,7 @@ npm run desktop:dist
 
 Artifacts are written to `release/`.
 
-Branding assets for the launcher and installer live in `electron/assets/`.
+Branding assets for the launcher and installer live in `launcher/assets/`.
 
 ## 🌐 Browser-First Client Model
 
@@ -274,7 +274,7 @@ Data flow:
 ```text
 x4-dashboard/
 |- client/                     React + TypeScript frontend
-|- electron/                   Windows Server Launcher
+|- launcher/                   Windows Server Launcher
 |- game-mods/x4_dashboard_bridge/ Lua bridge source
 |- landing/                    Public landing page
 |- server/                     Express + WebSocket backend

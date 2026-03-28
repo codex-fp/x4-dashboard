@@ -23,7 +23,7 @@ let startupError = ''
 
 function getLauncherIconPath() {
   if (app.isPackaged) {
-    return path.join(process.resourcesPath, 'app.asar.unpacked', 'electron', 'assets', 'icon.ico')
+    return path.join(process.resourcesPath, 'app.asar.unpacked', 'launcher', 'assets', 'icon.ico')
   }
   return path.join(__dirname, 'assets', 'icon.ico')
 }
