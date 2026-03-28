@@ -26,17 +26,53 @@ The main product direction is simple: run one server, then open the dashboard fr
 
 ## 🖼️ Screenshots
 
-### Flight dashboard
+### Flight (No Target)
 
-![Flight dashboard](docs/screenshots/dashboard-flight.png)
+![Flight (No Target)](docs/screenshots/dashboard-flight-no-target.png)
 
-### Flight dashboard - ARC speedometer
+### Flight (Classic)
 
-![Flight dashboard with ARC speedometer](docs/screenshots/dashboard-flight-arc.png)
+![Flight (Classic)](docs/screenshots/dashboard-flight-classic.png)
 
-### Operations dashboard
+### Flight combat variant - alert + active target
 
-![Operations dashboard](docs/screenshots/dashboard-operations.png)
+![Flight combat alert with active target](docs/screenshots/dashboard-flight-combat-alert-target.png)
+
+### Flight combat variant - missile inbound
+
+![Flight combat missile inbound](docs/screenshots/dashboard-flight-combat-missile-inbound.png)
+
+### Flight speedometer - Arc
+
+![Flight speedometer arc](docs/screenshots/dashboard-flight-speedometer-arc.png)
+
+### Flight speedometer - Bar
+
+![Flight speedometer bar](docs/screenshots/dashboard-flight-speedometer-bar.png)
+
+### Ship Controls
+
+![Ship Controls dashboard](docs/screenshots/dashboard-ship-controls.png)
+
+### Target
+
+![Target dashboard](docs/screenshots/dashboard-target.png)
+
+### Operations / Overview
+
+![Operations Overview dashboard](docs/screenshots/dashboard-operations-overview.png)
+
+### Operations / Intel
+
+![Operations Intel dashboard](docs/screenshots/dashboard-operations-intel.png)
+
+### Operations / Missions
+
+![Operations Missions dashboard](docs/screenshots/dashboard-operations-missions.png)
+
+### Operations / Trade
+
+![Operations Trade dashboard](docs/screenshots/dashboard-operations-trade.png)
 
 ## 🚀 Developer Quick Start
 

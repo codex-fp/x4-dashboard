@@ -397,13 +397,21 @@ export function NavHeadingWidget({ player, flight, control }: { player: PlayerIn
 // ── NavSpeedometerWidget ──────────────────────────────────────────────────────
 
 export function NavSpeedometerWidget({ flight, control, scale = 1 }: { flight: FlightState; control: ShipControlState; scale?: number }) {
-  const [speedMode, setSpeedMode] = useState<'bars' | 'gauge'>(() => {
+  function getInitialSpeedMode(): 'bars' | 'gauge' {
     if (typeof window === 'undefined') {
       return 'bars'
     }
 
+    const forcedMode = new URLSearchParams(window.location.search).get('speedometer')
+    if (forcedMode === 'arc') return 'gauge'
+    if (forcedMode === 'bar') return 'bars'
+
     const storedMode = window.localStorage.getItem('navSpeedometerMode')
     return storedMode === 'gauge' ? 'gauge' : 'bars'
+  }
+
+  const [speedMode, setSpeedMode] = useState<'bars' | 'gauge'>(() => {
+    return getInitialSpeedMode()
   })
 
   useEffect(() => {

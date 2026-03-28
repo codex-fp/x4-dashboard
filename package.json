@@ -38,6 +38,7 @@
     "test": "npm --prefix server test",
     "test:watch": "npm --prefix server run test:watch",
     "test:coverage": "npm --prefix server run test:coverage",
+    "screenshots:capture": "./scripts/capture-dashboard-screenshots.sh",
     "release:check": "npm run typecheck && npm run build",
     "release:bundle": "npm run release:check && node scripts/create-server-bundle.js && node scripts/create-lua-mod-bundle.js",
     "desktop:dist": "npm run release:check && electron-builder --publish never"
