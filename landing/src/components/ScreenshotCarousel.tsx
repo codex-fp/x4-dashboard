@@ -1,30 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { Animator, Animated, Text, FrameCorners } from '@arwes/react'
 import './ScreenshotCarousel.css'
-
-interface Screenshot {
-  src: string
-  alt: string
-  title: string
-}
-
-const screenshots: Screenshot[] = [
-  {
-    src: 'https://raw.githubusercontent.com/fpiechowski/x4-dashboard/master/docs/screenshots/dashboard-flight.png',
-    alt: 'Flight dashboard showing ship telemetry',
-    title: 'Flight Dashboard',
-  },
-  {
-    src: 'https://raw.githubusercontent.com/fpiechowski/x4-dashboard/master/docs/screenshots/dashboard-flight-arc.png',
-    alt: 'Flight dashboard with ARC speedometer',
-    title: 'ARC Speedometer',
-  },
-  {
-    src: 'https://raw.githubusercontent.com/fpiechowski/x4-dashboard/master/docs/screenshots/dashboard-operations.png',
-    alt: 'Operations dashboard',
-    title: 'Operations View',
-  },
-]
+import { screenshots } from './screenshotData'
 
 export function ScreenshotCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0)
