@@ -4,7 +4,7 @@ export interface Screenshot {
   title: string
 }
 
-const BASE = 'https://raw.githubusercontent.com/fpiechowski/x4-dashboard/master/docs/screenshots'
+const BASE = './screenshots'
 
 export const screenshots: Screenshot[] = [
   {
