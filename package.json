@@ -27,6 +27,8 @@
     "install:all": "npm --prefix server install && npm --prefix client install && npm --prefix landing install",
     "dev": "electron .",
     "dev:mock": "cross-env MOCK=true electron .",
+    "dev:landing": "npm --prefix landing run dev",
+    "dev:landing:host": "npm --prefix landing run dev -- --host",
 
     "build": "npm --prefix client run build",
     "build:landing": "npm --prefix landing run build",
