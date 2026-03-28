@@ -34,12 +34,13 @@ Guidance for coding agents working in this repository.
   - `verify`
   - `deploy`
   - `release`
+  - `x4-api`
 - Custom project roles live in `.codex/agents/`:
   - `manager`
   - `developer`
   - `tester`
   - `devops`
-- Module-local skills may exist deeper in the tree, such as the X4 bridge skill under `game-mods/x4_dashboard_bridge/.agents/skills/`.
+- Keep skills that should be available from the repository root in `.agents/skills/`.
 - `.opencode/` and `opencode.json` are legacy reference material during migration only; do not treat them as the source of truth.
 
 ## Build, Run, And Validation

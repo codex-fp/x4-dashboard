@@ -5,7 +5,7 @@ Bridge-mod guidance for the X4: Foundations integration layer.
 ## Scope
 
 - `game-mods/x4_dashboard_bridge/` owns the Lua bridge that extracts game data and posts it to the dashboard server.
-- Prefer the local `x4-api` skill when working on unfamiliar X4 APIs, new widgets, or FFI bindings.
+- Prefer the root `x4-api` skill when working on unfamiliar X4 APIs, new widgets, or FFI bindings.
 
 ## API Discovery
 
