@@ -6,6 +6,7 @@ import { screenshots } from './screenshotData'
 export function ScreenshotCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
 
   const nextSlide = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % screenshots.length)
@@ -22,11 +23,45 @@ export function ScreenshotCarousel() {
   }
 
   useEffect(() => {
-    if (!isAutoPlaying) return
+    if (!isAutoPlaying || expandedIndex !== null) return
 
     const interval = setInterval(nextSlide, 4000)
     return () => clearInterval(interval)
-  }, [isAutoPlaying, nextSlide])
+  }, [isAutoPlaying, nextSlide, expandedIndex])
+
+  useEffect(() => {
+    if (expandedIndex === null) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setExpandedIndex(null)
+        setIsAutoPlaying(true)
+        return
+      }
+
+      if (event.key === 'ArrowLeft') {
+        setExpandedIndex((prev) =>
+          prev === null ? currentIndex : (prev - 1 + screenshots.length) % screenshots.length
+        )
+        return
+      }
+
+      if (event.key === 'ArrowRight') {
+        setExpandedIndex((prev) =>
+          prev === null ? currentIndex : (prev + 1) % screenshots.length
+        )
+      }
+    }
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [expandedIndex, currentIndex])
 
   return (
     <Animator active>
@@ -57,12 +92,23 @@ export function ScreenshotCarousel() {
                 }}
               >
                 <div className="carousel-image-wrapper">
-                  <img
-                    src={screenshot.src}
-                    alt={screenshot.alt}
-                    className="carousel-image"
-                    loading="eager"
-                  />
+                  <button
+                    type="button"
+                    className="carousel-image-button"
+                    onClick={() => {
+                      setExpandedIndex(index)
+                      setCurrentIndex(index)
+                      setIsAutoPlaying(false)
+                    }}
+                    aria-label={`Expand screenshot: ${screenshot.title}`}
+                  >
+                    <img
+                      src={screenshot.src}
+                      alt={screenshot.alt}
+                      className="carousel-image"
+                      loading="eager"
+                    />
+                  </button>
                   <div className="carousel-overlay" />
                 </div>
               </div>
@@ -126,6 +172,68 @@ export function ScreenshotCarousel() {
             ))}
           </div>
         </div>
+
+        {expandedIndex !== null && (
+          <div
+            className="carousel-lightbox"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Expanded screenshot: ${screenshots[expandedIndex].title}`}
+            onClick={() => {
+              setExpandedIndex(null)
+              setCurrentIndex(expandedIndex)
+              setIsAutoPlaying(true)
+            }}
+          >
+            <button
+              type="button"
+              className="carousel-lightbox-close"
+              onClick={() => {
+                setExpandedIndex(null)
+                setCurrentIndex(expandedIndex)
+                setIsAutoPlaying(true)
+              }}
+              aria-label="Close expanded screenshot"
+            >
+              ×
+            </button>
+
+            <button
+              type="button"
+              className="carousel-lightbox-nav carousel-lightbox-prev"
+              onClick={(event) => {
+                event.stopPropagation()
+                setExpandedIndex((prev) =>
+                  prev === null ? currentIndex : (prev - 1 + screenshots.length) % screenshots.length
+                )
+              }}
+              aria-label="Previous expanded screenshot"
+            >
+              ‹
+            </button>
+
+            <img
+              src={screenshots[expandedIndex].src}
+              alt={screenshots[expandedIndex].alt}
+              className="carousel-lightbox-image"
+              onClick={(event) => event.stopPropagation()}
+            />
+
+            <button
+              type="button"
+              className="carousel-lightbox-nav carousel-lightbox-next"
+              onClick={(event) => {
+                event.stopPropagation()
+                setExpandedIndex((prev) =>
+                  prev === null ? currentIndex : (prev + 1) % screenshots.length
+                )
+              }}
+              aria-label="Next expanded screenshot"
+            >
+              ›
+            </button>
+          </div>
+        )}
       </Animated>
     </Animator>
   )

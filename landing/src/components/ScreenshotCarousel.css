@@ -44,6 +44,15 @@
   justify-content: center;
 }
 
+.carousel-image-button {
+  width: 100%;
+  height: 100%;
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
 .carousel-image {
   width: 100%;
   height: 100%;
@@ -131,6 +140,71 @@
   box-shadow: 0 0 10px hsl(191deg 100% 50% / 60%);
 }
 
+.carousel-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: hsl(220deg 45% 5% / 92%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.carousel-lightbox-image {
+  width: min(1400px, calc(100vw - 140px));
+  max-height: calc(100vh - 80px);
+  object-fit: contain;
+  border: 1px solid hsl(191deg 100% 50% / 40%);
+  box-shadow: 0 0 40px hsl(191deg 100% 50% / 18%);
+  border-radius: 8px;
+}
+
+.carousel-lightbox-close {
+  position: fixed;
+  top: 18px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid hsl(191deg 100% 50% / 45%);
+  border-radius: 999px;
+  background: hsl(220deg 45% 8% / 90%);
+  color: hsl(191deg 100% 72%);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.carousel-lightbox-nav {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border: 1px solid hsl(191deg 100% 50% / 45%);
+  border-radius: 999px;
+  background: hsl(220deg 45% 8% / 90%);
+  color: hsl(191deg 100% 72%);
+  font-size: 36px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.carousel-lightbox-prev {
+  left: 24px;
+}
+
+.carousel-lightbox-next {
+  right: 24px;
+}
+
+.carousel-lightbox-close:hover,
+.carousel-lightbox-nav:hover {
+  border-color: hsl(191deg 100% 50% / 80%);
+  background: hsl(191deg 100% 50% / 18%);
+  color: hsl(0deg 0% 100%);
+}
+
 /* Responsive */
 @media (max-width: 968px) {
   .carousel-container {
@@ -190,5 +264,36 @@
   .carousel-dot {
     width: 8px;
     height: 8px;
+  }
+
+  .carousel-lightbox {
+    padding: 18px;
+  }
+
+  .carousel-lightbox-image {
+    width: calc(100vw - 32px);
+    max-height: calc(100vh - 120px);
+  }
+
+  .carousel-lightbox-nav {
+    width: 42px;
+    height: 42px;
+    font-size: 30px;
+  }
+
+  .carousel-lightbox-prev {
+    left: 8px;
+  }
+
+  .carousel-lightbox-next {
+    right: 8px;
+  }
+
+  .carousel-lightbox-close {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
   }
 }
