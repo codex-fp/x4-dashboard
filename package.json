@@ -24,7 +24,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "install:all": "npm --prefix server install && npm --prefix client install && npm --prefix landing install",
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install && npm --prefix landing install",
     "dev": "electron .",
     "dev:mock": "cross-env MOCK=true electron .",
     "dev:landing": "npm --prefix landing run dev",

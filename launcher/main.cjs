@@ -563,7 +563,7 @@ function createWindow() {
     },
   })
 
-  mainWindow.loadFile(path.join(__dirname, 'launcher', 'index.html'))
+  mainWindow.loadFile(path.join(__dirname, 'index.html'))
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url)
