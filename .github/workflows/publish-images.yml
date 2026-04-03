@@ -1,5 +1,8 @@
 name: Publish Container Images
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 on:
   push:
     tags:
@@ -65,7 +68,7 @@ jobs:
           echo "image_tag=${image_tag}" >> "${GITHUB_OUTPUT}"
 
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ steps.target.outputs.git_ref }}
 
