@@ -69,6 +69,12 @@ Only change `host` when the game sends data to a different machine on your LAN. 
 
 You can view the dashboard from other LAN devices without enabling remote controls.
 
+### Custom dashboards
+
+Use `EDIT` in the dashboard header to open the dashboard manager. From there you can create grid or columns dashboards, duplicate built-in presets, hide built-in presets, reorder the dashboard selector, add panels, add existing widgets, and adjust panel or widget scale.
+
+Custom dashboards are stored on the host that runs the server. Other browsers connected to the same host load the same custom catalog. Export/import in the manager lets you back up or share the JSON definition.
+
 ## 5. Configure controls once in the launcher
 
 The launcher is where host-side control settings live.

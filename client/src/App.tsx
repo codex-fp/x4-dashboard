@@ -1,12 +1,20 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { AnimatorGeneralProvider, Animator, GridLines, Dots } from '@arwes/react'
 import { useGameData } from './hooks/useGameData'
 import { Dashboard } from './components/Dashboard'
-import { DASHBOARDS, getDashboard } from './dashboards'
+import { DashboardManager } from './components/dashboard/DashboardManager'
+import {
+  EMPTY_DASHBOARD_STORE,
+  buildDashboardCatalog,
+  fetchDashboardStore,
+  resolveDashboardConfig,
+  resolveVisibleDashboardId,
+} from './dashboardStore'
+import { getDashboard } from './dashboards'
 import { getDefaultWebSocketUrl } from './utils/network'
 
 const DASHBOARD_SCALE_STORAGE_KEY = 'dashboardScale'
-const DEFAULT_DASHBOARD_ID = DASHBOARDS[0]?.id ?? 'flight'
+const DEFAULT_DASHBOARD_ID = EMPTY_DASHBOARD_STORE.selectedDashboardId
 
 function getWebSocketUrl(): string {
   const envUrl = import.meta.env.VITE_WS_URL?.trim()
@@ -34,6 +42,45 @@ export function App() {
   const { state, wsConnected, bridgeConnected, lastDataTimestamp, isInitialLoading, pressKey } = useGameData(getWebSocketUrl())
   const [dashboardId, setDashboardId] = useState(getInitialDashboard)
   const [dashboardScale, setDashboardScale] = useState(getInitialDashboardScale)
+  const [dashboardStore, setDashboardStore] = useState(EMPTY_DASHBOARD_STORE)
+  const [dashboardManagerOpen, setDashboardManagerOpen] = useState(false)
+  const [dashboardStoreError, setDashboardStoreError] = useState<string | null>(null)
+  const dashboardCatalog = useMemo(() => buildDashboardCatalog(dashboardStore), [dashboardStore])
+  const resolvedDashboardId = resolveVisibleDashboardId(dashboardId, dashboardStore)
+  const dashboardConfig = resolveDashboardConfig(resolvedDashboardId, dashboardStore)
+
+  useEffect(() => {
+    let cancelled = false
+
+    fetchDashboardStore()
+      .then((store) => {
+        if (cancelled) return
+        setDashboardStore(store)
+        if (!new URLSearchParams(window.location.search).get('dashboard')) {
+          setDashboardId(resolveVisibleDashboardId(store.selectedDashboardId, store))
+        }
+      })
+      .catch((error) => {
+        if (cancelled) return
+        setDashboardStoreError(error instanceof Error ? error.message : 'Cannot load dashboards.')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    const nextVersion = state._meta.dashboardStoreVersion
+    if (!nextVersion || nextVersion <= dashboardStore.dashboardStoreVersion) return
+
+    fetchDashboardStore()
+      .then((store) => {
+        setDashboardStore(store)
+        setDashboardId((current) => resolveVisibleDashboardId(current, store))
+      })
+      .catch((error) => setDashboardStoreError(error instanceof Error ? error.message : 'Cannot refresh dashboards.'))
+  }, [state._meta.dashboardStoreVersion, dashboardStore.dashboardStoreVersion])
 
   function handleChangeDashboard(id: string) {
     const url = new URL(window.location.href)
@@ -81,12 +128,37 @@ export function App() {
             bridgeConnected={bridgeConnected}
             lastDataTimestamp={lastDataTimestamp}
             isInitialLoading={isInitialLoading}
-            dashboardId={dashboardId}
+            dashboardId={resolvedDashboardId}
+            dashboardConfig={dashboardConfig}
+            dashboards={dashboardCatalog.visibleDashboards}
             dashboardScale={dashboardScale}
             onKeyPress={pressKey}
             onChangeDashboard={handleChangeDashboard}
             onChangeDashboardScale={handleChangeDashboardScale}
+            onOpenDashboardManager={() => setDashboardManagerOpen(true)}
           />
+
+          {dashboardStoreError && (
+            <div className="dashboard-store-error">{dashboardStoreError}</div>
+          )}
+
+          {dashboardManagerOpen && (
+            <DashboardManager
+              store={dashboardStore}
+              activeDashboardId={resolvedDashboardId}
+              state={state}
+              wsConnected={wsConnected}
+              isInitialLoading={isInitialLoading}
+              onClose={() => setDashboardManagerOpen(false)}
+              onChangeDashboard={handleChangeDashboard}
+              onStoreSaved={(store) => {
+                setDashboardStore(store)
+                setDashboardStoreError(null)
+                setDashboardId(resolveVisibleDashboardId(store.selectedDashboardId, store))
+              }}
+              onError={setDashboardStoreError}
+            />
+          )}
         </div>
       </Animator>
     </AnimatorGeneralProvider>

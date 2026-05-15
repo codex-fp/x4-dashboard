@@ -6,6 +6,16 @@ The format is based on Keep a Changelog and the project follows Semantic Version
 
 ## [Unreleased]
 
+### Added
+- User-defined dashboard manager for creating, duplicating, hiding, reordering, deleting, importing, and exporting dashboards from the app UI
+- Host-side dashboard persistence API backed by `dashboards.json` in launcher user data
+- Drag-resize grid editor for custom dashboard panels and widget placements
+- Versioned dashboard store schema and OpenAPI contract for dashboard management
+
+### Changed
+- Dashboard rendering now resolves built-in and custom dashboard catalogs together while preserving legacy dashboard URLs
+- Screenshot set refreshed for the dashboard header and custom dashboard entry point
+
 ## [1.5.0] - 2026-03-29
 
 ### Added

@@ -1,6 +1,6 @@
 import React from 'react'
 import { GameState } from '../../types/gameData'
-import { ColumnsDashboard, GridDashboard, PanelDisplay } from '../../dashboards'
+import { ColumnsDashboard, GridDashboard, PanelDisplay, resolvePanelColor } from '../../dashboards'
 import { ArwesPanel } from '../ArwesPanel'
 import { renderWidget } from './widgetRegistry'
 
@@ -87,8 +87,8 @@ function renderPanelContent(panel: PanelDisplay, state: GameState, onKeyPress: (
   )
 }
 
-function renderPanel(panel: PanelDisplay, state: GameState, onKeyPress: (action: string) => void, wsConnected: boolean, isInitialLoading: boolean): React.ReactNode {
-  const color = panel.colorFn ? panel.colorFn(state) : (panel.color ?? 'primary')
+export function renderDashboardPanel(panel: PanelDisplay, state: GameState, onKeyPress: (action: string) => void, wsConnected: boolean, isInitialLoading: boolean): React.ReactNode {
+  const color = resolvePanelColor(panel, state)
   const content = renderPanelContent(panel, state, onKeyPress, wsConnected, isInitialLoading)
 
   if (panel.frameless) return content
@@ -102,9 +102,16 @@ function renderPanel(panel: PanelDisplay, state: GameState, onKeyPress: (action:
 
 export function GridLayout({ config, state, onKeyPress, wsConnected, isInitialLoading }: LayoutProps & { config: GridDashboard }) {
   return (
-    <div className={`dashboard-grid dashboard-grid-${config.id}`} style={{ gridTemplateColumns: config.columns }}>
+    <div
+      className={`dashboard-grid dashboard-grid-${config.id.startsWith('custom:') ? 'custom' : config.id}`}
+      style={{
+        gridTemplateColumns: config.columns,
+        gridTemplateRows: config.rows,
+        gridAutoRows: config.autoRows,
+      }}
+    >
       {config.panels.map((panel) => {
-        const content = renderPanel(panel, state, onKeyPress, wsConnected, isInitialLoading)
+        const content = renderDashboardPanel(panel, state, onKeyPress, wsConnected, isInitialLoading)
         if (content === null) return null
 
         return (
@@ -138,7 +145,7 @@ export function ColumnsLayout({ config, state, onKeyPress, wsConnected, isInitia
           style={column.width ? { width: column.width, flexShrink: 0 } : { flex: 1 }}
         >
           {column.panels.map((panel, panelIndex) => {
-            const content = renderPanel(panel, state, onKeyPress, wsConnected, isInitialLoading)
+            const content = renderDashboardPanel(panel, state, onKeyPress, wsConnected, isInitialLoading)
             if (content === null) return null
 
             return (

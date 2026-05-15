@@ -13,6 +13,12 @@ const { readKeybindings, writeKeybindings, mergeKeybindingUpdates } = require('.
 const { requireLocalControlRequest } = require('./requestGuards');
 const { readRuntimeConfig } = require('./runtimeConfigStore');
 const { writeRuntimeConfig, mergeRuntimeConfigUpdates } = require('./runtimeConfigStore');
+const {
+  createDashboardCatalogPayload,
+  readDashboardStore,
+  resetDashboardStore,
+  writeDashboardStore,
+} = require('./dashboardStore');
 
 const PORT = process.env.PORT || 3001;
 const MOCK_MODE = process.argv.includes('--mock') || process.env.MOCK === 'true';
@@ -73,7 +79,7 @@ registerClientRoutes();
 // === WebSocket server ===
 function serializeState() {
   const state = aggregator.getState();
-  return { ...state, _meta: { ...state._meta, mockMode: MOCK_MODE } };
+  return { ...state, _meta: { ...state._meta, mockMode: MOCK_MODE, dashboardStoreVersion: readDashboardStore().dashboardStoreVersion } };
 }
 
 function broadcast(data) {
@@ -200,6 +206,36 @@ app.put('/api/runtime-config', requireLocalControlRequest, (req, res) => {
     writeRuntimeConfig(next);
     console.log('[RuntimeConfig] Updated runtime settings');
     res.json(next);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/dashboards', (req, res) => {
+  try {
+    res.json(createDashboardCatalogPayload());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/dashboards', requireLocalControlRequest, (req, res) => {
+  try {
+    const next = writeDashboardStore(req.body?.store || req.body || {});
+    console.log('[Dashboards] Updated dashboard definitions');
+    broadcastState();
+    res.json(createDashboardCatalogPayload(next));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/dashboards/reset', requireLocalControlRequest, (req, res) => {
+  try {
+    const next = resetDashboardStore();
+    console.log('[Dashboards] Reset dashboard definitions');
+    broadcastState();
+    res.json(createDashboardCatalogPayload(next));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

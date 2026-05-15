@@ -1,6 +1,7 @@
 import React from 'react'
 import { GameState } from '../types/gameData'
-import { getDashboard } from '../dashboards'
+import { DashboardConfig } from '../dashboards'
+import { DashboardOption } from '../dashboardStore'
 import { DashboardHeader } from './dashboard/DashboardHeader'
 import { GridLayout, ColumnsLayout } from './dashboard/DashboardLayouts'
 
@@ -11,10 +12,13 @@ interface Props {
   lastDataTimestamp: number
   isInitialLoading: boolean
   dashboardId: string
+  dashboardConfig: DashboardConfig
+  dashboards: DashboardOption[]
   dashboardScale: number
   onKeyPress: (action: string) => void
   onChangeDashboard: (id: string) => void
   onChangeDashboardScale: (scale: number) => void
+  onOpenDashboardManager: () => void
 }
 
 export function Dashboard({
@@ -24,13 +28,16 @@ export function Dashboard({
   lastDataTimestamp,
   isInitialLoading,
   dashboardId,
+  dashboardConfig,
+  dashboards,
   dashboardScale,
   onKeyPress,
   onChangeDashboard,
   onChangeDashboardScale,
+  onOpenDashboardManager,
 }: Props) {
   const { _meta, ship } = state
-  const config = getDashboard(dashboardId)
+  const config = dashboardConfig
   const combat = state.combat
   const scaledLayoutStyle: React.CSSProperties = {
     '--dashboard-scale': String(dashboardScale),
@@ -45,10 +52,12 @@ export function Dashboard({
         lastDataTimestamp={lastDataTimestamp}
         dashboardId={dashboardId}
         dashboardScale={dashboardScale}
+        dashboards={dashboards}
         flight={state.flight}
         combat={combat}
         onChangeDashboard={onChangeDashboard}
         onChangeDashboardScale={onChangeDashboardScale}
+        onOpenDashboardManager={onOpenDashboardManager}
       />
 
       <div className="dashboard-scale-frame">

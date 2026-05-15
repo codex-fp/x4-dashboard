@@ -1,6 +1,6 @@
 import React from 'react'
 import { Animator, Text } from '@arwes/react'
-import { DASHBOARDS } from '../../dashboards'
+import { DashboardOption } from '../../dashboardStore'
 import { CombatState, ConnectionMeta, FlightState } from '../../types/gameData'
 import { withBasePath } from '../../utils/network'
 
@@ -11,10 +11,12 @@ interface Props {
   lastDataTimestamp: number
   dashboardId: string
   dashboardScale: number
+  dashboards: DashboardOption[]
   flight: FlightState
   combat: CombatState
   onChangeDashboard: (id: string) => void
   onChangeDashboardScale: (scale: number) => void
+  onOpenDashboardManager: () => void
 }
 
 const DASHBOARD_SCALE_OPTIONS = [0.5, 0.6, 0.75, 0.85, 1, 1.1, 1.25, 1.4, 1.6, 1.8, 2]
@@ -30,10 +32,12 @@ export function DashboardHeader({
   lastDataTimestamp,
   dashboardId,
   dashboardScale,
+  dashboards,
   flight,
   combat,
   onChangeDashboard,
   onChangeDashboardScale,
+  onOpenDashboardManager,
 }: Props) {
   const lastSyncText = (() => {
     if (lastDataTimestamp === 0 || bridgeConnected) return null
@@ -129,12 +133,16 @@ export function DashboardHeader({
         )}
 
         <select className="dashboard-selector" value={dashboardId} onChange={(event) => onChangeDashboard(event.target.value)}>
-          {DASHBOARDS.map((dashboard) => (
+          {dashboards.map((dashboard) => (
             <option key={dashboard.id} value={dashboard.id}>
-              {dashboard.label}
+              {dashboard.source === 'custom' ? `* ${dashboard.label}` : dashboard.label}
             </option>
           ))}
         </select>
+
+        <button className="header-settings-btn" onClick={onOpenDashboardManager}>
+          EDIT
+        </button>
 
         <label className="dashboard-scale-control">
           <span className="dashboard-scale-label">Scale</span>

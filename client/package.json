@@ -14,6 +14,7 @@
     "@arwes/react": "1.0.0-next.25020502",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-grid-layout": "^2.2.3",
     "x4-dashboard": "file:.."
   },
   "devDependencies": {

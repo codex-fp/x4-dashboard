@@ -77,10 +77,11 @@ This roadmap is a lightweight public planning document for a shorter, more frequ
 - Design the widget/layout model so custom dashboards stay compatible with future widgets and data fields
 - Let users manage which built-in dashboards are visible so shipped presets and custom presets can coexist cleanly
 - Individual panel/widget scaling for fine-grained control over widget sizing within custom dashboards (avoids complexity of global font scaling, see #29)
+- **Implementation status:** dashboard manager, host-side JSON persistence, import/export, built-in visibility/order management, and drag-resize grid editing are now implemented on `master` pending release validation.
 
 ## How this is managed
 
-- Each minor release gets its own GitHub milestone
-- Implementation tasks are tracked as concrete GitHub issues; release themes stay in the roadmap and milestone instead of separate umbrella issues unless a distinct cross-cutting deliverable needs one
+- Each minor release can be mirrored as a Backlog.md milestone when useful
+- Implementation tasks are tracked as concrete Backlog.md tasks; release themes stay in the roadmap and milestone instead of separate umbrella tasks unless a distinct cross-cutting deliverable needs one
 - `v2.0.0` stays reserved for user-defined dashboards unless a larger strategic shift appears
 - Scope may still move based on feedback from early public users, but each release should stay intentionally small

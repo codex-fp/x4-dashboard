@@ -16,7 +16,7 @@
 import type {CSSProperties} from 'react'
 import type {GameState} from './types/gameData'
 
-export type WidgetId =
+export type KnownWidgetId =
     | 'PlayerInfo'
     | 'ShipShields'
     | 'ShipHull'
@@ -44,6 +44,9 @@ export type WidgetId =
     | 'Inventory'
     | 'TransactionLog'
     | 'UnderAttack'
+
+export type WidgetId = KnownWidgetId | (string & {})
+export type PanelToneRule = 'fixed' | 'targetHostility' | 'missionUrgency'
 
 // ── Panel internal layout types ───────────────────────────────────────────────
 
@@ -89,9 +92,13 @@ export interface PanelDisplay {
     title?: string
     titleIcon?: string
     color?: PanelColor
+    toneRule?: PanelToneRule
     colorFn?: (state: GameState) => PanelColor
     style?: CSSProperties                 // applied to the ArwesPanel wrapper
     frameless?: boolean
+    scale?: number
+    grow?: boolean
+    height?: string
     internal: PanelInternalLayout
 }
 
@@ -118,6 +125,8 @@ export interface GridDashboard {
     label: string
     layout: 'grid'
     columns: string
+    rows?: string
+    autoRows?: string
     panels: GridPanelItem[]
 }
 
@@ -446,30 +455,41 @@ export const DASHBOARDS: DashboardConfig[] = [
     },
 ]
 
+export const BUILT_IN_DASHBOARDS = DASHBOARDS
+
+export const LEGACY_DASHBOARD_ALIASES: Record<string, string> = {
+    'flight-horizontal': 'flight',
+    'systems-horizontal': 'ship-controls',
+    comms: 'operations-intel',
+    intel: 'operations-intel',
+    missions: 'operations-missions',
+    trade: 'operations-trade',
+}
+
+export function resolveLegacyDashboardId(id: string): string {
+    return LEGACY_DASHBOARD_ALIASES[id] ?? id
+}
+
+export function getDashboardFromList(id: string, dashboards: DashboardConfig[]): DashboardConfig {
+    const resolvedId = resolveLegacyDashboardId(id)
+    return dashboards.find(d => d.id === resolvedId) ?? dashboards[0]
+}
+
+export function resolvePanelColor(panel: PanelDisplay, state: GameState): PanelColor {
+    if (panel.colorFn) return panel.colorFn(state)
+
+    if (panel.toneRule === 'targetHostility') {
+        return state.combat.target?.isHostile ? 'danger' : 'warning'
+    }
+
+    if (panel.toneRule === 'missionUrgency') {
+        if (state.activeMission?.completed) return 'success'
+        if (state.activeMission && state.activeMission.timeleft > 0 && state.activeMission.timeleft < 300) return 'danger'
+    }
+
+    return panel.color ?? 'primary'
+}
+
 export function getDashboard(id: string): DashboardConfig {
-    if (id === 'flight-horizontal') {
-        return DASHBOARDS.find(d => d.id === 'flight') ?? DASHBOARDS[0]
-    }
-
-    if (id === 'systems-horizontal') {
-        return DASHBOARDS.find(d => d.id === 'ship-controls') ?? DASHBOARDS[0]
-    }
-
-    if (id === 'comms') {
-        return DASHBOARDS.find(d => d.id === 'operations-intel') ?? DASHBOARDS[0]
-    }
-
-    if (id === 'intel') {
-        return DASHBOARDS.find(d => d.id === 'operations-intel') ?? DASHBOARDS[0]
-    }
-
-    if (id === 'missions') {
-        return DASHBOARDS.find(d => d.id === 'operations-missions') ?? DASHBOARDS[0]
-    }
-
-    if (id === 'trade') {
-        return DASHBOARDS.find(d => d.id === 'operations-trade') ?? DASHBOARDS[0]
-    }
-
-    return DASHBOARDS.find(d => d.id === id) ?? DASHBOARDS[0]
+    return getDashboardFromList(id, DASHBOARDS)
 }

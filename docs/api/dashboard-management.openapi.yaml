@@ -1,0 +1,119 @@
+openapi: 3.0.3
+info:
+  title: X4 Dashboard Management API
+  version: 2.0.0
+  description: Host-side API for user-managed dashboard definitions.
+paths:
+  /api/dashboards:
+    get:
+      summary: Read dashboard catalog and persisted store
+      responses:
+        "200":
+          description: Dashboard catalog payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardCatalogResponse"
+    put:
+      summary: Replace the persisted dashboard store
+      description: Protected by the same local-control guard used for host-side settings.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/DashboardStore"
+                - type: object
+                  required: [store]
+                  properties:
+                    store:
+                      $ref: "#/components/schemas/DashboardStore"
+      responses:
+        "200":
+          description: Updated dashboard catalog payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardCatalogResponse"
+        "403":
+          description: Remote writes are disabled for this request source
+        "500":
+          description: Store could not be written
+  /api/dashboards/reset:
+    post:
+      summary: Reset dashboard store to built-in defaults
+      description: Protected by the same local-control guard used for host-side settings.
+      responses:
+        "200":
+          description: Reset dashboard catalog payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardCatalogResponse"
+        "403":
+          description: Remote writes are disabled for this request source
+components:
+  schemas:
+    DashboardCatalogResponse:
+      allOf:
+        - $ref: "#/components/schemas/DashboardStore"
+        - type: object
+          required: [store, catalog]
+          properties:
+            store:
+              $ref: "#/components/schemas/DashboardStore"
+            catalog:
+              type: object
+              required: [builtIns, customDashboards]
+              properties:
+                builtIns:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/DashboardSummary"
+                customDashboards:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/DashboardSummary"
+    DashboardSummary:
+      type: object
+      required: [id, label]
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        layout:
+          type: string
+          enum: [grid, columns]
+    DashboardStore:
+      type: object
+      required:
+        - schemaVersion
+        - dashboardStoreVersion
+        - selectedDashboardId
+        - builtInOrder
+        - hiddenBuiltInDashboardIds
+        - customDashboards
+      properties:
+        schemaVersion:
+          type: integer
+          enum: [1]
+        dashboardStoreVersion:
+          type: integer
+          minimum: 1
+        selectedDashboardId:
+          type: string
+        builtInOrder:
+          type: array
+          items:
+            type: string
+        hiddenBuiltInDashboardIds:
+          type: array
+          items:
+            type: string
+        customDashboards:
+          type: array
+          items:
+            type: object
+            description: See docs/schemas/dashboard-store.schema.json for the full persisted dashboard shape.

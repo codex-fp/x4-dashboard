@@ -1,0 +1,339 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/codex-fp/x4-dashboard/docs/schemas/dashboard-store.schema.json",
+  "title": "X4 Dashboard Store",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "dashboardStoreVersion",
+    "selectedDashboardId",
+    "builtInOrder",
+    "hiddenBuiltInDashboardIds",
+    "customDashboards"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "dashboardStoreVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "selectedDashboardId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "builtInOrder": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "hiddenBuiltInDashboardIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "customDashboards": {
+      "type": "array",
+      "maxItems": 60,
+      "items": {
+        "$ref": "#/$defs/dashboard"
+      }
+    }
+  },
+  "$defs": {
+    "dashboard": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/gridDashboard"
+        },
+        {
+          "$ref": "#/$defs/columnsDashboard"
+        }
+      ]
+    },
+    "baseDashboard": {
+      "type": "object",
+      "required": ["id", "label", "layout"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^custom:[A-Za-z0-9._:-]+$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 140
+        },
+        "layout": {
+          "enum": ["grid", "columns"]
+        }
+      }
+    },
+    "gridDashboard": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/baseDashboard"
+        },
+        {
+          "type": "object",
+          "required": ["columns", "panels"],
+          "properties": {
+            "layout": {
+              "const": "grid"
+            },
+            "columns": {
+              "type": "string",
+              "default": "repeat(12, minmax(0, 1fr))"
+            },
+            "rows": {
+              "type": "string"
+            },
+            "autoRows": {
+              "type": "string",
+              "default": "minmax(88px, 1fr)"
+            },
+            "panels": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/gridPanel"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "columnsDashboard": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/baseDashboard"
+        },
+        {
+          "type": "object",
+          "required": ["columns"],
+          "properties": {
+            "layout": {
+              "const": "columns"
+            },
+            "columns": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/dashboardColumn"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dashboardColumn": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["panels"],
+      "properties": {
+        "width": {
+          "type": "string"
+        },
+        "panels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/columnPanel"
+          }
+        }
+      }
+    },
+    "panelBase": {
+      "type": "object",
+      "required": ["id", "internal"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "titleIcon": {
+          "type": "string"
+        },
+        "color": {
+          "enum": ["primary", "danger", "success", "warning", "purple"]
+        },
+        "toneRule": {
+          "enum": ["fixed", "targetHostility", "missionUrgency"]
+        },
+        "frameless": {
+          "type": "boolean"
+        },
+        "internal": {
+          "$ref": "#/$defs/internalLayout"
+        },
+        "scale": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 2.5
+        },
+        "grow": {
+          "type": "boolean"
+        },
+        "height": {
+          "type": "string"
+        }
+      }
+    },
+    "gridPanel": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/panelBase"
+        },
+        {
+          "type": "object",
+          "required": ["col", "row"],
+          "properties": {
+            "col": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "row": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "colSpan": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "rowSpan": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      ]
+    },
+    "columnPanel": {
+      "$ref": "#/$defs/panelBase"
+    },
+    "internalLayout": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/internalGrid"
+        },
+        {
+          "$ref": "#/$defs/internalColumns"
+        }
+      ]
+    },
+    "internalGrid": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["layout", "columns", "widgets"],
+      "properties": {
+        "layout": {
+          "const": "grid"
+        },
+        "columns": {
+          "type": "string"
+        },
+        "rows": {
+          "type": "string"
+        },
+        "gap": {
+          "type": "string"
+        },
+        "width": {
+          "type": "string"
+        },
+        "widgets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/gridWidget"
+          }
+        }
+      }
+    },
+    "internalColumns": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["layout", "columns"],
+      "properties": {
+        "layout": {
+          "const": "columns"
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["widgets"],
+            "properties": {
+              "width": {
+                "type": "string"
+              },
+              "widgets": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/columnWidget"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "widgetBase": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "scale": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 2.5
+        },
+        "grow": {
+          "type": "boolean"
+        },
+        "height": {
+          "type": "string"
+        }
+      }
+    },
+    "gridWidget": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/widgetBase"
+        },
+        {
+          "type": "object",
+          "required": ["col", "row"],
+          "properties": {
+            "col": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "row": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "colSpan": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "rowSpan": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      ]
+    },
+    "columnWidget": {
+      "$ref": "#/$defs/widgetBase"
+    }
+  }
+}

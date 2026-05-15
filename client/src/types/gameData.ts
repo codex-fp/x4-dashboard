@@ -2,6 +2,7 @@ export interface ConnectionMeta {
   timestamp: string;
   externalConnected: boolean;
   mockMode?: boolean;
+  dashboardStoreVersion?: number;
 }
 
 export interface PlayerInfo {

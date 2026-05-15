@@ -14,6 +14,7 @@
 /release/
 /server/public/
 /server/config/runtime.json
+/server/config/dashboards.json
 .env
 .env.*
 !.env.example
