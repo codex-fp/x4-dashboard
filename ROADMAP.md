@@ -81,7 +81,7 @@ This roadmap is a lightweight public planning document for a shorter, more frequ
 
 ## How this is managed
 
-- Each minor release can be mirrored as a Backlog.md milestone when useful
-- Implementation tasks are tracked as concrete Backlog.md tasks; release themes stay in the roadmap and milestone instead of separate umbrella tasks unless a distinct cross-cutting deliverable needs one
+- Each minor release can have a lightweight milestone when useful
+- Implementation work should stay concrete; release themes stay in the roadmap and milestone instead of separate umbrella tasks unless a distinct cross-cutting deliverable needs one
 - `v2.0.0` stays reserved for user-defined dashboards unless a larger strategic shift appears
 - Scope may still move based on feedback from early public users, but each release should stay intentionally small

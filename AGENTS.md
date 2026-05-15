@@ -21,7 +21,7 @@ Guidance for coding agents working in this repository.
 - `CHANGELOG.md` stores user-facing release notes.
 - `RELEASE.md` is the release and packaging checklist.
 - Prefer the current milestone in `ROADMAP.md` over future work unless the user explicitly redirects.
-- Prefer concrete Backlog.md tasks over vague ideas when selecting work.
+- Prefer concrete planned work over vague ideas when selecting work.
 
 ## Codex Layout
 
