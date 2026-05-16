@@ -1,0 +1,78 @@
+# AGENTS.md
+
+<!--
+Template usage:
+- Use this template for nested AGENTS.md files below the x4-dashboard root.
+- Keep this file thinner than the root AGENTS.md.
+- Replace every {{PLACEHOLDER}} before committing.
+- Delete sections that do not apply. Keep the remaining sections in this order.
+- Do not repeat repository-wide planning, release, commit, or quality gate
+  defaults unless this subtree intentionally overrides them.
+-->
+
+Guidance for coding agents working in `{{SUBTREE_PATH}}`.
+This file inherits repository defaults from parent `AGENTS.md` files and
+defines only local guidance.
+
+## Scope
+
+{{SUBTREE_SCOPE_DESCRIPTION}}
+
+- Applies to `{{SUBTREE_PATH}}`.
+- Inherits broader `x4-dashboard` guidance.
+- Keep sibling module concerns in their owning subtrees.
+
+## Purpose
+
+{{LOCAL_PURPOSE}}
+
+This area owns:
+
+- {{OWNED_CONTRACT_OR_BEHAVIOR}}
+- {{OWNED_CONTRACT_OR_BEHAVIOR}}
+
+This area does not own:
+
+- {{OUT_OF_SCOPE_CONTRACT_OR_BEHAVIOR}}
+- {{OUT_OF_SCOPE_CONTRACT_OR_BEHAVIOR}}
+
+## Boundaries
+
+- {{LOCAL_BOUNDARY_RULE}}
+- {{LOCAL_BOUNDARY_RULE}}
+- Coordinate cross-module data shape changes with the owning client, server,
+  launcher, bridge, or landing guidance.
+
+## Validation
+
+Run commands from the repository root unless this subtree explicitly requires
+another working directory.
+
+```bash
+{{LOCAL_CHECK_COMMAND}}
+{{LOCAL_CHECK_COMMAND}}
+```
+
+Validation expectations:
+
+- After {{CHANGE_TYPE}}, run `{{CHECK_COMMAND}}`.
+- If no executable check applies, state that clearly in the handoff.
+
+## Conventions
+
+- {{LOCAL_CONVENTION}}
+- {{LOCAL_CONVENTION}}
+- Preserve existing style and avoid unrelated refactors.
+
+## Runtime Or Deployment Notes
+
+Delete this section when the subtree has no runtime or deployment
+responsibility.
+
+- {{RUNTIME_OR_DEPLOYMENT_NOTE}}
+- {{RUNTIME_OR_DEPLOYMENT_NOTE}}
+
+## References
+
+- `{{REFERENCE_DOCUMENT}}` - {{REFERENCE_PURPOSE}}.
+- `{{REFERENCE_DOCUMENT}}` - {{REFERENCE_PURPOSE}}.

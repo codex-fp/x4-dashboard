@@ -1,151 +1,162 @@
 # AGENTS.md
 
-Guidance for coding agents working in this repository.
+Guidance for coding agents working in `x4-dashboard`.
+This file inherits organization defaults from parent `AGENTS.md` files and
+defines only local guidance.
 
-## Project Snapshot
+## Scope
 
-- `x4-dashboard` is a browser-first cockpit dashboard and server launcher for X4: Foundations.
-- Main areas:
-  - `client/` - main dashboard frontend in React + TypeScript
-  - `server/` - Express + WebSocket backend in CommonJS
-  - `launcher/` - Windows host-side Server Launcher
-  - `game-mods/x4_dashboard_bridge/` - Lua bridge mod for the game
-  - `landing/` - public project landing page
-- `server/public/` is generated build output from `client/`; do not edit it directly.
-- The product model is one host server with one or more browser clients on localhost or LAN.
+This repository is a browser-first cockpit dashboard and server launcher for
+X4: Foundations.
+
+- Applies to `x4-dashboard/`.
+- Inherits broader `codex-fp` guidance when opened inside the organization
+  workspace.
+- More specific nested `AGENTS.md` files override this file for their subtree.
+
+## Purpose
+
+This area owns the X4 Dashboard product.
+
+This area owns:
+
+- The React dashboard frontend.
+- The Express and WebSocket backend.
+- The Windows host-side server launcher.
+- The X4 Lua bridge mod.
+- The public landing page and release packaging workflow.
+
+This area does not own:
+
+- Generated `server/public/` output as a hand-edited source tree.
+- GitHub Pages deployment unless explicitly restored.
+- Local MCP endpoints, secrets, or user-specific deployment configuration.
+
+## Read Order
+
+Before changing this area, read:
+
+1. `README.md` for the product overview.
+2. This file and any deeper `AGENTS.md` for the touched path.
+3. `ROADMAP.md` for release planning.
+4. `RELEASE.md` and `CHANGELOG.md` for release or packaging changes.
+
+## Documentation Contract
+
+- Treat `ROADMAP.md` as the source of truth for release planning.
+- Keep user-facing release notes in `CHANGELOG.md`.
+- Keep release and packaging procedure in `RELEASE.md`.
+- Update documentation before or with product behavior, workflow, deployment,
+  or release-contract changes.
+- Link to module-specific guidance instead of duplicating it here.
+
+## Layout
+
+- `client/` - main dashboard frontend in React and TypeScript.
+- `server/` - Express and WebSocket backend in CommonJS.
+- `launcher/` - Windows host-side Server Launcher.
+- `game-mods/x4_dashboard_bridge/` - Lua bridge mod for the game.
+- `landing/` - public project landing page.
+- `.agents/skills/` - repository root skills.
+- `.codex/agents/` - custom project roles.
+- `server/public/` - generated client build output; do not edit directly.
+
+## Architecture And Boundaries
+
+- The product model is one host server with one or more browser clients on
+  localhost or LAN.
 - Electron is the host-side launcher, not the main dashboard UI.
+- Node serves the built dashboard frontend from `server/public/`.
+- In dashboard dev mode, Vite runs on port `3000` and proxies `/api` to port
+  `3001`.
+- Shared game-state types belong in `client/src/types/gameData.ts`.
+- Host-only settings and key bindings belong in `launcher/`, not the browser
+  dashboard.
+- Do not mix CommonJS and ESM across module boundaries.
 
-## Planning And Delivery
+## Workflow Overrides
 
-- `ROADMAP.md` is the source of truth for release planning.
-- `CHANGELOG.md` stores user-facing release notes.
-- `RELEASE.md` is the release and packaging checklist.
-- Prefer the current milestone in `ROADMAP.md` over future work unless the user explicitly redirects.
+- Prefer the current milestone in `ROADMAP.md` over future work unless the user
+  explicitly redirects.
 - Prefer concrete planned work over vague ideas when selecting work.
-
-## Codex Layout
-
-- Repository-wide policy lives in this file.
-- Module-specific policy lives in the nearest nested `AGENTS.md`.
-- Root project skills live in `.agents/skills/`:
-  - `propose`
-  - `refine`
-  - `deliver`
-  - `implement`
-  - `verify`
-  - `deploy`
-  - `release`
-  - `x4-api`
-- Custom project roles live in `.codex/agents/`:
-  - `manager`
-  - `developer`
-  - `tester`
-  - `devops`
-- Keep skills that should be available from the repository root in `.agents/skills/`.
+- Use Conventional Commits for every commit.
+- Do not push, tag, or rewrite history unless the user explicitly asks.
 
 ## Build, Run, And Validation
 
-Run commands from the repository root unless noted.
+Run commands from `x4-dashboard/` unless a deeper `AGENTS.md` states otherwise.
 
 ```bash
-npm run install:all       # install client, server, and landing dependencies
-npm run dev               # dashboard dev flow with Electron launcher
-npm run dev:mock          # mock dashboard dev flow with Electron launcher
-npm run build             # build dashboard client into server/public/
-npm run build:landing     # build the landing page
-npm start                 # run the built app through the Electron launcher
-npm run serve             # start the production server only
-npm run typecheck         # dashboard/client typecheck
-npm run typecheck:landing # landing page typecheck
-npm run test              # server-side Jest tests
-npm run release:check     # dashboard release validation
-npm run release:bundle    # server + Lua release bundles
-npm run desktop:dist      # Windows desktop artifacts
-npm run screenshots:capture # regenerate docs/screenshots with Playwright
+npm run install:all
+npm run dev
+npm run dev:mock
+npm run build
+npm run build:landing
+npm start
+npm run serve
+npm run typecheck
+npm run typecheck:landing
+npm run test
+npm run release:check
+npm run release:bundle
+npm run desktop:dist
+npm run screenshots:capture
 ```
 
-- There is no linter configured.
-- `npm run typecheck` and `npm test` are the main validation commands for the dashboard product.
-- After dashboard TypeScript changes, run `npm run typecheck`.
-- After landing changes, run `npm run typecheck:landing`, and run `npm run build:landing` when practical.
-- After server logic changes, run `npm test` when practical.
-- After packaging, deployment, or release changes, run the most relevant command when practical:
-  - `npm run release:check`
-  - `npm run release:bundle`
-  - `npm run desktop:dist`
+Validation expectations:
 
-### Screenshot Regeneration
+- Run `npm run typecheck` after dashboard TypeScript changes.
+- Run `npm run typecheck:landing` after landing TypeScript changes.
+- Run `npm run build:landing` for meaningful landing rendering or deployment
+  changes when practical.
+- Run `npm run test` for meaningful server logic changes when practical.
+- Run the most relevant release or desktop command for packaging, deployment,
+  or release changes.
+- If no executable check applies, state that clearly in the handoff.
 
-- `npm run screenshots:capture` is the canonical, repeatable way to recreate the public screenshot set in `docs/screenshots/`.
-- The script starts the mock server, normalizes mock state, applies scenario-specific toggles (combat, missile, boost, travel), and captures all expected screenshots with Playwright at a fixed viewport.
-- Keep screenshot filenames stable because README and landing screenshot metadata reference them directly.
-
-## Deployment Awareness
-
-- Active deployment for the landing page and mock deployment targets is handled through Dokploy.
-- `Dockerfile.landing` and `Dockerfile.mock` back those Dokploy targets.
-- Do not reintroduce GitHub Pages for `landing/` unless the user explicitly requests it.
-- Codex may use Dokploy MCP and Chrome DevTools MCP when they are configured in the local environment.
-- Never commit MCP secrets, API keys, local endpoints, or user-specific MCP configuration into the repository.
-- GitHub Releases and desktop packaging are still part of the project delivery flow, but they are separate from Dokploy-hosted deployments.
-
-## Architecture Boundaries
-
-- Node serves the built dashboard frontend from `server/public/`.
-- In dashboard dev mode, Vite runs on `3000` and proxies `/api` to `3001`.
-- Data flow:
-  1. the Lua bridge posts widget payloads to `POST /api/data`
-  2. `server/utils/normalizeData.js` strips X4 formatting codes
-  3. `server/dataAggregator.js` merges partial payloads into durable game state
-  4. `client/src/hooks/useGameData.ts` receives updates over WebSocket
-  5. UI actions call `POST /api/keypress` for host key presses
-- When adding a new exported game field:
-  1. update `client/src/types/gameData.ts`
-  2. update `getState()` in `server/dataAggregator.js`
-  3. update `server/mockData.js` if mock mode should expose it
-- Host-only settings and key bindings belong in the Electron Server Launcher, not the browser dashboard.
-- Shared game-state types belong in `client/src/types/gameData.ts`.
-- Do not mix CommonJS and ESM across module boundaries.
-
-## Repository-Wide Conventions
+## Conventions
 
 - Follow existing file style and avoid unrelated refactors.
 - Prefer descriptive names using existing product vocabulary.
-- Use Conventional Commits for every commit.
 - Keep commit scopes aligned with the touched area when practical.
-- Code, commit messages, PR descriptions, and GitHub comments must be in English.
-- Chat with the user in the user's language.
-
-## Do Not
-
-- Do not edit `server/public/` directly.
+- Keep root project skills in `.agents/skills/`.
+- Keep custom project roles in `.codex/agents/`.
 - Do not add a linter or a new test framework without explicit request.
-- Do not use destructive git commands unless explicitly requested.
-- Do not push, tag, or rewrite history unless the user explicitly asks.
 
-<CRITICAL_INSTRUCTION>
+## Runtime Or Deployment Notes
 
-## BACKLOG WORKFLOW INSTRUCTIONS
+- Active deployment for the landing page and mock deployment targets is handled
+  through Dokploy.
+- `Dockerfile.landing` and `Dockerfile.mock` back the Dokploy targets.
+- Do not reintroduce GitHub Pages for `landing/` unless the user explicitly
+  requests it.
+- `npm run screenshots:capture` is the canonical repeatable screenshot
+  regeneration flow for `docs/screenshots/`.
 
-This project uses Backlog.md MCP for all task and project management activities.
+## Secrets And State
 
-**CRITICAL GUIDANCE**
+- Never commit MCP secrets, API keys, local endpoints, user-specific MCP
+  configuration, or generated local runtime state.
+- Treat Dokploy access, endpoints, and secrets as environment-local
+  configuration.
 
-- If your client supports MCP resources, read `backlog://workflow/overview` to understand when and how to use Backlog for this project.
-- If your client only supports tools or the above request fails, call `backlog.get_backlog_instructions()` to load the tool-oriented overview. Use the `instruction` selector when you need `task-creation`, `task-execution`, or `task-finalization`.
+## Quality Gates
 
-- **First time working here?** Read the overview resource IMMEDIATELY to learn the workflow
-- **Already familiar?** You should have the overview cached ("## Backlog.md Overview (MCP)")
-- **When to read it**: BEFORE creating tasks, or when you're unsure whether to track work
+- Confirm changed files match this repository's scope.
+- Confirm docs, release notes, and implementation agree.
+- Confirm generated output such as `server/public/` was not edited directly.
+- Confirm local links and file references remain correct.
+- Review the diff for accidental generated output, hidden artifacts, local
+  state, secrets, and scope creep.
 
-These guides cover:
-- Decision framework for when to create tasks
-- Search-first workflow to avoid duplicates
-- Links to detailed guides for task creation, execution, and finalization
-- MCP tools reference
+## References
 
-You MUST read the overview resource to understand the complete workflow. The information is NOT summarized here.
-
-</CRITICAL_INSTRUCTION>
-
-<!-- BACKLOG.MD MCP GUIDELINES END -->
+- `README.md` - product overview.
+- `ROADMAP.md` - release planning.
+- `CHANGELOG.md` - user-facing release notes.
+- `RELEASE.md` - release and packaging checklist.
+- `client/AGENTS.md` - dashboard frontend guidance.
+- `server/AGENTS.md` - backend guidance.
+- `launcher/AGENTS.md` - launcher guidance.
+- `game-mods/x4_dashboard_bridge/AGENTS.md` - Lua bridge guidance.
+- `landing/AGENTS.md` - landing page guidance.
