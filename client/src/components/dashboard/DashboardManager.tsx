@@ -26,7 +26,7 @@ import {
   saveDashboardStore,
 } from '../../dashboardStore'
 import { GameState } from '../../types/gameData'
-import { renderDashboardPanel } from './DashboardLayouts'
+import { ColumnsLayout, GridLayout, renderDashboardPanel } from './DashboardLayouts'
 import { WIDGET_REGISTRY, getWidgetMetadata } from './widgetRegistry'
 
 interface Props {
@@ -41,18 +41,14 @@ interface Props {
   onError: (message: string | null) => void
 }
 
-interface SelectedPanelRef {
-  dashboard: DashboardConfig
-  panel: PanelDisplay
-  dashboardIndex: number
-}
-
 const PANEL_COLORS: PanelColor[] = ['primary', 'danger', 'success', 'warning', 'purple']
 const TONE_RULES: Array<{ id: PanelToneRule; label: string }> = [
   { id: 'fixed', label: 'Fixed' },
   { id: 'targetHostility', label: 'Target hostility' },
   { id: 'missionUrgency', label: 'Mission urgency' },
 ]
+
+const FIXED_GRID_COMPACTOR = { ...noCompactor, preventCollision: true }
 
 function updateAt<T>(items: T[], index: number, updater: (item: T) => T): T[] {
   return items.map((item, itemIndex) => itemIndex === index ? updater(item) : item)
@@ -94,7 +90,7 @@ function createPanel(dashboard: DashboardConfig): GridPanelItem | ColumnPanelIte
 
   if (dashboard.layout === 'grid') {
     const maxRow = dashboard.panels.reduce((row, item) => Math.max(row, item.row + (item.rowSpan ?? 1)), 1)
-    return { ...panel, col: 1, row: maxRow, colSpan: 4, rowSpan: 3, grow: true }
+    return { ...panel, col: 1, row: maxRow, colSpan: 4, rowSpan: 4, grow: true }
   }
 
   return { ...panel, grow: true }
@@ -267,10 +263,10 @@ function DashboardGridEditor({
         <ReactGridLayout
           width={width}
           layout={layout}
-          gridConfig={{ cols: 12, rowHeight: 42, margin: [8, 8], containerPadding: [0, 0], maxRows: 80 }}
+          gridConfig={{ cols: 12, rowHeight: 72, margin: [10, 10], containerPadding: [0, 0], maxRows: 80 }}
           dragConfig={{ enabled: editable, handle: '.dashboard-editor-drag-handle', cancel: '.dashboard-editor-panel-body,button,input,select' }}
           resizeConfig={{ enabled: editable, handles: ['se'] }}
-          compactor={noCompactor}
+          compactor={FIXED_GRID_COMPACTOR}
           autoSize
           onLayoutChange={handleLayoutChange}
           className="dashboard-editor-rgl"
@@ -295,6 +291,32 @@ function DashboardGridEditor({
           })}
         </ReactGridLayout>
       )}
+    </div>
+  )
+}
+
+function DashboardReadOnlyPreview({
+  dashboard,
+  state,
+  wsConnected,
+  isInitialLoading,
+}: {
+  dashboard: DashboardConfig
+  state: GameState
+  wsConnected: boolean
+  isInitialLoading: boolean
+}) {
+  return (
+    <div className="dashboard-manager-preview">
+      <div className="dashboard-manager-preview-note">
+        Built-in dashboards are preview-only. Duplicate this preset to edit panel and widget layout.
+      </div>
+      <div className="dashboard-manager-preview-shell">
+        {dashboard.layout === 'grid'
+          ? <GridLayout config={dashboard} state={state} onKeyPress={() => {}} wsConnected={wsConnected} isInitialLoading={isInitialLoading} />
+          : <ColumnsLayout config={dashboard} state={state} onKeyPress={() => {}} wsConnected={wsConnected} isInitialLoading={isInitialLoading} />
+        }
+      </div>
     </div>
   )
 }
@@ -757,9 +779,18 @@ export function DashboardManager({
           <main className="dashboard-manager-canvas-wrap">
             <div className="dashboard-manager-canvas-toolbar">
               <span>{canEditLayout ? 'Edit mode' : 'Built-in preview'}</span>
-              <button onClick={handleAddPanel} disabled={!canEditLayout}>ADD PANEL</button>
+              <button onClick={canEditLayout ? handleAddPanel : handleDuplicate}>
+                {canEditLayout ? 'ADD PANEL' : 'DUPLICATE TO EDIT'}
+              </button>
             </div>
-            {dashboard.layout === 'grid' ? (
+            {!canEditLayout ? (
+              <DashboardReadOnlyPreview
+                dashboard={dashboard}
+                state={state}
+                wsConnected={wsConnected}
+                isInitialLoading={isInitialLoading}
+              />
+            ) : dashboard.layout === 'grid' ? (
               <DashboardGridEditor
                 dashboard={dashboard}
                 editable={canEditLayout}
@@ -901,10 +932,10 @@ function WidgetGridEditor({ panel, editable, onLayoutChange }: { panel: PanelDis
         <ReactGridLayout
           width={width}
           layout={layout}
-          gridConfig={{ cols: 12, rowHeight: 18, margin: [4, 4], containerPadding: [0, 0], maxRows: 40 }}
+          gridConfig={{ cols: 12, rowHeight: 34, margin: [5, 5], containerPadding: [0, 0], maxRows: 40 }}
           dragConfig={{ enabled: editable }}
           resizeConfig={{ enabled: editable, handles: ['se'] }}
-          compactor={noCompactor}
+          compactor={FIXED_GRID_COMPACTOR}
           autoSize
           onLayoutChange={onLayoutChange}
         >

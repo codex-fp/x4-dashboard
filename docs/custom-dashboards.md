@@ -9,6 +9,7 @@ X4 Dashboard 2.0 stores user-defined dashboards on the host that runs the server
 - Reorder visible dashboards and hide built-in presets.
 - Add existing widgets to panels without changing the Lua bridge.
 - Drag and resize panels in grid dashboards.
+- Grid editing uses fixed slots: dragging or resizing into an occupied slot is blocked instead of pushing other panels or widgets away.
 - Adjust panel and widget scale on custom dashboards.
 - Export and import dashboard JSON for backup or sharing.
 

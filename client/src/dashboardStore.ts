@@ -173,6 +173,28 @@ function cloneInternalLayout(internal: PanelInternalLayout): PanelInternalLayout
   return cloneJson(internal)
 }
 
+function countGridTracks(columns: string): number {
+  let depth = 0
+  let token = ''
+  const tokens: string[] = []
+
+  for (const char of columns.trim()) {
+    if (char === '(') depth += 1
+    if (char === ')') depth = Math.max(0, depth - 1)
+
+    if (/\s/.test(char) && depth === 0) {
+      if (token) tokens.push(token)
+      token = ''
+      continue
+    }
+
+    token += char
+  }
+
+  if (token) tokens.push(token)
+  return Math.max(1, tokens.length)
+}
+
 function clonePanelBase(panel: PanelDisplay, index: number): PanelDisplay {
   const cloned: PanelDisplay = {
     id: panel.id ?? `panel-${index + 1}`,
@@ -201,6 +223,22 @@ function cloneGridPanel(panel: GridPanelItem, index: number): GridPanelItem {
     row: panel.row,
     colSpan: panel.colSpan,
     rowSpan: panel.rowSpan,
+    scale: panel.scale,
+    grow: panel.grow,
+    height: panel.height,
+  }
+}
+
+function cloneGridPanelForEditor(panel: GridPanelItem, index: number, sourceColumns: number): GridPanelItem {
+  const columnFactor = 12 / Math.max(1, sourceColumns)
+  const rowFactor = 3
+
+  return {
+    ...clonePanelBase(panel, index),
+    col: Math.max(1, Math.round((panel.col - 1) * columnFactor) + 1),
+    row: Math.max(1, Math.round((panel.row - 1) * rowFactor) + 1),
+    colSpan: Math.max(2, Math.round((panel.colSpan ?? 1) * columnFactor)),
+    rowSpan: Math.max(3, Math.round((panel.rowSpan ?? 1) * rowFactor)),
     scale: panel.scale,
     grow: panel.grow,
     height: panel.height,
@@ -237,8 +275,10 @@ export function cloneDashboardAsCustom(dashboard: DashboardConfig, label?: strin
     layout: 'grid',
     columns: dashboard.id.startsWith('custom:') ? dashboard.columns : 'repeat(12, minmax(0, 1fr))',
     rows: dashboard.rows,
-    autoRows: dashboard.autoRows ?? 'minmax(88px, 1fr)',
-    panels: dashboard.panels.map(cloneGridPanel),
+    autoRows: dashboard.autoRows ?? 'minmax(104px, 1fr)',
+    panels: dashboard.id.startsWith('custom:')
+      ? dashboard.panels.map(cloneGridPanel)
+      : dashboard.panels.map((panel, index) => cloneGridPanelForEditor(panel, index, countGridTracks(dashboard.columns))),
   }
 }
 
@@ -262,7 +302,7 @@ export function createEmptyDashboard(layout: 'grid' | 'columns'): DashboardConfi
     label: 'New Grid Dashboard',
     layout: 'grid',
     columns: 'repeat(12, minmax(0, 1fr))',
-    autoRows: 'minmax(88px, 1fr)',
+    autoRows: 'minmax(104px, 1fr)',
     panels: [],
   }
 }
